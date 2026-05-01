@@ -215,17 +215,28 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          toolbarHeight: 80,
           title: Row(
             children: [
-              Image.asset(
-                _isGridView 
-                  ? 'assets/exotalk_logo_realistic.png' 
-                  : 'assets/exotalk_logo_minimal.png',
-                width: 28,
-                height: 28,
-                color: Colors.white,
+              // ------------------------------------------------
+              // IN-APP LOGO BRANDING
+              // Sized at 64px for visual presence. Toggles between
+              // photorealistic (Card View) and symbolic (List View).
+              // White ColorFilter ensures visibility on dark matte.
+              // ------------------------------------------------
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: Image.asset(
+                  _isGridView
+                    ? 'assets/exotalk_logo_realistic.png'
+                    : 'assets/exotalk_logo_minimal.png',
+                  key: ValueKey(_isGridView),
+                  width: 64,
+                  height: 64,
+                  color: Colors.white,
+                ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 20),
               Text(
                 "EXOTECH BRIDGE",
                 style: GoogleFonts.outfit(
@@ -240,12 +251,11 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
           actions: [
             IconButton(
               tooltip: _isGridView ? "Switch to List View" : "Switch to Grid View",
-              icon: Icon(_isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded, 
+              icon: Icon(_isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
                    color: const Color(0xFF00C9A7).withOpacity(0.8)),
               onPressed: () {
                 setState(() {
                   _isGridView = !_isGridView;
-                  // Intentionally NOT clearing _isolatedNodeId to retain state across views.
                 });
               },
             ),
@@ -500,8 +510,33 @@ class _LogViewerState extends State<LogViewer> {
               children: [
                 Icon(Icons.terminal, color: const Color(0xFF00C9A7).withOpacity(0.8), size: 16),
                 const SizedBox(width: 8),
-                Text("SYSTEM LOGS: ${widget.node.id}", 
+                Text("SYSTEM LOGS: ${widget.node.id}",
                   style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white70)),
+                const SizedBox(width: 12),
+                // ------------------------------------------
+                // LIVE INDICATOR
+                // Pulsing dot + log count so the user can
+                // visually confirm data is actively updating
+                // every 5-second polling cycle.
+                // ------------------------------------------
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00C9A7).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _PulsingDot(),
+                      const SizedBox(width: 6),
+                      Text(
+                        "${widget.node.logs.length} entries",
+                        style: GoogleFonts.outfit(fontSize: 10, color: const Color(0xFF00C9A7).withOpacity(0.8)),
+                      ),
+                    ],
+                  ),
+                ),
                 const Spacer(),
                 SizedBox(
                   width: 200,
@@ -741,6 +776,57 @@ class _StatusIndicator extends StatelessWidget {
             spreadRadius: 1,
           )
         ],
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// LIVE INDICATOR
+// A continuously pulsing dot that provides visual confirmation that the
+// log stream is actively polling. Uses a repeating AnimationController
+// to fade between 30% and 100% opacity on a 1-second cycle.
+// ============================================================================
+class _PulsingDot extends StatefulWidget {
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0.3, end: 1.0).animate(_controller),
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFF00C9A7),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF00C9A7).withOpacity(0.4),
+              blurRadius: 6,
+            ),
+          ],
+        ),
       ),
     );
   }
