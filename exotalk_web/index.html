@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExoTalk | Sovereign Messaging</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 
+      Sovereign Loading Overlay
+      This component mitigates theUX friction of downloading the large (~5-10MB) 
+      Wasm binary payload. It provides deterministic, visual feedback during the 
+      synchronization process to maintain a premium feel.
+    -->
+    <div id="loading-overlay">
+        <div class="loader-container">
+            <div class="loader-text">Initializing Sovereign Session</div>
+            <div class="loader-bar">
+                <div id="loader-progress" class="loader-progress"></div>
+            </div>
+            <div id="loader-status" class="loader-text" style="color: #555; letter-spacing: 0;">0% - SYNCHRONIZING ENGINE</div>
+        </div>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <img src="assets/common/exotalk_logo.webp" alt="ExoTalk Logo" class="logo-img">
+            <div class="logo-text">ExoTalk</div>
+        </div>
+        <nav>
+            <a href="https://github.com/exotalk/exotalk" class="loader-text" style="text-decoration: none; color: #888;">Open Source Infrastructure</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>Defend Your <br>Digital Sovereignty</h1>
+            <p>A zero-harvest, P2P messaging application engineered to operate beyond the reach of centralized "kill chains" and algorithmic surveillance.</p>
+            <div id="demo-controls">
+                <!-- This button triggers the Wasm session initialization and WebRTC handshake -->
+                <button id="launch-btn" class="cta-button">Launch Sovereign Demo</button>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="feature-card">
+                <h3>Sovereign Identity</h3>
+                <p>Local Ed25519 key generation via ExoAuth. Your identity is synthesized locally, never stored in the cloud.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Mesh Dynamics</h3>
+                <p>Real-time visualization of P2P ingress/egress flows. Gossip directly with peers without a central relay.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Zero-Harvest</h3>
+                <p>Local-first storage and peer-to-peer gossiping via Willow & Iroh. Data remains in your custody, always.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 The Sovereign Exosystem. Built for the frontlines of digital resistance.
+    </footer>
+
+    <!-- 
+      Core Logic Module 
+      Imports the compiled Rust WebAssembly bindings and manages the interaction
+      between the DOM and the Sovereign Engine.
+    -->
+    <script type="module">
+        import init, { SovereignSession } from './pkg/exotalk_wasm.js';
+
+        async function run() {
+            try {
+                // Initialize the Wasm runtime
+                await init();
+                
+                // --- Loading UI Orchestration ---
+                // Simulates a complex boot sequence while the Wasm engine warms up.
+                // In production, this would be tied to actual Wasm download/parsing metrics.
+                const progress = document.getElementById('loader-progress');
+                const status = document.getElementById('loader-status');
+                const overlay = document.getElementById('loading-overlay');
+
+                let percent = 0;
+                const interval = setInterval(() => {
+                    percent += Math.random() * 10;
+                    if (percent >= 100) {
+                        percent = 100;
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            overlay.classList.add('hidden');
+                        }, 500);
+                    }
+                    progress.style.width = percent + '%';
+                    status.textContent = Math.floor(percent) + '% - ' + getStatusMessage(percent);
+                }, 50);
+
+                function getStatusMessage(p) {
+                    if (p < 20) return "FETCHING WASM ENGINE";
+                    if (p < 40) return "INITIALIZING PEER VISTA";
+                    if (p < 60) return "SYNCHRONIZING MESH";
+                    if (p < 80) return "SYNTHESIZING IDENTITY";
+                    return "READY TO LAUNCH";
+                }
+
+                // --- Demo Launch Handler ---
+                // Triggers the local identity synthesis and begins the signaling process
+                // to join the remote ExoTalk mesh.
+                document.getElementById('launch-btn').addEventListener('click', async () => {
+                    const session = new SovereignSession("DemoUser");
+                    const did = session.synthesize_did();
+                    alert(`Sovereign Identity Synthesized: ${did}\nConnecting to mesh...`);
+                    
+                    // Connects to the zrok tunnel endpoint hosting the signaling relay
+                    await session.connect_to_mesh("wss://signaling.exotalk.tech");
+                });
+            } catch (err) {
+                console.error("Failed to initialize Sovereign Engine:", err);
+            }
+        }
+
+        run();
+    </script>
+</body>
+</html>
