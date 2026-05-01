@@ -1,0 +1,13 @@
+[Unit]
+Description=ExoTalk WebRTC Signaling Relay
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/exocrat/code/exotalk/infra/signaling_server.py
+WorkingDirectory=/home/exocrat/code/exotalk/infra
+Restart=always
+User=exocrat
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
