@@ -48,7 +48,6 @@ infra/conscia-deploy-key.json
 ../google-cloud-sdk/ # This is peer, but good to note
 .tools/
 docs/archive/
-docs/walkthroughs/
 
 # --- APP DATA ---
 **/conscia_storage/
