@@ -67,6 +67,13 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) => _performScan());
   }
 
+  // ==========================================
+  // LOCAL STORAGE & PERSISTENCE
+  // ==========================================
+  
+  /// Initializes the local logging directory.
+  /// Essential for "Testing Season" analysis where node failure states
+  /// must be preserved across app restarts.
   Future<void> _initStorage() async {
     final dir = Directory('logs');
     if (!await dir.exists()) {
@@ -78,6 +85,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     }
   }
 
+  /// Synchronously appends newly fetched log lines to the persistent file.
   void _appendLogToFile(String nodeId, List<String> newLogs) {
     if (_sessionLogFile == null || newLogs.isEmpty) return;
     final timestamp = DateTime.now().toIso8601String();
@@ -278,10 +286,18 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     );
   }
 
-  // --- Grid / Card View Logic ---
+  // ==========================================
+  // DYNAMIC GRID & CARD LOGIC
+  // ==========================================
 
   Widget _buildGrid() {
     if (_isolatedNodeId != null) {
+      // ------------------------------------------
+      // ISOLATED CARD VIEW
+      // Displays the selected node at full size on the left,
+      // compacts unselected nodes below it, and slides out
+      // the LogViewer on the right.
+      // ------------------------------------------
       final isolatedNode = _nodes.firstWhere((n) => n.id == _isolatedNodeId);
       final otherNodes = _nodes.where((n) => n.id != _isolatedNodeId).toList();
 
@@ -310,14 +326,14 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
                       ),
                     ),
                   ),
-                  // Subsequent cards are half height/size
+                  // Subsequent cards are dynamically compacted
                   ...otherNodes.map((n) {
                     return GestureDetector(
                       onTap: () {}, 
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 800),
                         curve: Curves.easeOutCubic,
-                        height: 125, // Half size
+                        height: 125, // Compact size for unselected cards
                         margin: const EdgeInsets.only(bottom: 16),
                         child: NodeCard(
                           node: n,
@@ -334,7 +350,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
             // Right Column: Slide-out Log Viewer
             Expanded(
               child: GestureDetector(
-                onTap: () {}, // Consume tap
+                onTap: () {}, // Consume tap to prevent closing isolation
                 child: LogViewer(node: isolatedNode),
               ),
             ),
@@ -342,6 +358,10 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
         ),
       );
     } else {
+      // ------------------------------------------
+      // STANDARD GRID VIEW
+      // Displays all nodes uniformly when none are selected.
+      // ------------------------------------------
       return _buildStandardGrid();
     }
   }
