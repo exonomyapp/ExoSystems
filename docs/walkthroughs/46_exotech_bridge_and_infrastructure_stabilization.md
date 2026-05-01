@@ -32,13 +32,21 @@ The UI was completely overhauled to meet the "Premium Sovereign" aesthetic and r
 
 ## Visual Verification
 
-### Pre-Intervention State
-The initial state showed failing services and an outdated, hardcoded UI.
-![Pre-Intervention State](assets/exonomy_pre_0.png)
+### 1. Card View (Default Overview)
+The default state displaying all local telemetry nodes in a clean, ambient grid.
+![Card View Normal](assets/grid_normal.png)
 
-### Final State (Card View)
-All indicators are now operational and dynamically labeled.
-![Final Card View](assets/exotech_bridge_final_card.png)
+### 2. Card View (Log Isolation)
+Clicking a node shrinks the unselected nodes into a scrollable list, while smoothly sliding out the persistent log viewer on the right.
+![Card View Isolated](assets/grid_selected.png)
+
+### 3. List View (Default Overview)
+Toggling to List View preserves the state. The unselected state displays high-density tracking rows.
+![List View Normal](assets/list_normal.png)
+
+### 4. List View (Log Accordion)
+Clicking a row expands the element vertically to reveal the same filterable log viewer in an accordion format.
+![List View Isolated](assets/list_selected.png)
 
 ---
 

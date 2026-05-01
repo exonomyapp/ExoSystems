@@ -189,7 +189,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
       if (_isolatedNodeId == nodeId) {
         _isolatedNodeId = null; // Un-isolate
       } else {
-        _isolatedNodeId = nodeId; // Isolate new
+        _isolatedNodeId = nodeId; // Isolate new (cross-card transition)
       }
     });
   }
@@ -230,7 +230,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
               onPressed: () {
                 setState(() {
                   _isGridView = !_isGridView;
-                  _isolatedNodeId = null; // Reset isolation on view switch
+                  // Intentionally NOT clearing _isolatedNodeId to retain state across views.
                 });
               },
             ),
@@ -244,7 +244,10 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
             Expanded(
               child: _nodes.isEmpty 
                 ? const Center(child: CircularProgressIndicator(color: Color(0xFF00C9A7)))
-                : _isGridView ? _buildGrid() : _buildList(),
+                : AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 800),
+                    child: _isGridView ? _buildGrid() : _buildList(),
+                  ),
             ),
           ],
         ),
@@ -278,46 +281,65 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
   // --- Grid / Card View Logic ---
 
   Widget _buildGrid() {
-    // If isolated, we show the card in top left, and log panel on right.
     if (_isolatedNodeId != null) {
       final isolatedNode = _nodes.firstWhere((n) => n.id == _isolatedNodeId);
-      return Stack(
-        children: [
-          // The background grid (faded)
-          Opacity(
-            opacity: 0.1,
-            child: _buildStandardGrid(),
-          ),
-          // The isolated foreground
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Isolated Card
-                SizedBox(
-                  width: 350,
-                  height: 250,
-                  child: GestureDetector(
-                    onTap: () {}, // Consume tap so it doesn't close
-                    child: NodeCard(
-                      node: isolatedNode,
-                      onTap: () => _toggleIsolation(isolatedNode.id),
+      final otherNodes = _nodes.where((n) => n.id != _isolatedNodeId).toList();
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Left Column: Scrollable cards
+            SizedBox(
+              width: 350,
+              child: ListView(
+                children: [
+                  // Top card is the selected one, full width (350), height 250
+                  GestureDetector(
+                    onTap: () {}, // Consume tap to prevent background close
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 800),
+                      curve: Curves.easeOutCubic,
+                      height: 250,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      child: NodeCard(
+                        node: isolatedNode,
+                        onTap: () => _toggleIsolation(isolatedNode.id),
+                        compact: false,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 32),
-                // Slide-out Log Viewer
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {}, // Consume tap
-                    child: LogViewer(node: isolatedNode),
-                  ),
-                ),
-              ],
+                  // Subsequent cards are half height/size
+                  ...otherNodes.map((n) {
+                    return GestureDetector(
+                      onTap: () {}, 
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 800),
+                        curve: Curves.easeOutCubic,
+                        height: 125, // Half size
+                        margin: const EdgeInsets.only(bottom: 16),
+                        child: NodeCard(
+                          node: n,
+                          onTap: () => _toggleIsolation(n.id),
+                          compact: true,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ],
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 32),
+            // Right Column: Slide-out Log Viewer
+            Expanded(
+              child: GestureDetector(
+                onTap: () {}, // Consume tap
+                child: LogViewer(node: isolatedNode),
+              ),
+            ),
+          ],
+        ),
       );
     } else {
       return _buildStandardGrid();
@@ -337,6 +359,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
       itemBuilder: (context, i) => NodeCard(
         node: _nodes[i],
         onTap: () => _toggleIsolation(_nodes[i].id),
+        compact: false,
       ),
     );
   }
@@ -360,14 +383,15 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
                 node: node,
                 onTap: () => _toggleIsolation(node.id),
               ),
-              if (isExpanded)
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  height: 300, // Accordion height
-                  margin: const EdgeInsets.only(top: 8),
-                  child: LogViewer(node: node),
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutCubic,
+                height: isExpanded ? 300 : 0, // Accordion height
+                margin: EdgeInsets.only(top: isExpanded ? 8 : 0),
+                child: ClipRect(
+                  child: isExpanded ? LogViewer(node: node) : null,
                 ),
+              ),
             ],
           ),
         );
@@ -495,7 +519,9 @@ class _LogViewerState extends State<LogViewer> {
 class NodeCard extends StatelessWidget {
   final BridgeNode node;
   final VoidCallback onTap;
-  const NodeCard({super.key, required this.node, required this.onTap});
+  final bool compact;
+  
+  const NodeCard({super.key, required this.node, required this.onTap, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -505,7 +531,9 @@ class NodeCard extends StatelessWidget {
     
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: surfaceColor,
           borderRadius: BorderRadius.circular(16),
@@ -518,20 +546,20 @@ class NodeCard extends StatelessWidget {
             )
           ],
         ),
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(compact ? 16 : 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(node.icon, color: statusColor.withOpacity(0.8), size: 20),
-                const SizedBox(width: 12),
+                Icon(node.icon, color: statusColor.withOpacity(0.8), size: compact ? 16 : 20),
+                SizedBox(width: compact ? 8 : 12),
                 Expanded(
                   child: Text(
                     node.name.toUpperCase(),
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.w900,
-                      fontSize: 16,
+                      fontSize: compact ? 12 : 16,
                       color: const Color(0xFFD0D0D0),
                       letterSpacing: 1.5,
                     ),
@@ -540,7 +568,7 @@ class NodeCard extends StatelessWidget {
                 _StatusIndicator(isUp: node.isUp),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: compact ? 8 : 16),
             Text(
               node.isUp ? "OPERATIONAL" : "INACTIVE",
               style: GoogleFonts.outfit(
@@ -550,24 +578,26 @@ class NodeCard extends StatelessWidget {
                 letterSpacing: 2.5,
               ),
             ),
-            const Spacer(),
-            Text(
-              "SOURCE: ${node.machine}",
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: textMuted,
-                letterSpacing: 1,
+            if (!compact) ...[
+              const Spacer(),
+              Text(
+                "SOURCE: ${node.machine}",
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: textMuted,
+                  letterSpacing: 1,
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              node.role,
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                color: textMuted.withOpacity(0.7),
+              const SizedBox(height: 6),
+              Text(
+                node.role,
+                style: GoogleFonts.outfit(
+                  fontSize: 12,
+                  color: textMuted.withOpacity(0.7),
+                ),
               ),
-            ),
+            ]
           ],
         ),
       ),
@@ -590,10 +620,10 @@ class NodeRow extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF141414),
-          borderRadius: BorderRadius.circular(8), // More compact
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: statusColor.withOpacity(0.1)),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16), // More compact
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Row(
           children: [
             Icon(node.icon, color: statusColor.withOpacity(0.7), size: 20),
