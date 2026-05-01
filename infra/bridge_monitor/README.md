@@ -1,17 +1,16 @@
-# cmc
+# ExoTech Bridge Monitor
 
-A new Flutter project.
+The **ExoTech Bridge Monitor** is a dedicated diagnostic dashboard built to monitor the health and connectivity of the Sovereign Exosystem's "Testing Season" infrastructure.
 
-## Getting Started
+Unlike the core Conscia daemon or the Exonomy application, the Bridge Monitor is a bespoke utility designed specifically for live demonstrations and system-level verification.
 
-This project is a starting point for a Flutter application.
+## Features
+- **Dynamic Discovery**: Automatically scans for and identifies local nodes (Signaling Relay on port 8080, Conscia Beacon on port 3000, and Public zrok Proxy).
+- **Premium Sovereign Aesthetics**: Uses high-contrast, low-glare themes optimized for long-term diagnostic monitoring.
+- **Dual Display Modes**: Toggles between high-density Card views and compact List views for feature parity in different display environments.
 
-A few resources to get you started if this is your first Flutter project:
+## Exhaustive Documentation
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+For exhaustive coverage of how this Bridge Monitor integrates with the `exotalk.tech` Wasm emulation and the underlying services running on the Exonomy node, please refer to the official walkthrough:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+👉 **[Walkthrough 46: ExoTech Bridge & Infrastructure Stabilization](../../docs/walkthroughs/46_exotech_bridge_and_infrastructure_stabilization.md)**
