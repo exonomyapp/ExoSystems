@@ -24,7 +24,10 @@ The UI was completely overhauled to meet the "Premium Sovereign" aesthetic and r
 
 - **Aesthetic Overhaul**: Implemented a dark matte background (`#0A0A0A`), muted teal indicators (`#00C9A7`), and high-legibility geometric typography (`GoogleFonts.outfit`).
 - **Dynamic Telemetry**: The dashboard now automatically detects the local hostname (e.g., `EXONOMY`) and actively polls local ports (`8080`, `3000`) and processes (`zrok`) to determine node health, avoiding static labels.
-- **View Parity**: The toggle between Card and List views now maintains 1:1 information parity.
+- **Stack-Based Slide Animations**: The Card View uses a `Stack` with `AnimatedPositioned` widgets for explicit 2D slide transitions. Selecting a node slides it to the top-left while compacting and vertically stacking the unselected nodes below it. The log viewer slides in horizontally from off-screen. All animations use 600ms `easeOutCubic` curves.
+- **Dual-Logo Branding**: The App Bar dynamically swaps between the photorealistic dandelion logo (Card View) and the symbolic/minimal logo (List View), both rendered with a white `ColorFilter` for dark mode consistency.
+- **Compact Card Text Retention**: In isolation mode, compact cards retain their SOURCE and role text rather than hiding it; only internal padding is reduced.
+- **View Parity**: The toggle between Card and List views now maintains 1:1 information parity and preserves the active node selection across view switches.
 - **Educational Commenting**: Exhaustive architectural comments were added to `infra/bridge_monitor/lib/main.dart` to explain the polling mechanisms and UI state management for future maintainability.
 
 > [!TIP]
@@ -33,11 +36,11 @@ The UI was completely overhauled to meet the "Premium Sovereign" aesthetic and r
 ## Visual Verification
 
 ### 1. Card View (Default Overview)
-The default state displaying all local telemetry nodes in a clean, ambient grid.
+The default state displaying all local telemetry nodes in a clean, ambient grid. The photorealistic dandelion logo is visible in the App Bar.
 ![Card View Normal](assets/grid_normal.png)
 
 ### 2. Card View (Log Isolation)
-Clicking a node shrinks the unselected nodes into a scrollable list, while smoothly sliding out the persistent log viewer on the right.
+Clicking a node slides it to the top-left, compacts the unselected nodes below it with their SOURCE/role text intact, and slides the log viewer in from the right.
 ![Card View Isolated](assets/grid_selected.png)
 
 ### 3. List View (Default Overview)

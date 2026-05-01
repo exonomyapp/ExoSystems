@@ -217,7 +217,14 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
           elevation: 0,
           title: Row(
             children: [
-              const Icon(Icons.waves, color: Color(0xFF00C9A7), size: 28),
+              Image.asset(
+                _isGridView 
+                  ? 'assets/exotalk_logo_realistic.png' 
+                  : 'assets/exotalk_logo_minimal.png',
+                width: 28,
+                height: 28,
+                color: Colors.white,
+              ),
               const SizedBox(width: 16),
               Text(
                 "EXOTECH BRIDGE",
@@ -291,95 +298,99 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
   // ==========================================
 
   Widget _buildGrid() {
-    if (_isolatedNodeId != null) {
-      // ------------------------------------------
-      // ISOLATED CARD VIEW
-      // Displays the selected node at full size on the left,
-      // compacts unselected nodes below it, and slides out
-      // the LogViewer on the right.
-      // ------------------------------------------
-      final isolatedNode = _nodes.firstWhere((n) => n.id == _isolatedNodeId);
-      final otherNodes = _nodes.where((n) => n.id != _isolatedNodeId).toList();
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Left Column: Scrollable cards
-            SizedBox(
-              width: 350,
-              child: ListView(
-                children: [
-                  // Top card is the selected one, full width (350), height 250
-                  GestureDetector(
-                    onTap: () {}, // Consume tap to prevent background close
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 800),
-                      curve: Curves.easeOutCubic,
-                      height: 250,
-                      margin: const EdgeInsets.only(bottom: 24),
-                      child: NodeCard(
-                        node: isolatedNode,
-                        onTap: () => _toggleIsolation(isolatedNode.id),
-                        compact: false,
-                      ),
-                    ),
-                  ),
-                  // Subsequent cards are dynamically compacted
-                  ...otherNodes.map((n) {
-                    return GestureDetector(
-                      onTap: () {}, 
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 800),
-                        curve: Curves.easeOutCubic,
-                        height: 125, // Compact size for unselected cards
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: NodeCard(
-                          node: n,
-                          onTap: () => _toggleIsolation(n.id),
-                          compact: true,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ],
-              ),
-            ),
-            const SizedBox(width: 32),
-            // Right Column: Slide-out Log Viewer
-            Expanded(
-              child: GestureDetector(
-                onTap: () {}, // Consume tap to prevent closing isolation
-                child: LogViewer(node: isolatedNode),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // ------------------------------------------
-      // STANDARD GRID VIEW
-      // Displays all nodes uniformly when none are selected.
-      // ------------------------------------------
-      return _buildStandardGrid();
-    }
-  }
-
-  Widget _buildStandardGrid() {
-    return GridView.builder(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 8),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 32,
-        mainAxisSpacing: 32,
-        childAspectRatio: 1.4,
-      ),
-      itemCount: _nodes.length,
-      itemBuilder: (context, i) => NodeCard(
-        node: _nodes[i],
-        onTap: () => _toggleIsolation(_nodes[i].id),
-        compact: false,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final maxWidth = constraints.maxWidth;
+          final maxHeight = constraints.maxHeight;
+
+          // Grid measurements
+          final gridCardWidth = (maxWidth - 64) / 3;
+          final gridCardHeight = gridCardWidth / 1.4;
+
+          // Isolation measurements
+          const isoCardWidth = 350.0;
+          const isoMainCardHeight = 250.0;
+          const isoCompactCardHeight = 125.0;
+          const spacing = 16.0;
+
+          return Stack(
+            children: [
+              // Slide-out Log Viewer
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutCubic,
+                left: _isolatedNodeId != null ? isoCardWidth + 32 : maxWidth,
+                top: 0,
+                width: maxWidth - isoCardWidth - 32,
+                height: maxHeight,
+                child: LogViewer(
+                  node: _nodes.firstWhere(
+                    (n) => n.id == _isolatedNodeId, 
+                    orElse: () => _nodes.first,
+                  ),
+                ),
+              ),
+              
+              // Nodes
+              ...List.generate(_nodes.length, (i) {
+                final node = _nodes[i];
+                final isIsolated = _isolatedNodeId == node.id;
+                final isAnyIsolated = _isolatedNodeId != null;
+                
+                // Determine position
+                double left;
+                double top;
+                double width;
+                double height;
+
+                if (!isAnyIsolated) {
+                  // Grid layout
+                  left = i * (gridCardWidth + 32);
+                  top = 0;
+                  width = gridCardWidth;
+                  height = gridCardHeight;
+                } else {
+                  // Isolated layout
+                  if (isIsolated) {
+                    left = 0;
+                    top = 0;
+                    width = isoCardWidth;
+                    height = isoMainCardHeight;
+                  } else {
+                    // Calculate rank among unselected nodes
+                    int unselectedIdx = 0;
+                    for (int j = 0; j < _nodes.length; j++) {
+                      if (_nodes[j].id == _isolatedNodeId) continue;
+                      if (_nodes[j].id == node.id) break;
+                      unselectedIdx++;
+                    }
+                    
+                    left = 0;
+                    top = isoMainCardHeight + spacing + (unselectedIdx * (isoCompactCardHeight + spacing));
+                    width = isoCardWidth;
+                    height = isoCompactCardHeight;
+                  }
+                }
+
+                return AnimatedPositioned(
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutCubic,
+                  left: left,
+                  top: top,
+                  width: width,
+                  height: height,
+                  child: NodeCard(
+                    node: node,
+                    compact: isAnyIsolated && !isIsolated,
+                    onTap: () => _toggleIsolation(node.id),
+                  ),
+                );
+              }),
+            ],
+          );
+        },
       ),
     );
   }
@@ -598,26 +609,24 @@ class NodeCard extends StatelessWidget {
                 letterSpacing: 2.5,
               ),
             ),
-            if (!compact) ...[
-              const Spacer(),
-              Text(
-                "SOURCE: ${node.machine}",
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: textMuted,
-                  letterSpacing: 1,
-                ),
+            const Spacer(),
+            Text(
+              "SOURCE: ${node.machine}",
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: textMuted,
+                letterSpacing: 1,
               ),
-              const SizedBox(height: 6),
-              Text(
-                node.role,
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  color: textMuted.withOpacity(0.7),
-                ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              node.role,
+              style: GoogleFonts.outfit(
+                fontSize: 12,
+                color: textMuted.withOpacity(0.7),
               ),
-            ]
+            ),
           ],
         ),
       ),
