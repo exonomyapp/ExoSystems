@@ -42,39 +42,56 @@ static void my_application_activate(GApplication* application) {
     }
   }
 #endif
+
+  // ----------------------------------------------------------------
+  // WINDOW ICON BRANDING
+  // Resolve the icon path from the bundled Flutter assets directory.
+  // Used for both the header bar icon and the window/taskbar icon.
+  // ----------------------------------------------------------------
+  g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", NULL);
+  g_autofree gchar* exe_dir = exe_path ? g_path_get_dirname(exe_path) : NULL;
+  g_autofree gchar* icon_path = exe_dir ? g_build_filename(
+      exe_dir, "data", "flutter_assets", "assets",
+      "exotalk_logo_realistic.png", NULL) : NULL;
+
+  // Set the window icon for taskbar / alt-tab / Activities overview
+  if (icon_path != NULL) {
+    g_autoptr(GError) icon_error = NULL;
+    GdkPixbuf* taskbar_icon = gdk_pixbuf_new_from_file(icon_path, &icon_error);
+    if (taskbar_icon != NULL) {
+      gtk_window_set_icon(window, taskbar_icon);
+      g_object_unref(taskbar_icon);
+    }
+  }
+
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
     gtk_header_bar_set_title(header_bar, "ExoTech Bridge");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
+
+    // Pack the dandelion logo into the header bar's leading position.
+    // GNOME Shell header bars suppress gtk_window_set_icon, so this
+    // is the only way to get the icon visible in the title bar.
+    if (icon_path != NULL) {
+      g_autoptr(GError) hb_error = NULL;
+      GdkPixbuf* raw = gdk_pixbuf_new_from_file(icon_path, &hb_error);
+      if (raw != NULL) {
+        GdkPixbuf* scaled = gdk_pixbuf_scale_simple(raw, 24, 24, GDK_INTERP_BILINEAR);
+        GtkWidget* icon_image = gtk_image_new_from_pixbuf(scaled);
+        gtk_widget_show(icon_image);
+        gtk_header_bar_pack_start(header_bar, icon_image);
+        g_object_unref(raw);
+        g_object_unref(scaled);
+      }
+    }
+
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
     gtk_window_set_title(window, "ExoTech Bridge");
   }
 
   gtk_window_set_default_size(window, 1280, 720);
-
-  // ----------------------------------------------------------------
-  // WINDOW ICON BRANDING
-  // Load the dandelion logo as the actual GTK window/taskbar icon.
-  // The asset is bundled at data/flutter_assets/assets/ relative to
-  // the executable's directory.
-  // ----------------------------------------------------------------
-  {
-    g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", NULL);
-    if (exe_path != NULL) {
-      g_autofree gchar* exe_dir = g_path_get_dirname(exe_path);
-      g_autofree gchar* icon_path = g_build_filename(
-          exe_dir, "data", "flutter_assets", "assets",
-          "exotalk_logo_realistic.png", NULL);
-      g_autoptr(GError) icon_error = NULL;
-      GdkPixbuf* icon = gdk_pixbuf_new_from_file(icon_path, &icon_error);
-      if (icon != NULL) {
-        gtk_window_set_icon(window, icon);
-        g_object_unref(icon);
-      }
-    }
-  }
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(

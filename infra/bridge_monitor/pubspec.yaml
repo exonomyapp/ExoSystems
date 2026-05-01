@@ -62,6 +62,8 @@ flutter:
   assets:
     - assets/exotalk_logo_minimal.png
     - assets/exotalk_logo_realistic.png
+    - assets/exotalk_logo_color.png
+    - assets/exotalk_logo_arabic_green.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
