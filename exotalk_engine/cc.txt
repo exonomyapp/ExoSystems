@@ -1,0 +1,31 @@
+    Checking rust_lib_exotalk_flutter v0.1.0 (/home/exocrat/code/exotalk/exotalk_flutter/rust)
+error[E0432]: unresolved import `crate::runtime`
+  --> src/network_internal.rs:13:5
+   |
+13 | use crate::runtime;
+   |     ^^^^^^^^^^^^^^ no `runtime` in the root
+   |
+help: consider importing this module instead
+   |
+13 - use crate::runtime;
+13 + use tokio::runtime;
+   |
+
+error[E0599]: no method named `remote_node_id` found for struct `iroh::endpoint::Connection` in the current scope
+   --> src/network_internal.rs:213:34
+    |
+213 |             let remote_id = conn.remote_node_id();
+    |                                  ^^^^^^^^^^^^^^ method not found in `iroh::endpoint::Connection`
+
+error[E0599]: no method named `alpn` found for struct `iroh::endpoint::Connection` in the current scope
+   --> src/network_internal.rs:214:29
+    |
+214 |             let alpn = conn.alpn().unwrap_or_default();
+    |                             ^^^^ method not found in `iroh::endpoint::Connection`
+
+Some errors have detailed explanations: E0432, E0599.
+For more information about an error, try `rustc --explain E0432`.
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `rust_lib_exotalk_flutter` (bin "exotalk-beacon") due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `rust_lib_exotalk_flutter` (lib) due to 2 previous errors

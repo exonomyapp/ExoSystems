@@ -1,0 +1,44 @@
+Analyzing exotalk_flutter...                                    
+
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/main.dart:52:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/main.dart:106:3 • prefer_const_constructors_in_immutables
+   info • Don't invoke 'print' in production code • lib/providers/group_provider.dart:55:7 • avoid_print
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/screens/chat_window_screen.dart:19:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/screens/home_screen.dart:19:3 • prefer_const_constructors_in_immutables
+warning • The declaration '_InfoBadge' isn't referenced • lib/screens/home_screen.dart:392:7 • unused_element
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/screens/home_screen.dart:448:3 • prefer_const_constructors_in_immutables
+   info • Unnecessary use of multiple underscores • lib/screens/home_screen.dart:715:18 • unnecessary_underscores
+warning • Unused import: '../providers/chat_provider.dart' • lib/screens/welcome_screen.dart:7:8 • unused_import
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/screens/welcome_screen.dart:17:3 • prefer_const_constructors_in_immutables
+  error • Const variables must be initialized with a constant value • lib/services/oauth_service.dart:61:15 • const_initialized_with_non_constant_value
+  error • The constructor being called isn't a const constructor • lib/services/oauth_service.dart:61:15 • const_with_non_const
+  error • The values in a const map literal must be constant • lib/services/oauth_service.dart:61:15 • non_constant_map_value
+  error • The constructor being called isn't a const constructor • lib/services/oauth_service.dart:74:16 • const_with_non_const
+  error • The values in a const map literal must be constant • lib/services/oauth_service.dart:74:16 • non_constant_map_value
+   info • Unnecessary 'const' keyword • lib/services/oauth_service.dart:79:17 • unnecessary_const
+  error • The constructor being called isn't a const constructor • lib/services/oauth_service.dart:86:15 • const_with_non_const
+  error • The values in a const map literal must be constant • lib/services/oauth_service.dart:86:15 • non_constant_map_value
+   info • The imported package 'collection' isn't a dependency of the importing package • lib/src/rust/api/network.dart:7:8 • depend_on_referenced_packages
+   info • The imported package 'collection' isn't a dependency of the importing package • lib/src/rust/lib.dart:7:8 • depend_on_referenced_packages
+  error • The name 'gold' is already defined • lib/src/theme.dart:57:22 • duplicate_definition
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/modals/account_manager.dart:37:3 • prefer_const_constructors_in_immutables
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/widgets/modals/account_manager.dart:222:44 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/widgets/modals/account_manager.dart:370:22 • use_build_context_synchronously
+warning • A value for optional parameter 'titleColor' isn't ever given • lib/widgets/modals/account_manager.dart:897:10 • unused_element_parameter
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/modals/device_pairing_modal.dart:31:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/modals/group_manager.dart:17:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/modals/linked_accounts_modal.dart:30:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/modals/new_chat_dialog.dart:13:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/modals/rename_confirm_dialog.dart:24:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/modals/verify_identity_modal.dart:36:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/notification_overlay.dart:9:3 • prefer_const_constructors_in_immutables
+warning • This default clause is covered by the previous cases • lib/widgets/notification_overlay.dart:185:7 • unreachable_switch_default
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/notification_overlay.dart:262:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/profile/name_history_card.dart:23:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/profile/verified_links_card.dart:26:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/sovereign_toast.dart:13:3 • prefer_const_constructors_in_immutables
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/sovereign_toast.dart:42:3 • prefer_const_constructors_in_immutables
+warning • This default clause is covered by the previous cases • lib/widgets/sovereign_toast.dart:93:7 • unreachable_switch_default
+   info • Constructors in '@immutable' classes should be declared as 'const' • lib/widgets/theme_selector.dart:10:3 • prefer_const_constructors_in_immutables
+
+40 issues found. (ran in 2.0s)

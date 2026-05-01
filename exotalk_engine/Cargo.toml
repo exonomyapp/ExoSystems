@@ -1,0 +1,53 @@
+# --- SOVEREIGN EXOSYSTEM ENGINE WORKSPACE ---
+# This is the pure root manifest for the decoupled Rust engine.
+# It acts ONLY as a workspace coordinator.
+
+[workspace]
+resolver = "2"
+# --- APP BLOAT PREVENTION & STRICT ISOLATION ---
+# To guarantee that a Chat app is never burdened by Scientific Calculation modules,
+# a Voucher Wallet never compiles Project Management trees, and a Scientific tool
+# is never burdened by Chat logic, the workspace divides the engine into strictly
+# isolated domains:
+#
+# 1. CORE
+# - exotalk_core: The pure, universal logic (networking, willow, identity). Blind to UI data.
+#
+# 2. PURE SCHEMAS (Data Shapes — one per application domain)
+# - exotalk_schema: ExoTalk domain (DirectMessage, Profile).
+# - republet_schema: RepubLet domain (ScientificReport, Dataset).
+# - exonomy_schema: Exonomy domain (Voucher, MintedOffer, ExchangeRequest).
+# - exocracy_schema: Exocracy domain (Project, TaskNode, VoucherAttachment).
+#
+# 3. INDEPENDENT FFIs (Flutter Converters — one per mobile app)
+# - exotalk_ffi: Binds Core + ExoTalk Schema.
+# - republet_ffi: Binds Core + RepubLet Schema.
+# - exonomy_ffi: Binds Core + Exonomy Schema.
+# - exocracy_ffi: Binds Core + Exocracy Schema.
+#
+# 4. TAURI DESKTOP BACKENDS (Bypass FFI, use Core directly)
+# - republet_desktop: SvelteKit desktop backend for RepubLet.
+# - exocracy_desktop: SvelteKit desktop backend for Exocracy.
+#
+# 5. STANDALONE BINARIES
+# - conscia: A headless beacon (uses core).
+members = [
+    "exotalk_core",
+    "exotalk_schema",
+    "republet_schema",
+    "exonomy_schema",
+    "exocracy_schema",
+    "exotalk_ffi",
+    "republet_ffi",
+    "exonomy_ffi",
+    "exocracy_ffi",
+    "conscia",
+    "republet_desktop",
+    "exocracy_desktop",
+]
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

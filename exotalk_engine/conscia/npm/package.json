@@ -1,0 +1,23 @@
+{
+  "name": "@exotalk/conscia",
+  "version": "0.7.7",
+  "description": "Sovereign Beacon Node for the ExoTalk Mesh — npm delivery wrapper",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/exonomy/exotalk"
+  },
+  "bin": {
+    "conscia": "bin/conscia.js"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "author": "ExoSystems Governance <federation@exonomy.local>",
+  "license": "AGPL-3.0",
+  "dependencies": {
+    "tar": "^6.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

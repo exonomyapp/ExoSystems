@@ -1,0 +1,12 @@
+# --- PURE SCHEMATICS ---
+# This crate exists to keep the engine domain-blind.
+# It defines the strict Rust `struct` definitions (e.g., ScientificReport) 
+# for RepubLet, ensuring they can be imported by the Desktop app or the 
+# Mobile FFI bridge WITHOUT polluting the core networking logic.
+
+[package]
+name = "republet_schema"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

@@ -1,0 +1,11 @@
+# --- INDEPENDENT FFI BRIDGE ---
+# This bridge is strictly isolated to the Exonomy Wallet app. It takes the agnostic
+# networking engine (`exotalk_core`) and binds it uniquely to `exonomy_schema`.
+# This guarantees that the Exonomy app never compiles Chat, Scientific, or Project models.
+
+[package]
+name = "exonomy_ffi"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

@@ -1,0 +1,11 @@
+# --- PURE SCHEMATICS ---
+# This crate defines the strict Rust `struct` definitions for the Exocracy
+# project manager (Project, TaskNode, VoucherAttachment). These data shapes
+# are imported by exocracy_ffi and exocracy_desktop but never by ExoTalk or Exonomy.
+
+[package]
+name = "exocracy_schema"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

@@ -1,0 +1,61 @@
+# --- RUST ---
+target/
+**/*.rs.bk
+Cargo.lock
+
+# --- NODE.JS (Legacy — Permanently Blocked) ---
+**/node_modules/
+
+# --- FLUTTER ---
+**/bin/
+**/build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Ephemeral/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.h
+**/ios/Runner/GeneratedPluginRegistrant.m
+**/android/local.properties
+**/android/key.properties
+**/android/app/src/main/res/values/strings.xml
+**/android/app/src/main/res/values/google-services.json
+**/*.key
+**/*.keystore
+**/*.jks
+
+# --- IDEs / OS ---
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.lock
+
+# --- INFRA / SECRETS ---
+.env
+infra/*.json
+!infra/conscia-deploy-key.json # Keep the deploy key for now if requested, but generally ignore secrets
+# Actually, let's ignore the key by default for safety
+infra/conscia-deploy-key.json
+
+# --- TOOLS ---
+../google-cloud-sdk/ # This is peer, but good to note
+.tools/
+docs/archive/
+docs/walkthroughs/
+
+# --- APP DATA ---
+**/conscia_storage/
+**/*.db
+**/*.db-journal
+**/*.db-shm
+**/*.db-wal
+
+# --- LOCAL SECRETS ---
+**/secrets_config.dart

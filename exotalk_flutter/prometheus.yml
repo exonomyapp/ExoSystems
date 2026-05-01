@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s # How often to poll the beacon
+
+scrape_configs:
+  - job_name: 'exotalk-beacon'
+    static_configs:
+      - targets: ['host.docker.internal:3000'] # Points to the Beacon node

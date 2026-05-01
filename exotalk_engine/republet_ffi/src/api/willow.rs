@@ -1,0 +1,805 @@
+// =============================================================================
+// willow.rs — Sovereign Identity & Data Engine
+// =============================================================================
+//
+// Hello! This is the "brain" of the ExoTalk backend. It handles everything
+// from generating your private keys to managing your message history.
+//
+// 💡 MENTOR TIP: All functions here are `async`. This is because they often 
+// need to wait for the "Hard Drive" (disk) or "Network" (gossip). If they 
+// weren't async, your phone would freeze every time you sent a message!
+//
+// Main Responsibilities:
+//   1. Identity Vault — Your cryptographically unique self (did:peer).
+//   2. Identity Proofs — How you prove to others who you are.
+//   3. OAuth Bindings — Optional "Inward Recovery" anchors.
+//   4. Conversations — Your private or group chat channels.
+//
+// These functions are called by Flutter using the `flutter_rust_bridge`.
+// =============================================================================
+
+use tokio::sync::RwLock;
+use serde::{Serialize, Deserialize};
+use once_cell::sync::Lazy;
+use ed25519_dalek::{SigningKey, VerifyingKey, Signer, Verifier};
+use rand_core::OsRng;
+use exotalk_core::protocol_internal::{Capability, PermissionLevel};
+
+/// An independently-verified link between a did:peer and a public URL.
+#[derive(Clone, Debug, Serialize, Deserialize, Default)]
+pub struct VerifiedLink {
+    pub platform_label: String, // User-defined: "GitHub", "Mastodon", "My Blog"
+    pub url: String,
+    pub is_verified: bool,
+    pub verified_at_ms: i64,
+}
+
+/// An archived name record kept when the user renames themselves.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct NameRecord {
+    pub name: String,
+    pub proof_string: String,           // The proof that was valid for this name
+    pub verified_links: Vec<VerifiedLink>,
+    pub active_from_ms: i64,
+    pub retired_at_ms: i64,
+    pub change_certificate: String,     // ed25519 sig: "name-change:from=X:to=Y:at=T"
+}
+
+/// An OAuth account linked as a secondary sign-in method.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct OAuthLink {
+    pub provider: String,       // "github", "google", "discord", etc.
+    pub display_name: String,   // "@alice on GitHub", "alice@gmail.com"
+    pub sub: String,            // Stable provider-assigned unique user ID
+    pub binding_proof: String,  // ed25519 sig: "oauth-link:provider=X:sub=Y:did=Z:at=T"
+    pub linked_at_ms: i64,
+}
+
+/// Represents a loaded Node Identity (Keypair)
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct IdentityVault {
+    pub did: String,
+    pub secret: String,          // Base58 encoded local root secret
+    pub display_name: String,
+    pub avatar_url: String,
+    #[serde(default)]
+    pub proof_string: String,    // Canonical proof for current display_name
+    #[serde(default)]
+    pub verified_links: Vec<VerifiedLink>,
+    #[serde(default)]
+    pub name_history: Vec<NameRecord>,
+    #[serde(default = "default_true")]
+    pub ingress_enabled: bool,
+    #[serde(default = "default_true")]
+    pub egress_enabled: bool,
+}
+
+fn default_true() -> bool { true }
+
+/// Represents a User in the peer-to-peer network
+pub struct UserIdentity {
+    pub did: String,
+    pub alias: String,
+}
+
+/// Represents a direct or group conversation
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Conversation {
+    pub id: String,
+    pub title: String,
+    pub peers: Vec<String>,
+    pub last_active: i64,
+    pub unread_count: u32,
+    pub avatar: String,
+    pub is_group: bool,
+}
+
+/// A cryptographically signed Willow message payload
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Message {
+    pub id: String,
+    pub conversation_id: String,
+    pub author_did: String,
+    pub content: String,
+    pub timestamp_ms: i64,
+}
+
+// Basic Mock Database using a global static map
+static DB_MESSAGES: Lazy<RwLock<Vec<Message>>> = Lazy::new(|| RwLock::new(Vec::new()));
+static DB_CONVERSATIONS: Lazy<RwLock<Vec<Conversation>>> = Lazy::new(|| RwLock::new(Vec::new()));
+
+// Store the active node identity
+static ACTIVE_IDENTITY: Lazy<RwLock<Option<IdentityVault>>> = Lazy::new(|| RwLock::new(None));
+
+// --- PERSISTENCE HELPERS ---
+fn storage_path(filename: &str) -> std::path::PathBuf {
+    let mut p = std::path::PathBuf::from("exotalk_storage");
+    let _ = std::fs::create_dir_all(&p);
+    p.push(filename);
+    p
+}
+
+async fn save_db_to_disk() {
+    if let Ok(c) = serde_json::to_string(&*DB_CONVERSATIONS.read().await) {
+        let _ = std::fs::write(storage_path("db_conversations.json"), c);
+    }
+    if let Ok(m) = serde_json::to_string(&*DB_MESSAGES.read().await) {
+        let _ = std::fs::write(storage_path("db_messages.json"), m);
+    }
+}
+
+
+/// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier
+pub async fn generate_new_identity() -> IdentityVault {
+    let mut csprng = OsRng;
+    let signing_key: SigningKey = SigningKey::generate(&mut csprng);
+    let public_key: VerifyingKey = signing_key.verifying_key();
+    
+    let pk_b58 = bs58::encode(public_key.as_bytes()).into_string();
+    let sk_b58 = bs58::encode(signing_key.to_bytes()).into_string();
+    
+    let did = format!("did:peer:2.Vz{}", pk_b58);
+    let vault = IdentityVault { 
+        did, 
+        secret: sk_b58,
+        display_name: "New Peer".to_string(),
+        avatar_url: "".to_string(),
+        proof_string: "".to_string(),
+        verified_links: vec![],
+        name_history: vec![],
+        ingress_enabled: true,
+        egress_enabled: true,
+    };
+    
+    if let Ok(j) = serde_json::to_string(&vault) {
+        let _ = std::fs::write(storage_path("identity.json"), j);
+    }
+
+    // Set as active session
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault.clone());
+    vault
+}
+
+/// Returns the active node identity or generates a new one if missing
+pub async fn get_active_identity() -> IdentityVault {
+    let active = ACTIVE_IDENTITY.read().await;
+    if let Some(vault) = active.as_ref() {
+        return vault.clone();
+    }
+    drop(active);
+    
+    if let Ok(data) = std::fs::read_to_string(storage_path("identity.json")) {
+        if let Ok(vault) = serde_json::from_str::<IdentityVault>(&data) {
+            let mut active = ACTIVE_IDENTITY.write().await;
+            *active = Some(vault.clone());
+            exotalk_core::network_internal::set_ingress_paused(!vault.ingress_enabled).await;
+            exotalk_core::network_internal::set_egress_paused(!vault.egress_enabled).await;
+            return vault;
+        }
+    }
+    
+    generate_new_identity().await
+}
+
+pub async fn update_active_profile(name: String, avatar: String) -> IdentityVault {
+    let mut vault = get_active_identity().await;
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
+
+    if vault.display_name != name && !vault.display_name.is_empty() && vault.display_name != "New Peer" {
+        // Sign a name-change certificate
+        let change_cert = if let Ok(sk_bytes) = bs58::decode(&vault.secret).into_vec() {
+            if let Ok(sk_arr) = sk_bytes.try_into() as Result<[u8; 32], _> {
+                let sk = ed25519_dalek::SigningKey::from_bytes(&sk_arr);
+                let claim = format!("name-change:from={}:to={}:at={}", vault.display_name, name, now_ms);
+                let sig = sk.sign(claim.as_bytes());
+                format!("{}:sig={}", claim, bs58::encode(sig.to_bytes()).into_string())
+            } else { String::new() }
+        } else { String::new() };
+
+        // Archive the current name into history
+        let record = NameRecord {
+            name: vault.display_name.clone(),
+            proof_string: vault.proof_string.clone(),
+            verified_links: vault.verified_links.clone(),
+            active_from_ms: 0, // TODO(identity): Track vault.activated_at_ms to populate this correctly
+            retired_at_ms: now_ms,
+            change_certificate: change_cert,
+        };
+        vault.name_history.push(record);
+        vault.proof_string = "".to_string();
+        vault.verified_links = vec![];
+    }
+
+    vault.display_name = name;
+    vault.avatar_url = avatar;
+    
+    if let Ok(j) = serde_json::to_string(&vault) {
+        let _ = std::fs::write(storage_path("identity.json"), j);
+    }
+    
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault.clone());
+    vault
+}
+
+/// Generates a signed proof string linking the display name to the did:peer key.
+/// Format (Legacy): exotalk-proof:v1:did={DID}:name={NAME}:sig={BASE58_SIG}
+/// Format (Full Compact): etp1:{PUBKEY_B58}.{SIG_B58}
+/// Format (Minimal): ets1:{SIG_B58}
+pub async fn generate_verification_proof(format: String) -> Result<String, String> {
+    let vault = get_active_identity().await;
+    if vault.display_name.is_empty() || vault.display_name == "New Peer" {
+        return Err("Set a display name before generating a verification proof.".to_string());
+    }
+
+    let sk_bytes = bs58::decode(&vault.secret).into_vec().map_err(|e| e.to_string())?;
+    let sk_arr: [u8; 32] = sk_bytes.try_into().map_err(|_| "Invalid secret key length".to_string())?;
+    let signing_key = ed25519_dalek::SigningKey::from_bytes(&sk_arr);
+
+    let claim = format!("exotalk-proof:v1:did={}:name={}", vault.did, vault.display_name);
+    let signature = signing_key.sign(claim.as_bytes());
+    let sig_b58 = bs58::encode(signature.to_bytes()).into_string();
+
+    let proof = generate_proof_string_for_format(&format, &vault.did, &vault.display_name, &sig_b58, &claim);
+
+    let mut updated = vault;
+    updated.proof_string = proof.clone();
+    if let Ok(j) = serde_json::to_string(&updated) {
+        let _ = std::fs::write(storage_path("identity.json"), j);
+    }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(updated);
+
+    Ok(proof)
+}
+
+/// Evaluates all available proof formats and returns the best one that fits within max_chars.
+pub async fn generate_best_proof(max_chars: usize) -> Result<String, String> {
+    let vault = get_active_identity().await;
+    if vault.display_name.is_empty() || vault.display_name == "New Peer" {
+        return Err("Set a display name before generating a verification proof.".to_string());
+    }
+
+    let sk_bytes = bs58::decode(&vault.secret).into_vec().map_err(|e| e.to_string())?;
+    let sk_arr: [u8; 32] = sk_bytes.try_into().map_err(|_| "Invalid secret key length".to_string())?;
+    let signing_key = ed25519_dalek::SigningKey::from_bytes(&sk_arr);
+
+    let claim = format!("exotalk-proof:v1:did={}:name={}", vault.did, vault.display_name);
+    let signature = signing_key.sign(claim.as_bytes());
+    let sig_b58 = bs58::encode(signature.to_bytes()).into_string();
+
+    // Check formats in order of preference (most verbose first)
+    let formats = vec!["legacy", "full", "compact"];
+    let mut best_proof = String::new();
+
+    for fmt in formats {
+        let p = generate_proof_string_for_format(fmt, &vault.did, &vault.display_name, &sig_b58, &claim);
+        if p.len() <= max_chars {
+            best_proof = p;
+            break;
+        }
+        best_proof = p; // fall back to the last one (compact) if none fit
+    }
+
+    let mut updated = vault;
+    updated.proof_string = best_proof.clone();
+    if let Ok(j) = serde_json::to_string(&updated) {
+        let _ = std::fs::write(storage_path("identity.json"), j);
+    }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(updated);
+
+    Ok(best_proof)
+}
+
+fn generate_proof_string_for_format(format: &str, did: &str, _name: &str, sig_b58: &str, claim: &str) -> String {
+    match format {
+        "compact" => format!("ets1:{}", sig_b58),
+        "full" => {
+            let pk_b58 = did.strip_prefix("did:peer:2.Vz").unwrap_or(did);
+            format!("etp1:{}.{}", pk_b58, sig_b58)
+        },
+        _ => format!("{}:sig={}", claim, sig_b58), // legacy
+    }
+}
+
+/// Verifies any supported ExoTalk proof string locally.
+pub fn verify_proof_locally(proof: String) -> bool {
+    let vault = match futures_lite::future::block_on(get_active_identity_sync()) {
+        Some(v) => v,
+        None => return false,
+    };
+
+    if proof.starts_with("ets1:") {
+        let sig_b58 = &proof[5..];
+        return verify_raw_sig(sig_b58, &vault.did, &vault.display_name);
+    }
+    
+    if proof.starts_with("etp1:") {
+        let content = &proof[5..];
+        let parts: Vec<&str> = content.split('.').collect();
+        if parts.len() != 2 { return false; }
+        return verify_raw_sig(parts[1], &vault.did, &vault.display_name);
+    }
+
+    // Legacy parser
+    let sig_marker = ":sig=";
+    let sig_pos = match proof.rfind(sig_marker) {
+        Some(p) => p,
+        None => return false,
+    };
+    let sig_b58 = &proof[sig_pos + sig_marker.len()..];
+    verify_raw_sig(sig_b58, &vault.did, &vault.display_name)
+}
+
+fn verify_raw_sig(sig_b58: &str, did: &str, name: &str) -> bool {
+    let sig_bytes = match bs58::decode(sig_b58).into_vec() {
+        Ok(b) => b,
+        Err(_) => return false,
+    };
+    let sig_arr: [u8; 64] = match sig_bytes.try_into() {
+        Ok(a) => a,
+        Err(_) => return false,
+    };
+    let signature = ed25519_dalek::Signature::from_bytes(&sig_arr);
+
+    let pk_b58 = match did.strip_prefix("did:peer:2.Vz") {
+        Some(s) => s,
+        None => return false,
+    };
+    let pk_bytes = match bs58::decode(pk_b58).into_vec() {
+        Ok(b) => b,
+        Err(_) => return false,
+    };
+    let pk_arr: [u8; 32] = match pk_bytes.try_into() {
+        Ok(a) => a,
+        Err(_) => return false,
+    };
+    let verifying_key = match ed25519_dalek::VerifyingKey::from_bytes(&pk_arr) {
+        Ok(k) => k,
+        Err(_) => return false,
+    };
+
+    let claim = format!("exotalk-proof:v1:did={}:name={}", did, name);
+    use ed25519_dalek::Verifier;
+    verifying_key.verify(claim.as_bytes(), &signature).is_ok()
+}
+
+pub async fn set_ingress_enabled(enabled: bool) -> IdentityVault {
+    let mut vault = get_active_identity().await;
+    vault.ingress_enabled = enabled;
+    if let Ok(j) = serde_json::to_string(&vault) {
+        let _ = std::fs::write(storage_path("identity.json"), j);
+    }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault.clone());
+    exotalk_core::network_internal::set_ingress_paused(!enabled).await;
+    vault
+}
+
+pub async fn set_egress_enabled(enabled: bool) -> IdentityVault {
+    let mut vault = get_active_identity().await;
+    vault.egress_enabled = enabled;
+    if let Ok(j) = serde_json::to_string(&vault) {
+        let _ = std::fs::write(storage_path("identity.json"), j);
+    }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault.clone());
+    exotalk_core::network_internal::set_egress_paused(!enabled).await;
+    vault
+}
+
+async fn get_active_identity_sync() -> Option<IdentityVault> {
+    let active = ACTIVE_IDENTITY.read().await;
+    active.clone()
+}
+
+// --- MULTI-PLATFORM VERIFIED LINKS ---
+
+/// Adds a pending (unverified) link to the vault.
+pub async fn add_verification_link(label: String, url: String) -> IdentityVault {
+    let mut vault = get_active_identity().await;
+    // Don't add duplicates
+    if !vault.verified_links.iter().any(|l| l.url == url) {
+        vault.verified_links.push(VerifiedLink { platform_label: label, url, is_verified: false, verified_at_ms: 0 });
+    }
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault.clone());
+    vault
+}
+
+/// Marks an existing link by URL as verified or failed after an HTTP check.
+pub async fn confirm_verification_link(url: String, verified: bool) -> IdentityVault {
+    let mut vault = get_active_identity().await;
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
+    if let Some(link) = vault.verified_links.iter_mut().find(|l| l.url == url) {
+        link.is_verified = verified;
+        link.verified_at_ms = if verified { now_ms } else { 0 };
+    }
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault.clone());
+    vault
+}
+
+/// Removes a link by URL.
+pub async fn remove_verification_link(url: String) -> IdentityVault {
+    let mut vault = get_active_identity().await;
+    vault.verified_links.retain(|l| l.url != url);
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault.clone());
+    vault
+}
+
+/// Renames the display label of a link.
+pub async fn update_link_label(url: String, new_label: String) -> IdentityVault {
+    let mut vault = get_active_identity().await;
+    if let Some(link) = vault.verified_links.iter_mut().find(|l| l.url == url) {
+        link.platform_label = new_label;
+    }
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault.clone());
+    vault
+}
+
+/// Returns the full name history list.
+pub async fn get_name_history() -> Vec<NameRecord> {
+    let vault = get_active_identity().await;
+    vault.name_history
+}
+
+// --- OAUTH LINKS ---
+
+static DB_OAUTH: Lazy<RwLock<Vec<OAuthLink>>> = Lazy::new(|| RwLock::new(Vec::new()));
+
+async fn load_oauth_links() {
+    if let Ok(data) = std::fs::read_to_string(storage_path("oauth_links.json")) {
+        if let Ok(parsed) = serde_json::from_str::<Vec<OAuthLink>>(&data) {
+            let mut db = DB_OAUTH.write().await;
+            *db = parsed;
+        }
+    }
+}
+
+async fn save_oauth_links() {
+    if let Ok(j) = serde_json::to_string(&*DB_OAUTH.read().await) {
+        let _ = std::fs::write(storage_path("oauth_links.json"), j);
+    }
+}
+
+/// Links an OAuth account to the active did:peer by signing a binding proof.
+pub async fn add_oauth_link(provider: String, display_name: String, sub: String) -> OAuthLink {
+    let vault = get_active_identity().await;
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
+
+    let binding_proof = if let Ok(sk_bytes) = bs58::decode(&vault.secret).into_vec() {
+        if let Ok(sk_arr) = sk_bytes.try_into() as Result<[u8; 32], _> {
+            let sk = ed25519_dalek::SigningKey::from_bytes(&sk_arr);
+            let claim = format!("oauth-link:provider={}:sub={}:did={}:at={}", provider, sub, vault.did, now_ms);
+            let sig = sk.sign(claim.as_bytes());
+            format!("{}:sig={}", claim, bs58::encode(sig.to_bytes()).into_string())
+        } else { String::new() }
+    } else { String::new() };
+
+    let link = OAuthLink { provider: provider.clone(), display_name, sub, binding_proof, linked_at_ms: now_ms };
+    {
+        let mut db = DB_OAUTH.write().await;
+        db.retain(|l| l.provider != provider); // replace existing
+        db.push(link.clone());
+    }
+    save_oauth_links().await;
+    link
+}
+
+/// Removes an OAuth link by provider key.
+pub async fn remove_oauth_link(provider: String) {
+    { let mut db = DB_OAUTH.write().await; db.retain(|l| l.provider != provider); }
+    save_oauth_links().await;
+}
+
+/// Returns all linked OAuth accounts.
+pub async fn get_oauth_links() -> Vec<OAuthLink> {
+    load_oauth_links().await;
+    DB_OAUTH.read().await.clone()
+}
+
+/// Finds the did:peer for a given OAuth provider + sub combination.
+/// Returns an empty string if not found.
+pub async fn find_did_for_oauth(provider: String, sub: String) -> String {
+    load_oauth_links().await;
+    let db = DB_OAUTH.read().await;
+    if db.iter().any(|l| l.provider == provider && l.sub == sub) {
+        get_active_identity().await.did
+    } else {
+        String::new()
+    }
+}
+
+// --- CROSS-DEVICE PAIRING ---
+
+/// Generates a short-lived signed pairing token for QR-code device sync.
+/// The token encodes: did + timestamp + signature. Expires after 5 minutes.
+pub async fn generate_device_pairing_token() -> Result<String, String> {
+    let vault = get_active_identity().await;
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
+
+    let sk_bytes = bs58::decode(&vault.secret).into_vec().map_err(|e| e.to_string())?;
+    let sk_arr: [u8; 32] = sk_bytes.try_into().map_err(|_| "Invalid key".to_string())?;
+    let sk = ed25519_dalek::SigningKey::from_bytes(&sk_arr);
+    let claim = format!("exotalk-pair:did={}:at={}", vault.did, now_ms);
+    let sig = sk.sign(claim.as_bytes());
+    Ok(format!("{}:sig={}", claim, bs58::encode(sig.to_bytes()).into_string()))
+}
+
+/// Verifies a pairing token (checks signature and 5-minute expiry).
+pub fn verify_device_pairing_token(token: String) -> bool {
+    // Delegate through the same verification engine as proof strings (same format)
+    // Additionally check timestamp expiry
+    let at_marker = ":at=";
+    let sig_marker = ":sig=";
+    let at_pos = match token.find(at_marker) { Some(p) => p, None => return false };
+    let sig_pos = match token.rfind(sig_marker) { Some(p) => p, None => return false };
+    let ts_str = &token[at_pos + at_marker.len()..sig_pos];
+    let ts: i64 = match ts_str.parse() { Ok(t) => t, Err(_) => return false };
+    let now_ms = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
+    if now_ms - ts > 5 * 60 * 1000 { return false; } // expired
+    verify_proof_locally(token) // re-uses the same signature logic
+}
+
+/// Exports the full profile + OAuth links as a JSON string (for cross-device transfer).
+/// In a production implementation this would be encrypted; here it is signed.
+pub async fn export_profile_bundle() -> Result<String, String> {
+    let vault = get_active_identity().await;
+    load_oauth_links().await;
+    let oauth = DB_OAUTH.read().await.clone();
+    let bundle = serde_json::json!({ "vault": vault, "oauth_links": oauth });
+    let bundle_str = serde_json::to_string(&bundle).map_err(|e| e.to_string())?;
+
+    let sk_bytes = bs58::decode(&vault.secret).into_vec().map_err(|e| e.to_string())?;
+    let sk_arr: [u8; 32] = sk_bytes.try_into().map_err(|_| "Invalid key".to_string())?;
+    let sk = ed25519_dalek::SigningKey::from_bytes(&sk_arr);
+    let sig = sk.sign(bundle_str.as_bytes());
+    let sig_b58 = bs58::encode(sig.to_bytes()).into_string();
+    Ok(format!("{}.{}", { use base64::Engine; base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(&bundle_str) }, sig_b58))
+}
+
+/// Imports a profile bundle from another device (verifies did:peer signature first).
+pub async fn import_profile_bundle(bundle: String) -> bool {
+    use base64::Engine;
+    let parts: Vec<&str> = bundle.rsplitn(2, '.').collect();
+    if parts.len() != 2 { return false; }
+    let sig_b58 = parts[0];
+    let payload_b64 = parts[1];
+    let payload_bytes = match base64::engine::general_purpose::URL_SAFE_NO_PAD.decode(payload_b64) {
+        Ok(b) => b, Err(_) => return false
+    };
+    let payload_str = match std::str::from_utf8(&payload_bytes) {
+        Ok(s) => s, Err(_) => return false
+    };
+    let bundle_val: serde_json::Value = match serde_json::from_str(payload_str) {
+        Ok(v) => v, Err(_) => return false
+    };
+    let vault: IdentityVault = match serde_json::from_value(bundle_val["vault"].clone()) {
+        Ok(v) => v, Err(_) => return false
+    };
+    // Verify signature using the embedded DID public key
+    let pk_b58 = match vault.did.strip_prefix("did:peer:2.Vz") {
+        Some(k) => k, None => return false
+    };
+    let pk_bytes = match bs58::decode(pk_b58).into_vec() { Ok(b) => b, Err(_) => return false };
+    let pk_arr: [u8; 32] = match pk_bytes.try_into() { Ok(a) => a, Err(_) => return false };
+    let vk = match ed25519_dalek::VerifyingKey::from_bytes(&pk_arr) { Ok(k) => k, Err(_) => return false };
+    let sig_bytes = match bs58::decode(sig_b58).into_vec() { Ok(b) => b, Err(_) => return false };
+    let sig = match ed25519_dalek::Signature::from_slice(&sig_bytes) { Ok(s) => s, Err(_) => return false };
+    use ed25519_dalek::Verifier;
+    if vk.verify(payload_bytes.as_slice(), &sig).is_err() { return false; }
+    // Write to disk
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    if let Ok(oauth) = serde_json::from_value::<Vec<OAuthLink>>(bundle_val["oauth_links"].clone()) {
+        if let Ok(j) = serde_json::to_string(&oauth) { let _ = std::fs::write(storage_path("oauth_links.json"), j); }
+        let mut db = DB_OAUTH.write().await;
+        *db = oauth;
+    }
+    let mut active = ACTIVE_IDENTITY.write().await;
+    *active = Some(vault);
+    true
+}
+
+use crate::api::network;
+
+pub async fn init_willow_database() -> Result<bool, String> {
+    // Ensure we have an identity before doing anything
+    get_active_identity().await;
+
+    // Start the P2P networking node using the active identity
+    let vault = get_active_identity().await;
+    network::start_iroh_node(vault.did, vault.secret).await?;
+
+    if let Ok(data) = std::fs::read_to_string(storage_path("db_conversations.json")) {
+        if let Ok(parsed) = serde_json::from_str::<Vec<Conversation>>(&data) {
+            let mut db_c = DB_CONVERSATIONS.write().await;
+            *db_c = parsed;
+        }
+    }
+    
+    if let Ok(data) = std::fs::read_to_string(storage_path("db_messages.json")) {
+        if let Ok(parsed) = serde_json::from_str::<Vec<Message>>(&data) {
+            let mut db_m = DB_MESSAGES.write().await;
+            *db_m = parsed;
+        }
+    }
+    
+    Ok(true)
+}
+
+pub async fn fetch_conversations() -> Vec<Conversation> {
+    let db = DB_CONVERSATIONS.read().await;
+    db.clone()
+}
+
+use exotalk_core::protocol_internal;
+
+pub async fn send_willow_message(conversation_id: String, _author_did: String, content: String) -> Message {
+    // 1. Prepare data OUTSIDE of the lock
+    let vault = get_active_identity().await;
+    let author_did = vault.did;
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
+    
+    // 2. Perform async networking OUTSIDE of the lock
+    let encoded = protocol_internal::encode_message(&content, timestamp).unwrap();
+    let blob_hash = network::save_blob(encoded).await.expect("Failed to persist message blob");
+    let namespace = protocol_internal::derive_namespace(&conversation_id);
+    network::broadcast_message_hash(namespace, blob_hash).await.expect("Failed to broadcast message announcement");
+
+    // 3. Update the materialized view DB within a NARROW lock scope
+    let msg = {
+        let mut db = DB_MESSAGES.write().await;
+        let m = Message {
+            id: format!("msg_{}", db.len()),
+            conversation_id,
+            author_did,
+            content,
+            timestamp_ms: timestamp,
+        };
+        db.push(m.clone());
+        m
+    };
+    
+    save_db_to_disk().await;
+    msg
+}
+
+pub async fn get_messages_for_conversation(convo_id: String) -> Vec<Message> {
+    let db = DB_MESSAGES.read().await;
+    db.iter().filter(|m| m.conversation_id == convo_id).cloned().collect()
+}
+
+pub async fn create_conversation(title: String, peers: Vec<String>) -> Conversation {
+    // 1. Prepare namespace OUTSIDE of lock
+    let id_str = {
+        let db = DB_CONVERSATIONS.read().await;
+        format!("convo_{}", db.len())
+    };
+    
+    // 2. Perform async networking OUTSIDE of lock
+    let namespace = protocol_internal::derive_namespace(&id_str);
+    let _ = network::join_conversation_topic(namespace).await;
+
+    // 3. Update DB within NARROW lock scope
+    let avatar_str = format!("https://picsum.photos/seed/{}/200/200", id_str);
+    let c = Conversation {
+        id: id_str,
+        title,
+        peers,
+        last_active: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64,
+        unread_count: 0,
+        avatar: avatar_str,
+        is_group: false,
+    };
+    
+    {
+        let mut db = DB_CONVERSATIONS.write().await;
+        db.push(c.clone());
+    }
+    
+    save_db_to_disk().await;
+    c
+}
+
+/// Signs and gossips a new Meadowcap Capability token granting access to a conversation.
+/// 💡 MENTOR TIP: "Delegation" means giving someone else the power to speak.
+/// We use our private key to sign a specialized payload that only we could 
+/// have created. When other peers see this token, they'll know the math 
+/// proves it came from us.
+pub async fn delegate_capability(
+    target_did: String,
+    namespace_id: String,
+    level: String, // "Read", "Write", "Admin"
+) -> Result<String, String> {
+    let vault = get_active_identity().await;
+    if vault.secret.is_empty() {
+        return Err("No active identity to delegate from".into());
+    }
+
+    let sk_bytes = bs58::decode(&vault.secret).into_vec().map_err(|e| e.to_string())?;
+    let sk_arr: [u8; 32] = sk_bytes.try_into().map_err(|_| "Invalid secret key length".to_string())?;
+    let signing_key = ed25519_dalek::SigningKey::from_bytes(&sk_arr);
+
+    let access_level = match level.as_str() {
+        "Read" => PermissionLevel::Read,
+        "Write" => PermissionLevel::Write,
+        "Admin" => PermissionLevel::Admin,
+        _ => return Err("Invalid permission level".to_string()),
+    };
+
+    let namespace = exotalk_core::protocol_internal::derive_namespace(&namespace_id);
+
+    let mut cap = Capability {
+        delegator: vault.did.clone(),
+        delegatee: target_did,
+        namespace,
+        access_level: access_level.clone(),
+        signature: vec![],
+    };
+
+    // Serialize payload for signature (exclude empty signature field)
+    let ns_b58 = bs58::encode(&cap.namespace).into_string();
+    let payload = format!("{}:{}:{}:{:?}", cap.delegator, cap.delegatee, ns_b58, cap.access_level);
+    let signature = signing_key.sign(payload.as_bytes());
+    cap.signature = signature.to_bytes().to_vec();
+
+    serde_json::to_string(&cap).map_err(|e| e.to_string())
+}
+
+/// Verifies a Meadowcap Capability token mathematically against the delegator's active DID
+pub async fn verify_capability(cap_json: String) -> Result<bool, String> {
+    let cap: Capability = serde_json::from_str(&cap_json).map_err(|e| e.to_string())?;
+    
+    let pk_b58 = match cap.delegator.strip_prefix("did:peer:2.Vz") {
+        Some(s) => s,
+        None => return Err("Invalid delegator DID format".to_string()),
+    };
+    
+    let pk_bytes = bs58::decode(pk_b58).into_vec().map_err(|e| e.to_string())?;
+    let pk_arr: [u8; 32] = pk_bytes.try_into().map_err(|_| "Invalid public key length".to_string())?;
+    let verifying_key = ed25519_dalek::VerifyingKey::from_bytes(&pk_arr).map_err(|e| e.to_string())?;
+
+    // 💡 MENTOR TIP: We use the exact same format for the payload as we did
+    // when signing. If even ONE character is different, the signature will fail!
+    let ns_b58 = bs58::encode(&cap.namespace).into_string();
+    let payload = format!("{}:{}:{}:{:?}", cap.delegator, cap.delegatee, ns_b58, cap.access_level);
+    
+    let sig_arr: [u8; 64] = cap.signature.clone().try_into().map_err(|_| "Invalid signature length".to_string())?;
+    let signature = ed25519_dalek::Signature::from_bytes(&sig_arr);
+
+    match verifying_key.verify(payload.as_bytes(), &signature) {
+        Ok(_) => Ok(true),
+        Err(_) => Ok(false),
+    }
+}
+
+/// Fetches the current roster of verified peers for a specific conversation.
+pub async fn get_capabilities_for_namespace(namespace_id: String) -> std::collections::HashMap<String, String> {
+    // 💡 MENTOR TIP: We derive the 32-byte namespace hash because that's how
+    // the CapabilityStore keys its in-memory map.
+    let namespace = exotalk_core::protocol_internal::derive_namespace(&namespace_id);
+    let store = exotalk_core::network_internal::CAPABILITY_STORE.read().await;
+    let mut res = std::collections::HashMap::new();
+    if let Some(map) = store.get(&namespace) {
+        for (did, level) in map.iter() {
+            res.insert(did.clone(), format!("{:?}", level));
+        }
+    }
+    res
+}

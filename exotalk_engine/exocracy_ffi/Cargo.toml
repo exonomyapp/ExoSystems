@@ -1,0 +1,11 @@
+# --- INDEPENDENT FFI BRIDGE ---
+# This bridge is strictly isolated to Exocracy Lite Mobile. It takes the agnostic
+# networking engine (`exotalk_core`) and binds it uniquely to `exocracy_schema`.
+# This guarantees that Exocracy Lite never compiles Chat, Scientific, or Voucher models.
+
+[package]
+name = "exocracy_ffi"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]

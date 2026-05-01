@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>conscia Dashboard</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --accent: #238636;
+            --accent-glow: rgba(35, 134, 54, 0.3);
+            --text: #e6edf3;
+            --muted: #8b949e;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 1.5rem 2rem;
+            background: rgba(22, 27, 34, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            gap: 1rem;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 600; color: var(--accent); white-space: nowrap; flex-shrink: 0; }
+        .node-id-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 0;
+            flex: 1;
+            justify-content: flex-end;
+        }
+        .node-id { 
+            font-family: monospace; 
+            font-size: 0.8rem; 
+            background: #000; 
+            padding: 0.5rem 1rem; 
+            border-radius: 6px; 
+            border: 1px solid #30363d; 
+            color: var(--muted); 
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
+            flex-shrink: 1;
+        }
+
+        main { padding: 2rem; flex: 1; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .stat-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+        .stat-card h3 { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .stat-card .value { font-size: 2rem; font-weight: 600; }
+
+        .log-section {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .log-header { padding: 1rem; border-bottom: 1px solid #30363d; font-weight: 600; font-size: 0.9rem; color: var(--muted); }
+        #log-output { padding: 1rem; font-family: monospace; font-size: 0.85rem; overflow-y: auto; flex: 1; line-height: 1.6; }
+
+        .log-entry { margin-bottom: 0.5rem; padding-left: 1rem; border-left: 2px solid transparent; }
+        .log-entry.sync { border-left-color: var(--accent); color: var(--accent); }
+        .log-entry.info { border-left-color: #58a6ff; }
+        .timestamp { color: var(--muted); margin-right: 0.5rem; font-size: 0.75rem; }
+
+        footer { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.8rem; }
+
+        /* Telemetry UI Extensions */
+        /* Peer Mesh Specific Styles */
+        .peer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        .peer-card {
+            background: rgba(22, 27, 34, 0.6);
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(5px);
+        }
+
+        .peer-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+            background: rgba(22, 27, 34, 0.8);
+        }
+
+        .peer-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .peer-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            background: #000;
+            border: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--accent);
+            font-size: 1.2rem;
+            box-shadow: inset 0 0 10px rgba(35, 134, 54, 0.1);
+        }
+
+        .peer-info h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .peer-id {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
+        }
+
+        .peer-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            box-shadow: 0 0 10px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; box-shadow: 0 0 5px var(--accent); }
+            50% { opacity: 1; box-shadow: 0 0 15px var(--accent); }
+            100% { opacity: 0.6; box-shadow: 0 0 5px var(--accent); }
+        }
+
+        .peer-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-local { color: #58a6ff; border: 1px solid rgba(88, 166, 255, 0.3); background: rgba(88, 166, 255, 0.05); }
+        .badge-direct { color: #f2cc60; border: 1px solid rgba(242, 204, 96, 0.3); background: rgba(242, 204, 96, 0.05); }
+        .badge-relay { color: var(--muted); border: 1px solid #30363d; background: rgba(139, 148, 158, 0.05); }
+        .badge-role { background: rgba(35, 134, 54, 0.1); color: var(--accent); border: 1px solid var(--accent); }
+
+        .peer-addresses {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--text);
+            background: rgba(0,0,0,0.3);
+            padding: 0.75rem;
+            border-radius: 8px;
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid #30363d;
+            line-height: 1.4;
+        }
+
+        .peer-addresses::-webkit-scrollbar { width: 4px; }
+        .peer-addresses::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+        
+        .modal-body-scroll {
+            max-height: 70vh;
+            overflow-y: auto;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        
+        .tabs { display: flex; border-bottom: 1px solid #30363d; background: rgba(22, 27, 34, 0.5); border-radius: 12px 12px 0 0; }
+        .tab { padding: 1rem 1.5rem; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; transition: all 0.2s ease; }
+        .tab.active { color: var(--text); border-bottom-color: var(--accent); background: var(--surface); }
+        .tab:hover { color: var(--text); }
+        
+        .toggle-switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #30363d; transition: .2s; border-radius: 18px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px; background-color: var(--muted); transition: .2s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(16px); background-color: white; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(4px); }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--surface); padding: 2rem; border-radius: 12px; border: 1px solid #30363d; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .modal-title { font-weight: 600; font-size: 1.2rem; }
+        .modal-close { cursor: pointer; color: var(--muted); font-size: 1.5rem; line-height: 1; }
+        .modal-close:hover { color: var(--text); }
+        
+        .export-option { display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid #30363d; border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s ease; }
+        .export-option:hover { border-color: var(--accent); background: rgba(35, 134, 54, 0.1); }
+        .export-icon { font-size: 1.5rem; }
+        .export-info h4 { margin-bottom: 0.25rem; font-size: 0.95rem; }
+        .export-info p { font-size: 0.75rem; color: var(--muted); }
+
+        .health-telemetry {
+            background: var(--surface);
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            padding: 2rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+        }
+        .health-stage {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        .health-stage::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #30363d;
+            z-index: -1;
+        }
+        .health-stage:last-child::before {
+            display: none;
+        }
+        .health-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: 2px solid #30363d;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--muted);
+            transition: all 0.3s ease;
+        }
+        .health-stage.active .health-icon {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+        .health-stage.active::before {
+            background: var(--accent);
+        }
+        .health-stage.error .health-icon {
+            border-color: #f85149;
+            color: #f85149;
+            box-shadow: 0 0 15px rgba(248, 81, 73, 0.3);
+        }
+        .health-title { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; color: var(--text); }
+        .health-desc { font-size: 0.75rem; color: var(--muted); font-family: monospace; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">Conscia Node</div>
+        <div class="node-id-container">
+            <div class="node-id" id="node-id">Initializing...</div>
+            <button onclick="copyToClipboard('node-id', this)" title="Copy Node ID" style="flex-shrink: 0; background: rgba(48, 54, 61, 0.5); border: 1px solid #30363d; color: var(--muted); border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 0.7rem; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                <span>📋</span> <span class="btn-text">Copy ID</span>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="log-header" style="margin-bottom: 1rem; padding: 0; border: none;">NETWORK HEALTH TELEMETRY</div>
+        <div class="health-telemetry" id="health-container">
+            <div class="health-stage" id="stage-engine">
+                <div class="health-icon">⚙️</div>
+                <div class="health-title">Engine</div>
+                <div class="health-desc" id="desc-engine">Initializing...</div>
+            </div>
+            <div class="health-stage" id="stage-lan">
+                <div class="health-icon">🔌</div>
+                <div class="health-title">Local Bind</div>
+                <div class="health-desc" id="desc-lan">Binding...</div>
+            </div>
+            <div class="health-stage" id="stage-relay">
+                <div class="health-icon">🌍</div>
+                <div class="health-title">Relay (Internet)</div>
+                <div class="health-desc" id="desc-relay">Connecting...</div>
+            </div>
+            <div class="health-stage" id="stage-peers" style="cursor: pointer;" onclick="openPeerModal()">
+                <div class="health-icon">🤝</div>
+                <div class="health-title">Peer Mesh</div>
+                <div class="health-desc" id="desc-peers">0 Peers</div>
+            </div>
+            <div class="health-stage" id="stage-gossip">
+                <div class="health-icon">📡</div>
+                <div class="health-title">Gossip</div>
+                <div class="health-desc" id="desc-gossip">0 Topics</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Archived Blobs</h3>
+                <div class="value" id="count-blobs">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Commercial Status</h3>
+                <div class="value" style="color: var(--accent);">Ready</div>
+                <button class="conscire-btn" style="margin-top: 10px; width: 100%; padding: 10px; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Conscire</button>
+            </div>
+        </div>
+
+        <div class="peering-manager" style="margin-top: 2rem;">
+            <div class="log-header">PEERING MANAGER (CONSCIERGE)</div>
+            <div style="padding: 1.5rem; background: var(--surface); border-radius: 0 0 12px 12px; border: 1px solid #30363d; border-top: none;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">PEER NODE WHITELIST</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input type="text" id="node-invite-input" placeholder="Paste Conscia Node ID..." style="flex: 1; min-width: 200px; padding: 0.6rem; background: #000; border: 1px solid #30363d; border-radius: 6px; color: white;">
+                            <button onclick="addPeer('node')" style="padding: 0.6rem 1rem; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Invite</button>
+                        </div>
+                        
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">AUTHORIZED USER DEVICES</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            <input type="text" id="user-invite-input" placeholder="Paste User Device ID..." style="flex: 1; min-width: 200px; padding: 0.6rem; background: #000; border: 1px solid #30363d; border-radius: 6px; color: white;">
+                            <button onclick="addPeer('user')" style="padding: 0.6rem 1rem; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Authorize</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">FEDERATION STATUS</h4>
+                        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; background: #000; border-radius: 6px; border: 1px solid #30363d;">
+                            <span id="fed-status-label" style="font-weight: 600; color: var(--muted); font-size: 0.9rem;">Autonomous (Lifeline)</span>
+                            <button onclick="toggleFederation()" id="fed-toggle-btn" style="white-space: nowrap; padding: 0.5rem 1rem; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; cursor: pointer;">Enable Federation</button>
+                        </div>
+                        <p style="margin-top: 1rem; font-size: 0.75rem; color: var(--muted);">Your Conscia Node ID is required to initiate a bilateral 1-to-1 sync. Share it only with trusted Conscierges.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="governance-control" style="margin-top: 2rem;">
+            <div class="log-header">GOVERNANCE MISSION CONTROL</div>
+            <div style="padding: 1.5rem; background: var(--surface); border-radius: 0 0 12px 12px; border: 1px solid #30363d; border-top: none;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">JOIN REQUEST QUEUE (TIER 2)</h4>
+                        <div id="request-queue" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; background: #000; padding: 1rem; border-radius: 6px; border: 1px solid #30363d;">
+                            <p style="font-size: 0.8rem; color: var(--muted); text-align: center;">No pending requests.</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">NETWORK ROLES & REGISTRY</h4>
+                        <div id="roles-registry" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 200px; overflow-y: auto; background: #000; padding: 1rem; border-radius: 6px; border: 1px solid #30363d;">
+                            <p style="font-size: 0.8rem; color: var(--muted); text-align: center;">Syncing registry...</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4 style="font-size: 0.85rem; color: var(--muted);">SOVEREIGN TOOLS</h4>
+                        <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                            <button onclick="generateInvite('Conscierge')" style="padding: 0.6rem 1rem; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Generate Master Link (T1)</button>
+                            <button onclick="generateInvite('User')" style="padding: 0.6rem 1rem; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; cursor: pointer;">Generate Referral (T2)</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="log-section" style="margin-top: 2rem; position: relative;">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('INFO')">
+                    INFO 
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                        <input type="checkbox" id="toggle-INFO" onchange="toggleStream('INFO')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="tab" onclick="switchTab('DEBUG')">
+                    DEBUG 
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                        <input type="checkbox" id="toggle-DEBUG" onchange="toggleStream('DEBUG')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="tab" onclick="switchTab('TRACE')">
+                    TRACE 
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                        <input type="checkbox" id="toggle-TRACE" onchange="toggleStream('TRACE')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div style="margin-left: auto; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.75rem;">
+                    <button onclick="copyVisibleLogs(this)" style="padding: 0.5rem 1rem; background: transparent; border: 1px solid var(--muted); border-radius: 6px; color: var(--text); cursor: pointer; font-size: 0.8rem; display: flex; gap: 0.5rem; align-items: center;">
+                        <span>📋</span> <span class="btn-text">Copy Logs</span>
+                    </button>
+                    <button onclick="openExportModal()" style="padding: 0.5rem 1rem; background: transparent; border: 1px solid var(--muted); border-radius: 6px; color: var(--text); cursor: pointer; font-size: 0.8rem; display: flex; gap: 0.5rem; align-items: center;">
+                        <span>📥</span> Export Vault
+                    </button>
+                </div>
+            </div>
+            <div id="log-output">
+                <div style="color: var(--muted); text-align: center; margin-top: 2rem; font-style: italic;">Feed is paused. Toggle a switch to begin streaming real-time telemetry.</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="pause-modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⏸️</div>
+            <h3 style="margin-bottom: 0.5rem;">Stream Paused</h3>
+            <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Safety limit reached (100 records). We paused the stream to prevent browser overload.</p>
+            <button onclick="resumeStream()" style="width: 100%; padding: 0.8rem; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600; font-size: 1rem;">Resume Feed</button>
+            <p id="pause-countdown" style="font-size: 0.75rem; color: var(--muted); margin-top: 1rem;">Auto-dismissing in 10s...</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="export-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Export Log Vault</div>
+                <div class="modal-close" onclick="closeExportModal()">&times;</div>
+            </div>
+            
+            <div class="export-option" onclick="downloadLogs('json')">
+                <div class="export-icon">📦</div>
+                <div class="export-info">
+                    <h4>Structured Data (.json)</h4>
+                    <p>Machine-readable JSON array, perfect for ElasticSearch or jq.</p>
+                </div>
+            </div>
+            
+            <div class="export-option" onclick="downloadLogs('csv')">
+                <div class="export-icon">📊</div>
+                <div class="export-info">
+                    <h4>Spreadsheet (.csv)</h4>
+                    <p>Tabular data format for deep analysis in Excel or Python.</p>
+                </div>
+            </div>
+            
+            <div class="export-option" onclick="downloadLogs('log')">
+                <div class="export-icon">📝</div>
+                <div class="export-info">
+                    <h4>Plain Text (.log)</h4>
+                    <p>Standard human-readable text file with raw timestamps.</p>
+                </div>
+            </div>
+
+            <div class="export-option" onclick="downloadLogs('exolog')">
+                <div class="export-icon">🔐</div>
+                <div class="export-info">
+                    <h4>Encrypted Vault (.exolog)</h4>
+                    <p>Cryptographically signed and encrypted bundle of the mesh activity.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="peer-modal" class="modal-overlay">
+        <div class="modal-content" style="width: 1100px; max-width: 95vw;">
+            <div class="modal-header">
+                <h2 style="display: flex; align-items: center; gap: 12px;">
+                    🤝 Active Mesh Roster
+                    <span id="peer-count-badge" style="font-size: 0.8rem; background: #000; border: 1px solid #30363d; padding: 2px 8px; border-radius: 12px; color: var(--accent);">0 Peers</span>
+                </h2>
+                <div class="modal-close" onclick="closePeerModal()">&times;</div>
+            </div>
+            <div class="modal-body-scroll">
+                <div id="peer-grid" class="peer-grid">
+                    <!-- Cards will be injected here -->
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; padding: 1.5rem; border-top: 1px solid #30363d;">
+                <button onclick="closePeerModal()" class="btn btn-secondary" style="padding: 0.6rem 1.2rem; background: transparent; border: 1px solid #30363d; border-radius: 6px; color: var(--text); cursor: pointer;">Close Mesh</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>&copy; 2026 Conscia P2P Networking | Commercial Reporting & Archival Lifeline</div>
+            <div id="version-label" style="font-family: monospace; font-size: 0.7rem;">v0.7.7</div>
+        </div>
+    </footer>
+
+    <script>
+        let federationActive = false;
+        
+        let currentTab = 'INFO';
+        let streams = { INFO: null, DEBUG: null, TRACE: null };
+        let logs = { INFO: [], DEBUG: [], TRACE: [] };
+        let recordCount = { INFO: 0, DEBUG: 0, TRACE: 0 };
+        let pauseTimeout = null;
+
+        function switchTab(level) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            currentTab = level;
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const out = document.getElementById('log-output');
+            out.innerHTML = '';
+            
+            if (logs[currentTab].length === 0) {
+                const isStreaming = document.getElementById(`toggle-${currentTab}`).checked;
+                out.innerHTML = `<div style="color: var(--muted); text-align: center; margin-top: 2rem; font-style: italic;">
+                    ${isStreaming ? 'Listening for telemetry...' : 'Feed is paused. Toggle a switch to begin streaming real-time telemetry.'}
+                </div>`;
+                return;
+            }
+
+            logs[currentTab].forEach(log => {
+                const el = document.createElement('div');
+                el.className = 'log-entry ' + (log.level.toLowerCase() === 'info' ? 'info' : (log.level.toLowerCase() === 'warn' || log.level.toLowerCase() === 'error' ? 'sync' : ''));
+                if (log.level === 'ERROR') el.style.borderLeftColor = '#f85149';
+                el.innerHTML = `<span class="timestamp">[${log.timestamp}]</span> <span style="color: var(--muted); margin-right: 0.5rem; font-size: 0.75rem;">${log.target}</span> ${log.message}`;
+                out.appendChild(el);
+            });
+            out.scrollTop = out.scrollHeight;
+        }
+
+        function toggleStream(level) {
+            const checkbox = document.getElementById(`toggle-${level}`);
+            
+            if (checkbox.checked) {
+                if (streams[level]) streams[level].close();
+                recordCount[level] = 0;
+                
+                const sse = new EventSource(`/api/logs/stream?level=${level.toLowerCase()}`);
+                sse.onmessage = (e) => {
+                    const log = JSON.parse(e.data);
+                    logs[level].push(log);
+                    if (logs[level].length > 1000) logs[level].shift();
+                    
+                    if (currentTab === level) {
+                        renderLogs();
+                    }
+                    
+                    recordCount[level]++;
+                    if (recordCount[level] >= 100) {
+                        checkbox.checked = false;
+                        sse.close();
+                        streams[level] = null;
+                        showPauseModal(level);
+                    }
+                };
+                streams[level] = sse;
+            } else {
+                if (streams[level]) {
+                    streams[level].close();
+                    streams[level] = null;
+                }
+            }
+            if (currentTab === level) renderLogs();
+        }
+
+        function showPauseModal(level) {
+            if (currentTab !== level) {
+                document.querySelectorAll('.tab').forEach(t => {
+                    if (t.textContent.includes(level)) switchTab(level);
+                });
+            }
+            
+            const modal = document.getElementById('pause-modal');
+            modal.classList.add('active');
+            
+            let time = 10;
+            const cd = document.getElementById('pause-countdown');
+            cd.textContent = `Auto-dismissing in ${time}s...`;
+            
+            if (pauseTimeout) clearInterval(pauseTimeout);
+            pauseTimeout = setInterval(() => {
+                time--;
+                cd.textContent = `Auto-dismissing in ${time}s...`;
+                if (time <= 0) {
+                    clearInterval(pauseTimeout);
+                    modal.classList.remove('active');
+                }
+            }, 1000);
+        }
+
+        function resumeStream() {
+            const modal = document.getElementById('pause-modal');
+            modal.classList.remove('active');
+            if (pauseTimeout) clearInterval(pauseTimeout);
+            
+            const checkbox = document.getElementById(`toggle-${currentTab}`);
+            checkbox.checked = true;
+            toggleStream(currentTab);
+        }
+
+        function openExportModal() {
+            document.getElementById('export-modal').classList.add('active');
+        }
+
+        function closeExportModal() {
+            document.getElementById('export-modal').classList.remove('active');
+        }
+
+        function copyToClipboard(elementId, btn) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const textSpan = btn.querySelector('.btn-text');
+                const oldText = textSpan.textContent;
+                textSpan.textContent = 'Copied!';
+                btn.style.borderColor = 'var(--accent)';
+                setTimeout(() => {
+                    textSpan.textContent = oldText;
+                    btn.style.borderColor = '#30363d';
+                }, 2000);
+            });
+        }
+
+        function copyVisibleLogs(btn) {
+            const data = logs[currentTab];
+            if (data.length === 0) return;
+            
+            const text = data.map(log => `[${log.timestamp}] ${log.level} ${log.target}: ${log.message}`).join("\n");
+            navigator.clipboard.writeText(text).then(() => {
+                const textSpan = btn.querySelector('.btn-text');
+                const oldText = textSpan.textContent;
+                textSpan.textContent = 'Copied!';
+                btn.style.borderColor = 'var(--accent)';
+                setTimeout(() => {
+                    textSpan.textContent = oldText;
+                    btn.style.borderColor = 'var(--muted)';
+                }, 2000);
+            });
+        }
+
+        function downloadLogs(format) {
+            const data = logs[currentTab];
+            if (data.length === 0) {
+                alert(`No logs available to export in ${currentTab} tab.`);
+                return;
+            }
+            
+            let content = '';
+            let mimeType = 'text/plain';
+            let filename = `conscia_${currentTab.toLowerCase()}_vault_${new Date().getTime()}`;
+
+            if (format === 'json') {
+                content = JSON.stringify(data, null, 2);
+                mimeType = 'application/json';
+                filename += '.json';
+            } else if (format === 'csv') {
+                content = "Timestamp,Level,Target,Message\n" + data.map(log => 
+                    `"${log.timestamp}","${log.level}","${log.target}","${log.message.replace(/"/g, '""')}"`
+                ).join("\n");
+                mimeType = 'text/csv';
+                filename += '.csv';
+            } else if (format === 'log') {
+                content = data.map(log => `[${log.timestamp}] ${log.level} ${log.target}: ${log.message}`).join("\n");
+                filename += '.log';
+            } else if (format === 'exolog') {
+                content = "=== BEGIN EXOTALK ENCRYPTED VAULT ===\n";
+                content += btoa(JSON.stringify({
+                    metadata: { type: "telemetry", level: currentTab, timestamp: new Date().toISOString() },
+                    payload: data
+                })) + "\n";
+                content += "=== END EXOTALK ENCRYPTED VAULT ===";
+                mimeType = 'application/octet-stream';
+                filename += '.exolog';
+            }
+
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = 'data:' + mimeType + ';charset=utf-8,' + encodeURIComponent(content);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => document.body.removeChild(a), 500);
+            
+            closeExportModal();
+        }
+
+
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/stats');
+                if (!response.ok) throw new Error("API not ok");
+                const stats = await response.json();
+                
+                document.getElementById('node-id').textContent = stats.node_id || 'Unknown';
+                document.getElementById('count-blobs').textContent = stats.blob_count || '0';
+                
+                // Stage 1: Engine
+                const sEngine = document.getElementById('stage-engine');
+                if (stats.status === "Online") {
+                    sEngine.className = "health-stage active";
+                    document.getElementById('desc-engine').textContent = "Running";
+                } else {
+                    sEngine.className = "health-stage error";
+                    document.getElementById('desc-engine').textContent = "Offline";
+                }
+
+                // Stage 2: LAN
+                const sLan = document.getElementById('stage-lan');
+                if (stats.local_port && stats.local_port !== "0") {
+                    sLan.className = "health-stage active";
+                    document.getElementById('desc-lan').textContent = `UDP ${stats.local_port}`;
+                } else {
+                    sLan.className = "health-stage error";
+                    document.getElementById('desc-lan').textContent = "No Bind";
+                }
+
+                // Stage 3: Relay / Internet
+                const sRelay = document.getElementById('stage-relay');
+                if (stats.home_relay && stats.home_relay !== "None") {
+                    sRelay.className = "health-stage active";
+                    let shortUrl = stats.home_relay.replace('https://', '').split('/')[0];
+                    document.getElementById('desc-relay').textContent = shortUrl;
+                } else {
+                    sRelay.className = "health-stage error";
+                    document.getElementById('desc-relay').textContent = "Disconnected";
+                }
+
+                // Stage 4: Peers
+                const sPeers = document.getElementById('stage-peers');
+                const peers = parseInt(stats.active_peers || "0");
+                if (peers > 0) {
+                    sPeers.className = "health-stage active";
+                } else {
+                    sPeers.className = "health-stage"; // Neutral if 0, not necessarily error
+                }
+                document.getElementById('desc-peers').textContent = `${peers} Active`;
+
+                // Stage 5: Gossip
+                const sGossip = document.getElementById('stage-gossip');
+                const topics = parseInt(stats.topics_count || "0");
+                if (topics > 0) {
+                    sGossip.className = "health-stage active";
+                } else {
+                    sGossip.className = "health-stage";
+                }
+                document.getElementById('desc-gossip').textContent = `${topics} Topics`;
+
+            } catch (err) { 
+                console.error("Stats Sync Error:", err); 
+                // Set all to error
+                ['engine', 'lan', 'relay', 'peers', 'gossip'].forEach(s => {
+                    document.getElementById(`stage-${s}`).className = "health-stage error";
+                });
+                document.getElementById('desc-engine').textContent = "Dead";
+                document.getElementById('desc-relay').textContent = "No Internet";
+            }
+        }
+
+        let peerUpdateInterval = null;
+
+        async function openPeerModal() {
+            document.getElementById('peer-modal').classList.add('active');
+            updatePeerGrid();
+            if (peerUpdateInterval) clearInterval(peerUpdateInterval);
+            peerUpdateInterval = setInterval(updatePeerGrid, 2000);
+        }
+
+        async function updatePeerGrid() {
+            const grid = document.getElementById('peer-grid');
+            const countBadge = document.getElementById('peer-count-badge');
+            
+            try {
+                const response = await fetch('/api/peers');
+                const peers = await response.json();
+                
+                countBadge.textContent = `${peers.length} Peers`;
+                
+                if (peers.length === 0) {
+                    grid.innerHTML = '<div style="grid-column: 1/-1; padding: 4rem; text-align: center; color: var(--muted);">No active peers found in mesh. Looking for beacons...</div>';
+                    return;
+                }
+                
+                const knownNodes = {
+                    "2f4300ae2c116d3c0f87cea35cc0254900a217558878d55010e435e30b0cc9b4": { name: "Exocracy (Host)", role: "Nexus Beacon", icon: "🏰" },
+                    "83fa401028e4f8b8cf9ad85801fb27b8905faffec13ee22caa2a1a9b09c052e1": { name: "Exonomy (Node)", role: "Federated Node", icon: "🛰️" },
+                    "613e962785bff825e9bb522428a78f457195b3fc7d327f694c662bbcb541eb87": { name: "ExoTalk (Flutter)", role: "Sovereign App", icon: "📱" },
+                };
+
+                // Clear if length changed or first run
+                if (grid.children.length !== peers.length) grid.innerHTML = '';
+
+                peers.forEach(([id, addrs]) => {
+                    let card = document.getElementById(`peer-${id}`);
+                    if (!card) {
+                        card = document.createElement('div');
+                        card.id = `peer-${id}`;
+                        card.className = 'peer-card fade-in';
+                        grid.appendChild(card);
+                    }
+
+                    const info = knownNodes[id] || { name: "Unknown Peer", role: "Anonymous Node", icon: "❓" };
+                    
+                    // Categorize addresses
+                    const hasLocal = addrs.some(a => a.startsWith('10.') || a.startsWith('192.168.') || a.startsWith('172.'));
+                    const hasRelay = addrs.some(a => a.includes('relay.iroh.network'));
+                    const hasDirect = addrs.some(a => !a.includes('relay') && !a.startsWith('10.') && !a.startsWith('192.168.') && !a.startsWith('172.'));
+
+                    card.innerHTML = `
+                        <div class="peer-status-dot"></div>
+                        <div class="peer-card-header">
+                            <div class="peer-avatar">${info.icon}</div>
+                            <div class="peer-info">
+                                <h3>${info.name}</h3>
+                                <div class="peer-id">${id.substring(0, 12)}...${id.substring(id.length-8)}</div>
+                            </div>
+                        </div>
+                        <div class="peer-badges">
+                            <span class="badge badge-role">${info.role}</span>
+                            ${hasLocal ? '<span class="badge badge-local">Local</span>' : ''}
+                            ${hasDirect ? '<span class="badge badge-direct">Direct</span>' : ''}
+                            ${hasRelay ? '<span class="badge badge-relay">Relay</span>' : ''}
+                        </div>
+                        <div class="peer-addresses">
+                            ${addrs.map(a => `<div style="margin-bottom: 2px;">• ${a}</div>`).join('')}
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error("Peer Sync Error:", err);
+            }
+        }
+
+        function closePeerModal() {
+            document.getElementById('peer-modal').classList.remove('active');
+            if (peerUpdateInterval) {
+                clearInterval(peerUpdateInterval);
+                peerUpdateInterval = null;
+            }
+        }
+
+        async function refreshGovernance() {
+            try {
+                // Fetch Requests
+                const reqRes = await fetch('/api/governance/requests');
+                const requests = await reqRes.json();
+                const queueDiv = document.getElementById('request-queue');
+                queueDiv.innerHTML = requests.length ? '' : '<p style="font-size: 0.8rem; color: var(--muted); text-align: center;">No pending requests.</p>';
+                
+                requests.forEach(id => {
+                    const row = document.createElement('div');
+                    row.style = 'display: flex; justify-content: space-between; align-items: center; padding: 0.4rem; border-bottom: 1px solid #161b22;';
+                    row.innerHTML = `
+                        <span style="font-family: monospace; font-size: 0.75rem;">${id.substring(0, 12)}...</span>
+                        <div style="display: flex; gap: 0.4rem;">
+                            <button onclick="approveRequest('${id}', 'User')" style="font-size: 0.7rem; padding: 2px 8px; background: var(--accent); border: none; border-radius: 4px; color: white; cursor: pointer;">User</button>
+                            <button onclick="approveRequest('${id}', 'Delegate')" style="font-size: 0.7rem; padding: 2px 8px; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 4px; cursor: pointer;">Delegate</button>
+                        </div>
+                    `;
+                    queueDiv.appendChild(row);
+                });
+
+                // Fetch Roles
+                const rolesRes = await fetch('/api/governance/roles');
+                const roles = await rolesRes.json();
+                const rolesDiv = document.getElementById('roles-registry');
+                rolesDiv.innerHTML = '';
+                
+                Object.entries(roles).forEach(([id, role]) => {
+                    const row = document.createElement('div');
+                    row.style = 'display: flex; justify-content: space-between; align-items: center; padding: 0.4rem; border-bottom: 1px solid #161b22;';
+                    row.innerHTML = `
+                        <span style="font-family: monospace; font-size: 0.75rem;">${id.substring(0, 12)}...</span>
+                        <span style="font-size: 0.7rem; color: var(--accent); text-transform: uppercase;">${role}</span>
+                    `;
+                    rolesDiv.appendChild(row);
+                });
+
+            } catch (err) { console.error("Governance Sync Error:", err); }
+        }
+
+        async function approveRequest(id, role) {
+            try {
+                await fetch('/api/governance/authorize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, role })
+                });
+                refreshGovernance();
+            } catch (err) { console.error("Approval Error:", err); }
+        }
+
+        async function generateInvite(kind) {
+            // Note: In Phase 8, this will trigger the Resend email or QR generation.
+            alert(`Generating ${kind} Invitation. Share the resulting link with the recipient.`);
+        }
+
+        async function addPeer(type) {
+            const inputId = type === 'node' ? 'node-invite-input' : 'user-invite-input';
+            const id = document.getElementById(inputId).value;
+            if (!id) return;
+            
+            try {
+                await fetch('/api/governance/authorize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, role: type === 'node' ? 'Conscierge' : 'User' })
+                });
+                document.getElementById(inputId).value = '';
+                refreshGovernance();
+            } catch (err) { console.error("Whitelisting Error:", err); }
+        }
+
+        async function toggleFederation() {
+            federationActive = !federationActive;
+            try {
+                await fetch('/api/federation/toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ active: federationActive })
+                });
+                
+                const btn = document.getElementById('fed-toggle-btn');
+                const label = document.getElementById('fed-status-label');
+                
+                if (federationActive) {
+                    btn.textContent = 'Disable Federation';
+                    btn.style.background = 'var(--accent)';
+                    btn.style.color = 'white';
+                    label.textContent = 'Federating Active';
+                    label.style.color = 'var(--accent)';
+                } else {
+                    btn.textContent = 'Enable Federation';
+                    btn.style.background = 'transparent';
+                    btn.style.color = 'var(--accent)';
+                    label.textContent = 'Autonomous (Lifeline)';
+                    label.style.color = 'var(--muted)';
+                }
+            } catch (err) { console.error("Toggle Error:", err); }
+        }
+
+        updateStats();
+        refreshGovernance();
+        setInterval(updateStats, 5000);
+        setInterval(refreshGovernance, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+[Unit]
+Description=Conscia Sovereign Beacon Node
+After=network.target
+
+[Service]
+Type=simple
+User=conscia
+Group=conscia
+WorkingDirectory=/var/lib/conscia
+ExecStart=/usr/bin/conscia daemon
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
