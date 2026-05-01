@@ -34,11 +34,11 @@ The UI was completely overhauled to meet the "Premium Sovereign" aesthetic and r
 
 ### Pre-Intervention State
 The initial state showed failing services and an outdated, hardcoded UI.
-![Pre-Intervention State](/home/exocrat/.gemini/antigravity/brain/3c0b4be7-16ad-4855-8d26-7909b3572b13/exonomy_pre_0.png)
+![Pre-Intervention State](assets/exonomy_pre_0.png)
 
 ### Final State (Card View)
 All indicators are now operational and dynamically labeled.
-![Final Card View](/home/exocrat/.gemini/antigravity/brain/3c0b4be7-16ad-4855-8d26-7909b3572b13/exotech_bridge_final_card.png)
+![Final Card View](assets/exotech_bridge_final_card.png)
 
 ---
 

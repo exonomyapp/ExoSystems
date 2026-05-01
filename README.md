@@ -29,6 +29,7 @@ We believe that technical documentation should be as engaging as the software it
 ### Core Infrastructure
 *   **[exotalk_engine/](exotalk_engine/README.md)**: The Rust-powered P2P heart.
     - **[conscia/](exotalk_engine/conscia/README.md)**: **The Sovereign Lifeline.** Headless beacon & HA relay daemon.
+*   **[cmc/](cmc/README.md)**: **Conscia Management Console.** High-density node governance UI.
 
 ### Shared Modules
 *   **[exoauth/](exoauth/README.md)**: **The Universal Passport.** The "Solid Front Door" identity package.
@@ -56,3 +57,4 @@ Each application operates on a 3-tier model. See [Specification 22](docs/spec/22
 
 ### Documentation & Specs
 *   **[docs/](docs/README.md)**: Centralized system specifications and [ExoTalk Sovereign Scenarios](docs/scenarios/exotalk/).
+    - **[Functional Specifications](docs/spec/README.md)**: Master index of all architectural and visual standards.

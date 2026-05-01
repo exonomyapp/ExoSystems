@@ -7,6 +7,8 @@ For a complete understanding of how this mobile client interacts with the RepubL
 [RepubLet Topology Specification](../docs/spec/25_republet_topology.md)
 
 ## Development
+The core Rust logic is managed via the **[Rust Builder](rust_builder/README.md)**.
+
 ```bash
 flutter run
 ```

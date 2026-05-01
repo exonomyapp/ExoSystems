@@ -42,7 +42,10 @@ We use `flutter_rust_bridge` to auto-generate the binding code. Specifically, th
 
 ## Development
 
-### 1. Generating the Bridge
+### 1. The Rust Builder
+The core Rust logic is compiled and linked via the **[Rust Builder](rust_builder/README.md)**. Refer to its README for low-level toolchain and Cargokit details.
+
+### 2. Generating the Bridge
 If you make a change in the `exotalk_ffi` Rust crate, you must regenerate the Dart bindings:
 ```bash
 flutter_rust_bridge_codegen generate

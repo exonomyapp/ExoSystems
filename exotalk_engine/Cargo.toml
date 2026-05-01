@@ -43,7 +43,7 @@ members = [
     "exocracy_ffi",
     "conscia",
     "republet_desktop",
-    "exocracy_desktop",
+    "exocracy_desktop", "exotalk_wasm",
 ]
 
 [profile.dev]

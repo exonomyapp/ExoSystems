@@ -12,7 +12,10 @@ Located in `docs/scenarios/`:
 *   **[ExoTalk](scenarios/exotalk/)**: 10 milestones and their corresponding screenplays (`*_sc.md`) for the flagship messaging client.
 *   **[Sovereign Saga](scenarios/sovereign_saga.md)**: The overarching narrative framework.
 
-## 🛠 Specifications (Deep Dives)
+## 🏗️ Functional Specifications
+*   **[Functional Specifications Index](spec/README.md)**: Master map of all system standards and architectural deep-dives.
+
+## 🛠 Individual Specifications
 Located in `docs/spec/`:
 *   **[Conscia Distribution](spec/conscia_distribution.md)**: Packaging strategy for global South resilience.
 *   **[ExoTalk Distribution](spec/exotalk_distribution.md)**: Roadmap for multi-platform delivery.
