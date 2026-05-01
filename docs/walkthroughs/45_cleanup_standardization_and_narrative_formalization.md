@@ -38,6 +38,9 @@ We documented the strategic and operational workflow to guide future development
 ## What's Next?
 
 1.  **Scenario Pipeline Expansion**: Commencing the next episode of the Sovereign Saga, utilizing the new naming conventions and the finalized "Solid Front Door" baseline.
-2.  **Telemetry Integration**: Implementing real-time telemetry hooks in the Conscia/ExoTalk engines to provide automated feedback during screenplay execution.
-3.  **RepubLet Prototyping**: Based on the Jurgen/Isabella narrative, start drafting the technical specifications for the RepubLet scientific publishing layer, focusing on negative-result liberation and blind delivery protocols.
-4.  **Automated Environment Bootstrapping**: Transitioning to a fully automated testing environment that can execute and validate the multi-node choreography defined in our scenarios.
+2.  **Web Launch Optimization (`exotalk.tech`)**:
+    - **Asset Compression**: Convert high-resolution `.png` assets (currently ~22MB) to **WebP** to ensure lightning-fast load times for the public landing page.
+    - **Secure Web Builds**: Transition from the local `secrets_config.dart` to a secure build pipeline using `--dart-define` for OAuth secret injection.
+    - **Blob Management**: Audit and optimize the initial `.db` blob templates (currently ~7MB) to ensure a clean, identity-free bootstrapping experience for new users.
+3.  **Telemetry Integration**: Implementing real-time telemetry hooks in the Conscia/ExoTalk engines to provide automated feedback during screenplay execution.
+4.  **RepubLet Prototyping**: Based on the Jurgen/Isabella narrative, start drafting the technical specifications for the RepubLet scientific publishing layer, focusing on negative-result liberation and blind delivery protocols.
