@@ -5,7 +5,6 @@ After=exotalk-signaling.service
 [Service]
 ExecStart=/home/exocrat/code/exotalk/infra/bin/zrok share public http://localhost:8080 --headless
 Restart=always
-User=exocrat
 WorkingDirectory=/home/exocrat
 Environment=HOME=/home/exocrat
 

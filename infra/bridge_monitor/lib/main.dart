@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'dart:io';
@@ -46,24 +48,24 @@ class ExoTechBridgeApp extends StatelessWidget {
               surface: const Color(0xFF141414),
             ),
             textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).copyWith(
-              displayLarge: GoogleFonts.outfit(color: const Color(0xFFD0D0D0), fontWeight: FontWeight.w900),
-              bodyLarge: GoogleFonts.outfit(color: const Color(0xFFB0B0B0)),
-              bodyMedium: GoogleFonts.outfit(color: const Color(0xFFA0A0A0)),
+              displayLarge: GoogleFonts.outfit(color: const Color(0xFFB0B4BE), fontWeight: FontWeight.w900),
+              bodyLarge: GoogleFonts.outfit(color: const Color(0xFF8E929B)),
+              bodyMedium: GoogleFonts.outfit(color: const Color(0xFF787C87)),
             ),
           ),
-          // Premium Light Theme
+          // Premium Light Theme — No pure white
           theme: ThemeData(
             brightness: Brightness.light,
-            scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+            scaffoldBackgroundColor: const Color(0xFFD1D3D8), // Premium dashboard gray
             colorScheme: ColorScheme.fromSeed(
               seedColor: const Color(0xFF00C9A7),
               brightness: Brightness.light,
-              surface: Colors.white,
+              surface: const Color(0xFFE8E9EB), // Soft light gray surfaces
             ),
             textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme).copyWith(
-              displayLarge: GoogleFonts.outfit(color: const Color(0xFF2D3436), fontWeight: FontWeight.w900),
-              bodyLarge: GoogleFonts.outfit(color: const Color(0xFF636E72)),
-              bodyMedium: GoogleFonts.outfit(color: const Color(0xFFB2BEC3)),
+              displayLarge: GoogleFonts.outfit(color: const Color(0xFF3D4446), fontWeight: FontWeight.w900),
+              bodyLarge: GoogleFonts.outfit(color: const Color(0xFF5F6368)),
+              bodyMedium: GoogleFonts.outfit(color: const Color(0xFF70757A)),
             ),
           ),
           home: const BridgeMonitorScreen(),
@@ -85,10 +87,14 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
   String _localHost = "DISCOVERING...";
   List<BridgeNode> _nodes = [];
   String? _isolatedNodeId; // Tracks which node is currently expanded/isolated
+  String? _lastKey;
   
   Timer? _refreshTimer;
   bool _isScanning = false;
   File? _sessionLogFile;
+
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _keyboardFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -96,6 +102,14 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     _initStorage();
     _initDiscovery();
     _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) => _performScan());
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    _scrollController.dispose();
+    _keyboardFocusNode.dispose();
+    super.dispose();
   }
 
   // ==========================================
@@ -133,9 +147,21 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     });
     // Create initial node shells
     _nodes = [
-      BridgeNode(id: "signaling-1", name: "Signaling Relay", machine: _localHost, role: "WebRTC Handshake Bridge", port: 8080, icon: Icons.hub_outlined),
-      BridgeNode(id: "beacon-1", name: "Conscia Beacon", machine: _localHost, role: "P2P Mesh Node (Sovereign)", port: 3000, icon: Icons.radar_outlined),
-      BridgeNode(id: "proxy-1", name: "Public Proxy", machine: "ZROK INFRA", role: "External Gateway (exotalk.tech)", port: 0, icon: Icons.public_outlined),
+      BridgeNode(
+        id: "signaling-1", name: "Signaling Relay", machine: _localHost, role: "WebRTC Handshake Bridge", port: 8080, icon: Icons.hub_outlined,
+        startCmd: "systemctl --user start exotalk-signaling",
+        stopCmd: "systemctl --user stop exotalk-signaling",
+      ),
+      BridgeNode(
+        id: "beacon-1", name: "Conscia Beacon", machine: _localHost, role: "P2P Mesh Node (Sovereign)", port: 3000, icon: Icons.radar_outlined,
+        startCmd: "nohup bash -c 'cd /home/exocrat/code/exotalk/exotalk_engine/conscia && cargo run --release > /home/exocrat/conscia.log 2>&1' &",
+        stopCmd: "pkill -f 'conscia'",
+      ),
+      BridgeNode(
+        id: "proxy-1", name: "Public Proxy", machine: "ZROK INFRA", role: "External Gateway (exotalk.tech)", port: 0, icon: Icons.public_outlined,
+        startCmd: "systemctl --user start exotalk-zrok",
+        stopCmd: "systemctl --user stop exotalk-zrok",
+      ),
     ];
     await _performScan();
   }
@@ -146,15 +172,22 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
 
     for (var node in _nodes) {
       if (node.id.startsWith("signaling")) {
-        node.isUp = await _checkPort(node.port);
+        final res = await Process.run('systemctl', ['--user', 'is-active', 'exotalk-signaling']);
+        node.isUp = res.exitCode == 0;
         final logs = await _fetchJournalctlLogs("exotalk-signaling");
         _updateLogs(node, logs);
       } else if (node.id.startsWith("beacon")) {
-        node.isUp = await _checkPort(node.port);
+        if (node.isSleeping) {
+          node.isUp = false;
+          continue;
+        }
+        final res = await Process.run('pgrep', ['-f', 'conscia']);
+        node.isUp = res.exitCode == 0;
         final logs = await _fetchTailLogs("/home/exocrat/conscia.log");
         _updateLogs(node, logs);
       } else if (node.id.startsWith("proxy")) {
-        node.isUp = await _checkProcess("zrok");
+        final res = await Process.run('systemctl', ['--user', 'is-active', 'exotalk-zrok']);
+        node.isUp = res.exitCode == 0;
         final logs = await _fetchJournalctlLogs("exotalk-zrok");
         _updateLogs(node, logs);
       }
@@ -168,19 +201,28 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
   }
 
   void _updateLogs(BridgeNode node, List<String> fetchedLogs) {
-    if (fetchedLogs.isNotEmpty) {
-      // Find new logs that haven't been captured yet
-      final newLogs = fetchedLogs.where((l) => !node.logs.contains(l)).toList();
-      if (newLogs.isNotEmpty) {
-        node.logs.addAll(newLogs);
-        _appendLogToFile(node.id, newLogs);
+    if (fetchedLogs.isEmpty) return;
+    
+    // Efficiently find new logs using a temporary Set for lookup
+    // We only care about matching against the existing logs
+    final existingLogsSet = node.logs.toSet();
+    final newLogs = fetchedLogs.where((l) => !existingLogsSet.contains(l)).toList();
+    
+    if (newLogs.isNotEmpty) {
+      node.logs.addAll(newLogs);
+      
+      // Keep only the last 1000 logs in memory to prevent bloat
+      if (node.logs.length > 1000) {
+        node.logs.removeRange(0, node.logs.length - 1000);
       }
+      
+      _appendLogToFile(node.id, newLogs);
     }
   }
 
   Future<List<String>> _fetchJournalctlLogs(String service) async {
     try {
-      final res = await Process.run('journalctl', ['-u', service, '-n', '50', '--no-pager']);
+      final res = await Process.run('journalctl', ['--user', '-u', service, '-n', '50', '--no-pager']);
       if (res.exitCode == 0) {
         return res.stdout.toString().split('\n').where((s) => s.trim().isNotEmpty).toList();
       }
@@ -208,20 +250,16 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     }
   }
 
-  Future<bool> _checkProcess(String name) async {
+  Future<bool> _checkProcess(String pattern) async {
     try {
-      final res = await Process.run('pgrep', [name]);
+      final res = await Process.run('pgrep', ['-f', pattern]);
       return res.exitCode == 0;
     } catch (_) {
       return false;
     }
   }
 
-  @override
-  void dispose() {
-    _refreshTimer?.cancel();
-    super.dispose();
-  }
+
 
   void _toggleIsolation(String nodeId) {
     setState(() {
@@ -233,36 +271,122 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     });
   }
 
+  // ----------------------------------------------------------------------------
+  // REMOTE KEYBOARD CONTROL
+  // Shortcuts mapped to xdotool keys for deterministic UI testing.
+  // ----------------------------------------------------------------------------
+  void _handleShortcut(String key) {
+    print("DEBUG: Received shortcut key: $key");
+    if (key == 't') {
+      final current = themeModeNotifier.value;
+      if (current == ThemeMode.dark) themeModeNotifier.value = ThemeMode.light;
+      else if (current == ThemeMode.light) themeModeNotifier.value = ThemeMode.system;
+      else themeModeNotifier.value = ThemeMode.dark;
+      setState(() {});
+    } else if (key == 'v') {
+      setState(() => _isGridView = !_isGridView);
+    } else if (key == 'r') {
+      _performScan();
+    } else if (key == '1') {
+      // Toggle Signaling
+      final node = _nodes.firstWhere((n) => n.id == 'signaling-1');
+      _triggerToggle(node);
+    } else if (key == '2') {
+      // Cycle Conscia
+      final node = _nodes.firstWhere((n) => n.id == 'beacon-1');
+      int current = 0;
+      if (node.isSleeping) current = 1;
+      else if (node.isUp) current = 2;
+      final next = (current + 1) % 3;
+      _triggerConscia(node, next);
+    } else if (key == '3') {
+      // Toggle Proxy
+      final node = _nodes.firstWhere((n) => n.id == 'proxy-1');
+      _triggerToggle(node);
+    }
+  }
+
+  void _triggerToggle(BridgeNode node) {
+    // Optimistic UI update
+    setState(() {
+      node.isUp = !node.isUp;
+    });
+    if (node.isUp) {
+      if (node.startCmd != null) Process.run('bash', ['-c', node.startCmd!]);
+    } else {
+      if (node.stopCmd != null) Process.run('bash', ['-c', node.stopCmd!]);
+    }
+    Future.delayed(const Duration(seconds: 2), _performScan);
+  }
+
+  void _triggerConscia(BridgeNode node, int state) async {
+    // This replicates the logic in ConsciaTristateToggle for remote testing
+    await Process.run('bash', ['-c', "pkill -f 'cargo run' ; pkill -f 'conscia'"]);
+    if (state == 0) {
+      setState(() {
+        node.isSleeping = false;
+        node.isUp = false;
+      });
+    } else if (state == 1) {
+      setState(() {
+        node.isSleeping = true;
+        node.isUp = false;
+      });
+    } else if (state == 2) {
+      setState(() {
+        node.isSleeping = false;
+        node.isUp = true;
+      });
+      await Process.start('cargo', ['run', '--release'],
+        workingDirectory: '/home/exocrat/code/exotalk/exotalk_engine/conscia',
+        mode: ProcessStartMode.detached,
+        environment: {'HOME': '/home/exocrat', 'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/exocrat/.cargo/bin'},
+      );
+    }
+    Future.delayed(const Duration(seconds: 1), _performScan);
+  }
+
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final logoColor = isDark ? Colors.white : const Color(0xFF2D3436);
 
-    return GestureDetector(
-      // Clicking the background removes isolation
-      onTap: () {
-        if (_isolatedNodeId != null) {
-          setState(() => _isolatedNodeId = null);
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      autofocus: true,
+      onKeyEvent: (event) {
+        if (event is KeyDownEvent) {
+          final key = event.logicalKey.keyLabel.toLowerCase();
+          setState(() => _lastKey = key);
+          _handleShortcut(key);
         }
       },
-      child: Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildPremiumHeader(isDark, logoColor),
-            Expanded(
-              child: _nodes.isEmpty 
-                ? const Center(child: CircularProgressIndicator(color: Color(0xFF00C9A7)))
-                : AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 800),
-                    child: _isGridView ? _buildGrid() : _buildList(),
-                  ),
+      child: GestureDetector(
+        // Clicking the background removes isolation
+          onTap: () {
+            if (_isolatedNodeId != null) {
+              setState(() => _isolatedNodeId = null);
+            }
+          },
+          child: Scaffold(
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPremiumHeader(isDark, logoColor),
+                Expanded(
+                  child: _nodes.isEmpty 
+                    ? const Center(child: CircularProgressIndicator(color: Color(0xFF00C9A7)))
+                    : AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 800),
+                        child: _isGridView ? _buildGrid() : _buildList(),
+                      ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildPremiumHeader(bool isDark, Color logoColor) {
@@ -270,14 +394,20 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF141414) : Colors.white,
+        color: isDark ? const Color(0xFF141414) : const Color(0xFFF8F9FA),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border(
+          bottom: BorderSide(
+            color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+            width: 1,
+          ),
+        ),
       ),
       child: Row(
         children: [
@@ -290,16 +420,20 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
           // the view mode, and 'logoColor' adapts to the theme brightness.
           // AnimatedSwitcher provides a smooth cross-fade transition.
           // ------------------------------------------------------------------
+          // ------------------------------------------------------------------
+          // DYNAMIC BRANDING ASSET
+          // Light mode → full-color logo. Dark mode → monochromatic logo.
+          // View mode does not affect the logo color selection.
+          // ------------------------------------------------------------------
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 400),
             child: Image.asset(
-              _isGridView
-                ? 'assets/exotalk_logo_realistic.png'
-                : 'assets/exotalk_logo_minimal.png',
-              key: ValueKey("${_isGridView}_$isDark"),
-              width: 128,
-              height: 128,
-              color: logoColor,
+              isDark
+                ? 'assets/exotalk_pappus_realistic.png'
+                : 'assets/exotalk_pappus_color.png',
+              key: ValueKey(isDark),
+              width: 96,
+              height: 96,
             ),
           ),
           const SizedBox(width: 24),
@@ -326,18 +460,23 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
                   color: const Color(0xFF00C9A7).withOpacity(0.8),
                 ),
               ),
+              if (_lastKey != null)
+                Text(
+                  "LAST KEY: $_lastKey",
+                  style: GoogleFonts.outfit(fontSize: 10, color: Colors.orange, fontWeight: FontWeight.bold),
+                ),
             ],
           ),
           const Spacer(),
           // ------------------------------------------------
           // CONTROLS (Stacked at end)
           // ------------------------------------------------
-          Column(
+          Row(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildViewToggle(isDark),
-              const SizedBox(height: 8),
+              const SizedBox(width: 8),
               _ThemeTristateToggle(
                 currentMode: themeModeNotifier.value,
                 onChanged: (mode) {
@@ -355,21 +494,25 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
 
   Widget _buildViewToggle(bool isDark) {
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(12),
+        color: isDark ? Colors.white10 : Colors.black.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: isDark ? Colors.white12 : Colors.black12),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _ViewToggleOption(
             icon: Icons.grid_view_rounded,
             isSelected: _isGridView,
+            isDark: isDark,
             onTap: () => setState(() => _isGridView = true),
           ),
           _ViewToggleOption(
             icon: Icons.view_list_rounded,
             isSelected: !_isGridView,
+            isDark: isDark,
             onTap: () => setState(() => _isGridView = false),
           ),
         ],
@@ -477,6 +620,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
                     node: node,
                     compact: isAnyIsolated && !isIsolated,
                     onTap: () => _toggleIsolation(node.id),
+                    onToggled: () { setState(() {}); _performScan(); },
                   ),
                 );
               }),
@@ -505,6 +649,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
               NodeRow(
                 node: node,
                 onTap: () => _toggleIsolation(node.id),
+                onToggled: () { setState(() {}); _performScan(); },
               ),
               AnimatedContainer(
                 duration: const Duration(milliseconds: 600),
@@ -534,7 +679,10 @@ class BridgeNode {
   final String role;
   final int port;
   final IconData icon;
+  final String? startCmd;
+  final String? stopCmd;
   bool isUp;
+  bool isSleeping;
   List<String> logs;
 
   BridgeNode({
@@ -544,7 +692,10 @@ class BridgeNode {
     required this.role, 
     required this.port, 
     required this.icon,
+    this.startCmd,
+    this.stopCmd,
     this.isUp = false,
+    this.isSleeping = false,
     List<String>? logs,
   }) : logs = logs ?? [];
 }
@@ -570,7 +721,7 @@ class _LogViewerState extends State<LogViewer> {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F0F0F) : Colors.white,
+        color: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFF1F3F4),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFF00C9A7).withOpacity(0.3), width: 1),
         boxShadow: [
@@ -672,17 +823,20 @@ class _LogViewerState extends State<LogViewer> {
 class NodeCard extends StatelessWidget {
   final BridgeNode node;
   final VoidCallback onTap;
+  final VoidCallback onToggled;
   final bool compact;
   
-  const NodeCard({super.key, required this.node, required this.onTap, this.compact = false});
+  const NodeCard({super.key, required this.node, required this.onTap, required this.onToggled, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final statusColor = node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
-    final surfaceColor = isDark ? const Color(0xFF141414) : Colors.white;
-    final textMain = isDark ? const Color(0xFFD0D0D0) : const Color(0xFF2D3436);
-    final textMuted = isDark ? const Color(0xFFA0A0A0) : const Color(0xFF636E72);
+    final statusColor = node.isSleeping 
+        ? Colors.orange 
+        : (node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F));
+    final surfaceColor = isDark ? const Color(0xFF141414) : const Color(0xFFF1F3F4);
+    final textMain = isDark ? const Color(0xFFA5AAB5) : const Color(0xFF2D3436);
+    final textMuted = isDark ? const Color(0xFF787C87) : const Color(0xFF5F6368);
     
     return GestureDetector(
       onTap: onTap,
@@ -725,7 +879,7 @@ class NodeCard extends StatelessWidget {
             ),
             SizedBox(height: compact ? 8 : 16),
             Text(
-              node.isUp ? "OPERATIONAL" : "INACTIVE",
+              node.isSleeping ? "SLEEPING" : (node.isUp ? "OPERATIONAL" : "INACTIVE"),
               style: GoogleFonts.outfit(
                 fontSize: 11,
                 fontWeight: FontWeight.w900,
@@ -734,22 +888,41 @@ class NodeCard extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            Text(
-              "SOURCE: ${node.machine}",
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: textMuted,
-                letterSpacing: 1,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              node.role,
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                color: textMuted.withOpacity(0.7),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "SOURCE: ${node.machine}",
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: textMain.withOpacity(0.85), // Intensified to match logo
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      node.role,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        color: textMain.withOpacity(0.65), // Intensified
+                      ),
+                    ),
+                  ],
+                ),
+                if (!compact)
+                  GestureDetector(
+                    onTap: () {},
+                    behavior: HitTestBehavior.opaque,
+                    child: node.id.startsWith("beacon")
+                        ? ConsciaTristateToggle(node: node, onToggled: onToggled)
+                        : NodeKillSwitch(node: node, onToggled: onToggled),
+                  ),
+              ],
             ),
           ],
         ),
@@ -761,15 +934,16 @@ class NodeCard extends StatelessWidget {
 class NodeRow extends StatelessWidget {
   final BridgeNode node;
   final VoidCallback onTap;
-  const NodeRow({super.key, required this.node, required this.onTap});
+  final VoidCallback onToggled;
+  const NodeRow({super.key, required this.node, required this.onTap, required this.onToggled});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
-    final surfaceColor = isDark ? const Color(0xFF141414) : Colors.white;
-    final textMain = isDark ? const Color(0xFFD0D0D0) : const Color(0xFF2D3436);
-    final textMuted = isDark ? const Color(0xFFA0A0A0) : const Color(0xFF636E72);
+    final surfaceColor = isDark ? const Color(0xFF141414) : const Color(0xFFF1F3F4);
+    final textMain = isDark ? const Color(0xFFA5AAB5) : const Color(0xFF2D3436);
+    final textMuted = isDark ? const Color(0xFF787C87) : const Color(0xFF5F6368);
     
     return GestureDetector(
       onTap: onTap,
@@ -840,7 +1014,21 @@ class NodeRow extends StatelessWidget {
                 ),
               ),
             ),
-            _StatusIndicator(isUp: node.isUp),
+            SizedBox(
+              width: 170, // Fixed width prevents grid alignment breaking
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () {},
+                  behavior: HitTestBehavior.opaque,
+                  child: node.id.startsWith("beacon")
+                      ? ConsciaTristateToggle(node: node, onToggled: onToggled)
+                      : NodeKillSwitch(node: node, onToggled: onToggled),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            _StatusIndicator(isUp: node.isUp, isSleeping: node.isSleeping),
           ],
         ),
       ),
@@ -856,7 +1044,8 @@ class NodeRow extends StatelessWidget {
 // ----------------------------------------------------------------------------
 class _StatusIndicator extends StatefulWidget {
   final bool isUp;
-  const _StatusIndicator({required this.isUp});
+  final bool isSleeping;
+  const _StatusIndicator({required this.isUp, this.isSleeping = false});
 
   @override
   State<_StatusIndicator> createState() => _StatusIndicatorState();
@@ -878,8 +1067,8 @@ class _StatusIndicatorState extends State<_StatusIndicator> with SingleTickerPro
   @override
   void didUpdateWidget(_StatusIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isUp != oldWidget.isUp) {
-      if (widget.isUp) {
+    if (widget.isUp != oldWidget.isUp || widget.isSleeping != oldWidget.isSleeping) {
+      if (widget.isUp && !widget.isSleeping) {
         _controller.repeat(reverse: true);
       } else {
         _controller.stop();
@@ -896,10 +1085,12 @@ class _StatusIndicatorState extends State<_StatusIndicator> with SingleTickerPro
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = widget.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
+    final statusColor = widget.isSleeping 
+        ? Colors.orange 
+        : (widget.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F));
     
     return FadeTransition(
-      opacity: widget.isUp 
+      opacity: (widget.isUp && !widget.isSleeping)
           ? Tween<double>(begin: 0.4, end: 1.0).animate(_controller)
           : const AlwaysStoppedAnimation(1.0),
       child: Container(
@@ -976,6 +1167,9 @@ class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderState
 // THEME SELECTOR COMPONENTS
 // ============================================================================
 
+// ============================================================================
+// THEME SELECTOR — Compact Cupertino segmented control
+// ============================================================================
 class _ThemeTristateToggle extends StatelessWidget {
   final ThemeMode currentMode;
   final ValueChanged<ThemeMode> onChanged;
@@ -988,110 +1182,68 @@ class _ThemeTristateToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Container(
+    final selectedIndex = currentMode == ThemeMode.light ? 0 : currentMode == ThemeMode.system ? 1 : 2;
+
+    return CupertinoSlidingSegmentedControl<int>(
+      groupValue: selectedIndex,
+      backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFDEE0E4),
+      thumbColor: isDark ? const Color(0xFF3A3A3A) : Colors.white,
       padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: isDark ? Colors.white12 : Colors.black12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _ThemeToggleOption(
-            icon: Icons.light_mode_outlined,
-            isSelected: currentMode == ThemeMode.light,
-            onTap: () => onChanged(ThemeMode.light),
-          ),
-          _ThemeToggleOption(
-            icon: Icons.settings_suggest_outlined,
-            isSelected: currentMode == ThemeMode.system,
-            onTap: () => onChanged(ThemeMode.system),
-          ),
-          _ThemeToggleOption(
-            icon: Icons.dark_mode_outlined,
-            isSelected: currentMode == ThemeMode.dark,
-            onTap: () => onChanged(ThemeMode.dark),
-          ),
-        ],
-      ),
+      children: {
+        0: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Icon(CupertinoIcons.sun_max_fill, size: 14,
+            color: selectedIndex == 0 ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38)),
+        ),
+        1: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Icon(CupertinoIcons.circle_lefthalf_fill, size: 14,
+            color: selectedIndex == 1 ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38)),
+        ),
+        2: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Icon(CupertinoIcons.moon_fill, size: 14,
+            color: selectedIndex == 2 ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38)),
+        ),
+      },
+      onValueChanged: (v) {
+        if (v == null) return;
+        onChanged(v == 0 ? ThemeMode.light : v == 1 ? ThemeMode.system : ThemeMode.dark);
+      },
     );
   }
 }
 
-class _ThemeToggleOption extends StatelessWidget {
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ThemeToggleOption({
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected 
-              ? const Color(0xFF00C9A7) 
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: isSelected ? [
-            BoxShadow(
-              color: const Color(0xFF00C9A7).withOpacity(0.4),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            )
-          ] : null,
-        ),
-        child: Icon(
-          icon,
-          size: 14,
-          color: isSelected 
-              ? Colors.white 
-              : (isDark ? Colors.white38 : Colors.black38),
-        ),
-      ),
-    );
-  }
-}
-
+// ============================================================================
+// VIEW TOGGLE OPTION
+// ============================================================================
 class _ViewToggleOption extends StatelessWidget {
   final IconData icon;
   final bool isSelected;
+  final bool isDark;
   final VoidCallback onTap;
 
   const _ViewToggleOption({
     required this.icon,
     required this.isSelected,
+    required this.isDark,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF00C9A7) : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Icon(
           icon,
-          size: 20,
+          size: 16,
           color: isSelected ? Colors.white : (isDark ? Colors.white38 : Colors.black38),
         ),
       ),
@@ -1099,4 +1251,162 @@ class _ViewToggleOption extends StatelessWidget {
   }
 }
 
+class NodeKillSwitch extends StatefulWidget {
+  final BridgeNode node;
+  final VoidCallback onToggled;
+  
+  const NodeKillSwitch({super.key, required this.node, required this.onToggled});
 
+  @override
+  State<NodeKillSwitch> createState() => _NodeKillSwitchState();
+}
+
+class _NodeKillSwitchState extends State<NodeKillSwitch> {
+  bool _isProcessing = false;
+
+  Future<void> _toggle() async {
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
+
+    if (widget.node.isUp) {
+      // STOP: always use bash for stop (pkill / systemctl stop)
+      final stopCmd = widget.node.stopCmd;
+      if (stopCmd != null) {
+        await Process.run('bash', ['-c', stopCmd]);
+      }
+    } else {
+      // START: use bash for systemctl; detached for Conscia is handled in ConsciaTristateToggle
+      final startCmd = widget.node.startCmd;
+      if (startCmd != null) {
+        await Process.run('bash', ['-c', startCmd]);
+      }
+    }
+    await Future.delayed(const Duration(milliseconds: 800));
+    widget.onToggled();
+    setState(() => _isProcessing = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: _isProcessing,
+      child: Opacity(
+        opacity: _isProcessing ? 0.5 : 1.0,
+        child: Transform.scale(
+          scale: 0.72,
+          child: CupertinoSwitch(
+            value: widget.node.isUp,
+            activeColor: const Color(0xFF00C9A7),
+            trackColor: const Color(0xFFFF5F5F).withOpacity(0.5),
+            onChanged: (_) => _toggle(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ConsciaTristateToggle extends StatefulWidget {
+  final BridgeNode node;
+  final VoidCallback onToggled;
+  
+  const ConsciaTristateToggle({super.key, required this.node, required this.onToggled});
+
+  @override
+  State<ConsciaTristateToggle> createState() => _ConsciaTristateToggleState();
+}
+
+class _ConsciaTristateToggleState extends State<ConsciaTristateToggle> {
+  bool _isProcessing = false;
+
+  Future<void> _setToggleState(int state) async {
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
+
+    if (state == 0) {
+      // OFF (Red) — GLOBAL SHUTDOWN: hard OS-level kill
+      await Process.run('bash', ['-c', "pkill -f 'cargo run' ; pkill -f 'conscia'"]);
+      widget.node.isSleeping = false;
+      widget.node.isUp = false;
+    } else if (state == 1) {
+      // SLEEP (Orange) — OBSERVER MODEL: We ignore telemetry, but leave the process alive
+      // for other potential bridge instances or background tasks.
+      widget.node.isSleeping = true;
+      widget.node.isUp = false;
+    } else if (state == 2) {
+      // ON (Green) — Start only if not already operational
+      widget.node.isSleeping = false;
+      
+      // Check if process is already running via pgrep before starting a new one
+      final check = await Process.run('pgrep', ['conscia']);
+      if (check.exitCode != 0) {
+        await Process.start(
+          'cargo',
+          ['run', '--release'],
+          workingDirectory: '/home/exocrat/code/exotalk/exotalk_engine/conscia',
+          mode: ProcessStartMode.detached,
+          environment: {'HOME': '/home/exocrat', 'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/exocrat/.cargo/bin'},
+        );
+        // Give it a moment to bind its port
+        await Future.delayed(const Duration(seconds: 2));
+      }
+    }
+
+    widget.onToggled();
+    setState(() => _isProcessing = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    int currentState = 0; // 0 = OFF, 1 = SLEEP, 2 = ON
+    if (widget.node.isSleeping) {
+      currentState = 1;
+    } else if (widget.node.isUp) {
+      currentState = 2;
+    }
+
+    Color labelColor;
+    if (currentState == 0) {
+      labelColor = const Color(0xFFFF5F5F);
+    } else if (currentState == 1) {
+      labelColor = Colors.orange;
+    } else {
+      labelColor = const Color(0xFF00C9A7);
+    }
+
+    return IgnorePointer(
+      ignoring: _isProcessing,
+      child: Opacity(
+        opacity: _isProcessing ? 0.5 : 1.0,
+        child: CupertinoSlidingSegmentedControl<int>(
+          groupValue: currentState,
+          backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFDEE0E4),
+          thumbColor: isDark ? const Color(0xFF3A3A3A) : Colors.white,
+          padding: const EdgeInsets.all(2),
+          children: {
+            0: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Icon(Icons.power_off_rounded, size: 14,
+                color: currentState == 0 ? const Color(0xFFFF5F5F) : (isDark ? Colors.white70 : Colors.black54)), // Brighter
+            ),
+            1: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Icon(Icons.bedtime_rounded, size: 14,
+                color: currentState == 1 ? Colors.orange : (isDark ? Colors.white70 : Colors.black54)), // Brighter
+            ),
+            2: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Icon(Icons.power_rounded, size: 14,
+                color: currentState == 2 ? const Color(0xFF00C9A7) : (isDark ? Colors.white70 : Colors.black54)), // Brighter
+            ),
+          },
+          onValueChanged: (v) {
+            if (v != null) _setToggleState(v);
+          },
+        ),
+      ),
+    );
+  }
+}
