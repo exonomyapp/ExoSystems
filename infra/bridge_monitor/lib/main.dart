@@ -15,7 +15,13 @@ void main() {
   runApp(const ExoTechBridgeApp());
 }
 
-// Global notifier for theme state
+// ----------------------------------------------------------------------------
+// THEME STATE MANAGEMENT
+// We use a global ValueNotifier to track ThemeMode (Light/System/Dark).
+// This allows the entire application to react to theme changes without
+// requiring a complex state management library like Riverpod or Bloc
+// for this specific standalone diagnostic tool.
+// ----------------------------------------------------------------------------
 final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.dark);
 
 class ExoTechBridgeApp extends StatelessWidget {
@@ -241,80 +247,10 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          toolbarHeight: 220, // Height to accommodate enlarged logo + toggle
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // ------------------------------------------------
-                  // ENLARGED IN-APP LOGO (128px)
-                  // Toggles between photorealistic and symbolic.
-                  // Color transitions between white and dark gray.
-                  // ------------------------------------------------
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    child: Image.asset(
-                      _isGridView
-                        ? 'assets/exotalk_logo_realistic.png'
-                        : 'assets/exotalk_logo_minimal.png',
-                      key: ValueKey("${_isGridView}_$isDark"),
-                      width: 128,
-                      height: 128,
-                      color: logoColor,
-                    ),
-                  ),
-                  const SizedBox(width: 24),
-                  Text(
-                    "EXOTECH BRIDGE",
-                    style: GoogleFonts.outfit(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 4,
-                      fontSize: 28,
-                      color: isDark ? const Color(0xFFD0D0D0) : const Color(0xFF2D3436),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // ------------------------------------------------
-              // THEME MODE TOGGLE
-              // Located right under the logo.
-              // ------------------------------------------------
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: _ThemeTristateToggle(
-                  currentMode: themeModeNotifier.value,
-                  onChanged: (mode) {
-                    setState(() {
-                      themeModeNotifier.value = mode;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              tooltip: _isGridView ? "Switch to List View" : "Switch to Grid View",
-              icon: Icon(_isGridView ? Icons.view_list_rounded : Icons.grid_view_rounded,
-                   color: const Color(0xFF00C9A7).withOpacity(0.8)),
-              onPressed: () {
-                setState(() {
-                  _isGridView = !_isGridView;
-                });
-              },
-            ),
-            const SizedBox(width: 24),
-          ],
-        ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeaderStatus(),
+            _buildPremiumHeader(isDark, logoColor),
             Expanded(
               child: _nodes.isEmpty 
                 ? const Center(child: CircularProgressIndicator(color: Color(0xFF00C9A7)))
@@ -329,28 +265,118 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     );
   }
 
-  Widget _buildHeaderStatus() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 48.0, vertical: 24.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xFF00C9A7).withOpacity(0.05),
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: const Color(0xFF00C9A7).withOpacity(0.2)),
-        ),
-        child: Text(
-          "ACTIVE TELEMETRY | NODE: $_localHost | REFRESH: 5S",
-          style: GoogleFonts.outfit(
-            fontSize: 11,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 3,
-            color: const Color(0xFF00C9A7).withOpacity(0.7),
+  Widget _buildPremiumHeader(bool isDark, Color logoColor) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF141414) : Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-        ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // ------------------------------------------------
+          // ENLARGED IN-APP LOGO (128px)
+          // ------------------------------------------------
+          // ------------------------------------------------------------------
+          // DYNAMIC BRANDING ASSET
+          // The logo switches between 'realistic' and 'minimal' based on
+          // the view mode, and 'logoColor' adapts to the theme brightness.
+          // AnimatedSwitcher provides a smooth cross-fade transition.
+          // ------------------------------------------------------------------
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            child: Image.asset(
+              _isGridView
+                ? 'assets/exotalk_logo_realistic.png'
+                : 'assets/exotalk_logo_minimal.png',
+              key: ValueKey("${_isGridView}_$isDark"),
+              width: 128,
+              height: 128,
+              color: logoColor,
+            ),
+          ),
+          const SizedBox(width: 24),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "EXOTECH BRIDGE",
+                style: GoogleFonts.outfit(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 4,
+                  fontSize: 28,
+                  color: isDark ? const Color(0xFFD0D0D0) : const Color(0xFF2D3436),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                "ACTIVE TELEMETRY | NODE: $_localHost",
+                style: GoogleFonts.outfit(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 2,
+                  color: const Color(0xFF00C9A7).withOpacity(0.8),
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          // ------------------------------------------------
+          // CONTROLS (Stacked at end)
+          // ------------------------------------------------
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _buildViewToggle(isDark),
+              const SizedBox(height: 8),
+              _ThemeTristateToggle(
+                currentMode: themeModeNotifier.value,
+                onChanged: (mode) {
+                  setState(() {
+                    themeModeNotifier.value = mode;
+                  });
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildViewToggle(bool isDark) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          _ViewToggleOption(
+            icon: Icons.grid_view_rounded,
+            isSelected: _isGridView,
+            onTap: () => setState(() => _isGridView = true),
+          ),
+          _ViewToggleOption(
+            icon: Icons.view_list_rounded,
+            isSelected: !_isGridView,
+            onTap: () => setState(() => _isGridView = false),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   // ==========================================
   // DYNAMIC GRID & CARD LOGIC
@@ -374,6 +400,13 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
           const isoCompactCardHeight = 125.0;
           const spacing = 16.0;
 
+          // ------------------------------------------------------------------
+          // 2D STACK ANIMATION (GRID TO ISOLATED)
+          // We use a Stack with AnimatedPositioned children to achieve
+          // explicit 2D slide transitions. When a node is selected, it 
+          // slides to the primary 'isolated' slot, while others compact 
+          // and slide into a vertical list on the left.
+          // ------------------------------------------------------------------
           return Stack(
             children: [
               // Slide-out Log Viewer
@@ -533,14 +566,16 @@ class _LogViewerState extends State<LogViewer> {
         .where((l) => l.toLowerCase().contains(_filter.toLowerCase()))
         .toList();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF0F0F0F),
+        color: isDark ? const Color(0xFF0F0F0F) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFF00C9A7).withOpacity(0.3), width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.5),
+            color: isDark ? Colors.black.withOpacity(0.5) : Colors.black.withOpacity(0.1),
             blurRadius: 15,
           )
         ],
@@ -551,8 +586,8 @@ class _LogViewerState extends State<LogViewer> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.white.withOpacity(0.1))),
-              color: const Color(0xFF141414),
+              border: Border(bottom: BorderSide(color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05))),
+              color: isDark ? const Color(0xFF141414) : const Color(0xFFF0F0F0),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
@@ -560,7 +595,10 @@ class _LogViewerState extends State<LogViewer> {
                 Icon(Icons.terminal, color: const Color(0xFF00C9A7).withOpacity(0.8), size: 16),
                 const SizedBox(width: 8),
                 Text("SYSTEM LOGS: ${widget.node.id}",
-                  style: GoogleFonts.outfit(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white70)),
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.bold, 
+                    fontSize: 12, 
+                    color: isDark ? Colors.white70 : const Color(0xFF2D3436))),
                 const SizedBox(width: 12),
                 // ------------------------------------------
                 // LIVE INDICATOR
@@ -640,9 +678,11 @@ class NodeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
-    final surfaceColor = const Color(0xFF141414);
-    final textMuted = const Color(0xFFA0A0A0);
+    final surfaceColor = isDark ? const Color(0xFF141414) : Colors.white;
+    final textMain = isDark ? const Color(0xFFD0D0D0) : const Color(0xFF2D3436);
+    final textMuted = isDark ? const Color(0xFFA0A0A0) : const Color(0xFF636E72);
     
     return GestureDetector(
       onTap: onTap,
@@ -675,7 +715,7 @@ class NodeCard extends StatelessWidget {
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.w900,
                       fontSize: compact ? 12 : 16,
-                      color: const Color(0xFFD0D0D0),
+                      color: textMain,
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -725,16 +765,19 @@ class NodeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
-    final textMuted = const Color(0xFFA0A0A0);
+    final surfaceColor = isDark ? const Color(0xFF141414) : Colors.white;
+    final textMain = isDark ? const Color(0xFFD0D0D0) : const Color(0xFF2D3436);
+    final textMuted = isDark ? const Color(0xFFA0A0A0) : const Color(0xFF636E72);
     
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF141414),
+          color: surfaceColor,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: statusColor.withOpacity(0.1)),
+          border: Border.all(color: statusColor.withOpacity(isDark ? 0.1 : 0.2)),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Row(
@@ -751,7 +794,7 @@ class NodeRow extends StatelessWidget {
                     style: GoogleFonts.outfit(
                       fontWeight: FontWeight.w900, 
                       fontSize: 14, 
-                      color: const Color(0xFFD0D0D0),
+                      color: textMain,
                       letterSpacing: 1.5,
                     ),
                   ),
@@ -805,26 +848,74 @@ class NodeRow extends StatelessWidget {
   }
 }
 
-class _StatusIndicator extends StatelessWidget {
+// ----------------------------------------------------------------------------
+// PULSING STATUS INDICATOR
+// A stateful widget that uses an AnimationController to continuously pulse 
+// (fade opacity) when a node is 'Up'. This provides immediate visual 
+// confirmation of a "living" system health state.
+// ----------------------------------------------------------------------------
+class _StatusIndicator extends StatefulWidget {
   final bool isUp;
   const _StatusIndicator({required this.isUp});
 
   @override
+  State<_StatusIndicator> createState() => _StatusIndicatorState();
+}
+
+class _StatusIndicatorState extends State<_StatusIndicator> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    if (widget.isUp) _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(_StatusIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isUp != oldWidget.isUp) {
+      if (widget.isUp) {
+        _controller.repeat(reverse: true);
+      } else {
+        _controller.stop();
+        _controller.value = 1.0;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final statusColor = isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
-    return Container(
-      width: 12,
-      height: 12,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: statusColor,
-        boxShadow: [
-          BoxShadow(
-            color: statusColor.withOpacity(0.4), 
-            blurRadius: 8,
-            spreadRadius: 1,
-          )
-        ],
+    final statusColor = widget.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
+    
+    return FadeTransition(
+      opacity: widget.isUp 
+          ? Tween<double>(begin: 0.4, end: 1.0).animate(_controller)
+          : const AlwaysStoppedAnimation(1.0),
+      child: Container(
+        width: 12,
+        height: 12,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: statusColor,
+          boxShadow: [
+            BoxShadow(
+              color: statusColor.withOpacity(0.4), 
+              blurRadius: 8,
+              spreadRadius: 1,
+            )
+          ],
+        ),
       ),
     );
   }
@@ -899,7 +990,7 @@ class _ThemeTristateToggle extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
         borderRadius: BorderRadius.circular(32),
@@ -948,7 +1039,7 @@ class _ThemeToggleOption extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected 
               ? const Color(0xFF00C9A7) 
@@ -957,14 +1048,14 @@ class _ThemeToggleOption extends StatelessWidget {
           boxShadow: isSelected ? [
             BoxShadow(
               color: const Color(0xFF00C9A7).withOpacity(0.4),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
             )
           ] : null,
         ),
         child: Icon(
           icon,
-          size: 18,
+          size: 14,
           color: isSelected 
               ? Colors.white 
               : (isDark ? Colors.white38 : Colors.black38),
@@ -973,4 +1064,39 @@ class _ThemeToggleOption extends StatelessWidget {
     );
   }
 }
+
+class _ViewToggleOption extends StatelessWidget {
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ViewToggleOption({
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF00C9A7) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: isSelected ? Colors.white : (isDark ? Colors.white38 : Colors.black38),
+        ),
+      ),
+    );
+  }
+}
+
 

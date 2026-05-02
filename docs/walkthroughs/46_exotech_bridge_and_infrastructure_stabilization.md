@@ -18,34 +18,36 @@ We finalized the separation of the temporary testing tools from the long-term Co
 - **Bridge Monitor Relocation**: The monitor codebase is securely housed in `infra/bridge_monitor/`.
 - **Build Cleanliness**: We updated the `linux/CMakeLists.txt` to explicitly name the binary `exotech_bridge` and set the application ID to `tech.exotalk.bridge`, preventing any residual `cmc` naming in the compiled outputs.
 
-## UI Refactor & Dynamic Discovery
+## UI Refactor & Visual Excellence
 
-The UI was completely overhauled to meet the "Premium Sovereign" aesthetic and remove brittle hardcoded values.
+The **ExoTech Bridge Monitor** has been transformed from a basic utility into a premium, sovereign dashboard that adheres to the highest aesthetic standards of the Exosystem.
 
-- **Aesthetic Overhaul**: Implemented a dark matte background (`#0A0A0A`), muted teal indicators (`#00C9A7`), and high-legibility geometric typography (`GoogleFonts.outfit`).
-- **Standardized Branding**: Standardized the entire ecosystem on the **short-stem dandelion** logo. 
-  - The photorealistic standard (white) is used for the Card View and GTK header.
-  - The symbolic standard (white) is used for the List View.
-  - The colorized and Arabic Green versions are used for OS-level desktop shortcuts.
-- **Stack-Based Slide Animations**: The Card View uses a `Stack` with `AnimatedPositioned` widgets for explicit 2D slide transitions. Selecting a node slides it to the top-left while compacting and vertically stacking the unselected nodes below it.
-- **Live Log Indicator**: Added a pulsing teal dot and entry counter in the LogViewer header, providing visual confirmation that the 5-second polling cycle is active.
+- **Compact Premium Header**: The header region has been optimized to fit tightly around the **128px logo**, using a subtle background (`#141414` in Dark mode) and shadow depth to distinguish it as a dedicated branding anchor.
+- **Sleek Control Cluster**: Integrated a custom **Light/System/Dark** tristate toggle and a view-mode selector into a compact, vertically aligned cluster. The toggle is 50% smaller than standard Flutter widgets, ensuring it doesn't clutter the high-density telemetry data.
+- **Tightly Coupled Typography**: The "ACTIVE TELEMETRY" status text has been relocated tightly under the "EXOTECH BRIDGE" title, improving readability while reclaiming vertical space for node telemetry.
+- **Pulsing Health Indicators**: Added a continuous heart-beat animation (opacity pulse) to all node status indicators. This provides immediate visual confirmation that the system is "alive" and actively reporting health data.
+- **Theme-Aware Components**: All cards, rows, and log viewers now dynamically adapt their surface colors and contrast based on the active theme, ensuring a premium experience in both matte dark and sleek light modes.
 
 ## Visual Verification
 
-### 1. Standardized Card View
-The final standardized UI featuring the enlarged 64px white short-stem dandelion logo and the integrated GTK header icon.
-![Standardized UI](assets/standardized_logos.png)
+### 1. Compact Premium Header (Dark Mode)
+The final polished UI featuring the consolidated title, compact controls, and the prominent 128px photorealistic logo.
+![Compact Header Final](assets/compact_header_final.png)
 
-### 2. Desktop Shortcuts
-The dual-icon branding on the Exonomy desktop using the colorized and Arabic Green standards.
+### 2. Premium Light Mode Transition
+Verified light mode transition with adjusted card contrast and a soft white palette.
+![Light Mode Verified](assets/light_mode_verified.png)
+
+### 3. Desktop Integration
+Dual-branded shortcuts on the Exonomy desktop using the colorized and Arabic Green standards.
 ![Desktop Icons](assets/desktop_icons.png)
 
 ---
 
-## What's Next
+## What's Next: The Sovereign Handshake
 
-With the Exonomy testing environment stabilized, the daemons running persistently, and the ExoTech Bridge dynamically monitoring the mesh health, we are now ready to:
+With the branding finalized and the Exonomy node health actively monitored, we transition to the final verification phase of the infrastructure build-out:
 
-1. **Deploy the Wasm Node**: Finalize the deployment of the Wasm-compiled `SovereignSession` to the `exotalk.tech` GitHub Pages site, ensuring it connects seamlessly to the Exonomy signaling relay (`jaxk57cbu209.shares.zrok.io`).
-2. **Execute Cross-Device Verification**: Use the Exocracy laptop (or an external device) to load the web app and verify the successful WebRTC handshake and P2P connection with the Exonomy Conscia Beacon.
-3. **Capture the Sovereign Demo**: Utilize the newly refined ExoTech Bridge to record the visual proof of dynamic P2P discovery during the "Testing Season" demo.
+1. **Deploying the Wasm Node**: Finalizing the `exotalk_wasm` compilation and deploying the `SovereignSession` to the `exotalk.tech` GitHub Pages site.
+2. **Cross-Device P2P Verification**: Using the Exocracy laptop to load the web app and verifying the successful WebRTC signaling handshake and direct P2P data exchange with the Exonomy Conscia Beacon.
+3. **Tutorial Production (KDVV)**: Recording the "Testing Season" demo using the polished ExoTech Bridge to visually prove the resilience of the sovereign mesh.
