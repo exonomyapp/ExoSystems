@@ -15,29 +15,54 @@ void main() {
   runApp(const ExoTechBridgeApp());
 }
 
+// Global notifier for theme state
+final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.dark);
+
 class ExoTechBridgeApp extends StatelessWidget {
   const ExoTechBridgeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ExoTech Bridge',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0A0A0A),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF00C9A7),
-          brightness: Brightness.dark,
-          surface: const Color(0xFF141414),
-        ),
-        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).copyWith(
-          displayLarge: GoogleFonts.outfit(color: const Color(0xFFD0D0D0), fontWeight: FontWeight.w900),
-          bodyLarge: GoogleFonts.outfit(color: const Color(0xFFB0B0B0)),
-          bodyMedium: GoogleFonts.outfit(color: const Color(0xFFA0A0A0)),
-        ),
-      ),
-      home: const BridgeMonitorScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeModeNotifier,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          title: 'ExoTech Bridge',
+          debugShowCheckedModeBanner: false,
+          themeMode: themeMode,
+          // Premium Dark Theme
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF0A0A0A),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF00C9A7),
+              brightness: Brightness.dark,
+              surface: const Color(0xFF141414),
+            ),
+            textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).copyWith(
+              displayLarge: GoogleFonts.outfit(color: const Color(0xFFD0D0D0), fontWeight: FontWeight.w900),
+              bodyLarge: GoogleFonts.outfit(color: const Color(0xFFB0B0B0)),
+              bodyMedium: GoogleFonts.outfit(color: const Color(0xFFA0A0A0)),
+            ),
+          ),
+          // Premium Light Theme
+          theme: ThemeData(
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF00C9A7),
+              brightness: Brightness.light,
+              surface: Colors.white,
+            ),
+            textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme).copyWith(
+              displayLarge: GoogleFonts.outfit(color: const Color(0xFF2D3436), fontWeight: FontWeight.w900),
+              bodyLarge: GoogleFonts.outfit(color: const Color(0xFF636E72)),
+              bodyMedium: GoogleFonts.outfit(color: const Color(0xFFB2BEC3)),
+            ),
+          ),
+          home: const BridgeMonitorScreen(),
+        );
+      },
     );
   }
 }
@@ -202,8 +227,12 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final logoColor = isDark ? Colors.white : const Color(0xFF2D3436);
+
     return GestureDetector(
       // Clicking the background removes isolation
       onTap: () {
@@ -215,35 +244,55 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          toolbarHeight: 80,
-          title: Row(
+          toolbarHeight: 220, // Height to accommodate enlarged logo + toggle
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ------------------------------------------------
-              // IN-APP LOGO BRANDING
-              // Sized at 64px for visual presence. Toggles between
-              // photorealistic (Card View) and symbolic (List View).
-              // White ColorFilter ensures visibility on dark matte.
-              // ------------------------------------------------
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                child: Image.asset(
-                  _isGridView
-                    ? 'assets/exotalk_logo_realistic.png'
-                    : 'assets/exotalk_logo_minimal.png',
-                  key: ValueKey(_isGridView),
-                  width: 64,
-                  height: 64,
-                  color: Colors.white,
-                ),
+              Row(
+                children: [
+                  // ------------------------------------------------
+                  // ENLARGED IN-APP LOGO (128px)
+                  // Toggles between photorealistic and symbolic.
+                  // Color transitions between white and dark gray.
+                  // ------------------------------------------------
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    child: Image.asset(
+                      _isGridView
+                        ? 'assets/exotalk_logo_realistic.png'
+                        : 'assets/exotalk_logo_minimal.png',
+                      key: ValueKey("${_isGridView}_$isDark"),
+                      width: 128,
+                      height: 128,
+                      color: logoColor,
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  Text(
+                    "EXOTECH BRIDGE",
+                    style: GoogleFonts.outfit(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 4,
+                      fontSize: 28,
+                      color: isDark ? const Color(0xFFD0D0D0) : const Color(0xFF2D3436),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 20),
-              Text(
-                "EXOTECH BRIDGE",
-                style: GoogleFonts.outfit(
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 4,
-                  fontSize: 22,
-                  color: const Color(0xFFD0D0D0),
+              const SizedBox(height: 12),
+              // ------------------------------------------------
+              // THEME MODE TOGGLE
+              // Located right under the logo.
+              // ------------------------------------------------
+              Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: _ThemeTristateToggle(
+                  currentMode: themeModeNotifier.value,
+                  onChanged: (mode) {
+                    setState(() {
+                      themeModeNotifier.value = mode;
+                    });
+                  },
                 ),
               ),
             ],
@@ -831,3 +880,97 @@ class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderState
     );
   }
 }
+
+// ============================================================================
+// THEME SELECTOR COMPONENTS
+// ============================================================================
+
+class _ThemeTristateToggle extends StatelessWidget {
+  final ThemeMode currentMode;
+  final ValueChanged<ThemeMode> onChanged;
+
+  const _ThemeTristateToggle({
+    required this.currentMode,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(color: isDark ? Colors.white12 : Colors.black12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _ThemeToggleOption(
+            icon: Icons.light_mode_outlined,
+            isSelected: currentMode == ThemeMode.light,
+            onTap: () => onChanged(ThemeMode.light),
+          ),
+          _ThemeToggleOption(
+            icon: Icons.settings_suggest_outlined,
+            isSelected: currentMode == ThemeMode.system,
+            onTap: () => onChanged(ThemeMode.system),
+          ),
+          _ThemeToggleOption(
+            icon: Icons.dark_mode_outlined,
+            isSelected: currentMode == ThemeMode.dark,
+            onTap: () => onChanged(ThemeMode.dark),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ThemeToggleOption extends StatelessWidget {
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ThemeToggleOption({
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? const Color(0xFF00C9A7) 
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: const Color(0xFF00C9A7).withOpacity(0.4),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            )
+          ] : null,
+        ),
+        child: Icon(
+          icon,
+          size: 18,
+          color: isSelected 
+              ? Colors.white 
+              : (isDark ? Colors.white38 : Colors.black38),
+        ),
+      ),
+    );
+  }
+}
+

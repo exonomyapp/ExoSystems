@@ -23,31 +23,21 @@ We finalized the separation of the temporary testing tools from the long-term Co
 The UI was completely overhauled to meet the "Premium Sovereign" aesthetic and remove brittle hardcoded values.
 
 - **Aesthetic Overhaul**: Implemented a dark matte background (`#0A0A0A`), muted teal indicators (`#00C9A7`), and high-legibility geometric typography (`GoogleFonts.outfit`).
-- **Dynamic Telemetry**: The dashboard now automatically detects the local hostname (e.g., `EXONOMY`) and actively polls local ports (`8080`, `3000`) and processes (`zrok`) to determine node health, avoiding static labels.
+- **Standardized Branding**: Standardized the entire ecosystem on the **short-stem dandelion** logo. 
+  - The photorealistic standard (white) is used for the Card View and GTK header.
+  - The symbolic standard (white) is used for the List View.
+  - The colorized and Arabic Green versions are used for OS-level desktop shortcuts.
 - **Stack-Based Slide Animations**: The Card View uses a `Stack` with `AnimatedPositioned` widgets for explicit 2D slide transitions. Selecting a node slides it to the top-left while compacting and vertically stacking the unselected nodes below it.
-- **Dual-Logo Branding**: The App Bar dynamically swaps between the photorealistic dandelion logo (Card View) and the symbolic/minimal logo (List View), both rendered with a white `ColorFilter` for dark mode consistency.
-- **Compact Card Text Retention**: In isolation mode, compact cards retain their SOURCE and role text rather than hiding it; only internal padding is reduced.
-- **Live Log Indicator**: Added a pulsing teal dot and entry counter in the LogViewer header, providing visual confirmation that the 5-second polling cycle is active and fetching data.
-- **Educational Commenting**: Exhaustive architectural comments were added to `infra/bridge_monitor/lib/main.dart` to explain the polling mechanisms and UI state management for future maintainability.
+- **Live Log Indicator**: Added a pulsing teal dot and entry counter in the LogViewer header, providing visual confirmation that the 5-second polling cycle is active.
 
 ## Visual Verification
 
-### 1. Card View (Default Overview)
-The default state displaying all local telemetry nodes. The photorealistic dandelion logo is now enlarged to 64px in the App Bar.
-![Card View Normal](assets/grid_normal.png)
+### 1. Standardized Card View
+The final standardized UI featuring the enlarged 64px white short-stem dandelion logo and the integrated GTK header icon.
+![Standardized UI](assets/standardized_logos.png)
 
-### 2. Card View (Log Isolation)
-Selecting a node reveals the live log viewer. Note the pulsing dot and entry count in the header.
-![Card View Isolated](assets/grid_selected.png)
-
-### 3. GNOME Header Bar Icon
-Since GNOME Shell suppresses standard window icons in header bar mode, we manually packed a 24px dandelion icon into the leading position of the `GtkHeaderBar`.
-![Header Bar Icon](assets/header_icon.png)
-
-### 4. Desktop Shortcuts
-Two specialized shortcuts were created on the Exonomy desktop using distinct branding:
-- **ExoTech Bridge**: Uses a colorized photorealistic dandelion with a shortened stem.
-- **ExoTech Dashboard**: Uses an "Arabic Green" symbolic dandelion logo.
+### 2. Desktop Shortcuts
+The dual-icon branding on the Exonomy desktop using the colorized and Arabic Green standards.
 ![Desktop Icons](assets/desktop_icons.png)
 
 ---
