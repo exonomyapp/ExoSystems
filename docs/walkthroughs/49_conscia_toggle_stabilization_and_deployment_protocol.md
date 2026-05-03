@@ -51,8 +51,20 @@ During testing, we observed that the Bridge Monitor consumes **30-40% CPU** when
 - **Transfer**: Release bundle deployed to Exonomy via `scp` ✅
 - **KDVV**: Click logging verified for all three nodes ✅
 
+## 🎓 Strategic Decision: Sovereign Asset Management
+
+As of this session, the repository's media assets (**~55MB**) have officially surpassed the size of the codebase history (**~42MB**). To maintain a "netto" lightweight repository, we evaluated three scaling strategies for the next session:
+
+1.  **Git LFS (Large File Storage)**: Replaces binaries with text pointers. While standard, it introduces third-party server dependencies and bandwidth quotas.
+2.  **Separate Assets Repository (Selected)**: Moving all media to a dedicated `exotalk-assets` repo and referencing them via absolute URLs.
+    - **Why Option 2?**: It aligns with the **Sovereign Application Triad** philosophy of modular independence. It keeps the core engine/app repos extremely fast for developers to clone, while providing a non-blocking, unlimited-growth home for high-resolution documentation and screencasts.
+3.  **GitHub CDN "Trick"**: Uploading to hidden issues/discussions. This is too ephemeral and "hacky" for a production-grade infrastructure project.
+
+**Decision**: We will proceed with **Option 2** to ensure the core repository remains focused on logic, not binary bloat.
+
 ## ⏭️ What's Next
 
-1. **CPU Optimization Campaign**: Research native FFI or socket-based process monitoring to replace subprocess spawning.
-2. **Tutorial Recording**: Commencing the "Sovereign Handshake" screenplay using the stabilized monitor.
-3. **Desktop Cleanup**: Remove redundant `.desktop` files (Exonomy has 3 identical launchers).
+1. **Asset Migration**: Execute the transition to a separate media repository.
+2. **CPU Optimization Campaign**: Research native FFI or socket-based process monitoring to replace subprocess spawning.
+3. **Tutorial Recording**: Commencing the "Sovereign Handshake" screenplay using the stabilized monitor.
+
