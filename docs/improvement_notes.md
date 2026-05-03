@@ -1,13 +1,11 @@
 # Improvement Notes
 
-This file tracks potential UI/UX and architectural improvements identified during development sessions. These are deferred tasks to prevent scope creep.
+## ⚙️ Performance & Efficiency
+- **High Idle CPU Usage**: The Bridge Monitor app consumes 30-40% CPU even when idle. 
+    - **Observed Behavior**: Resource usage drops to ~5% immediately upon closing the app.
+    - **Hypothesis**: The combination of `Timer.periodic` telemetry polling (subprocess calls to `systemctl` and `pgrep`) and Flutter's rendering loop for animated indicators is inefficient.
+    - **Proposed Research**: Quantify the impact of subprocess spawning vs. native C/FFI calls for process status. Evaluate if reducing the animation frame rate or using a "lazy" update model (only when in focus) reduces load.
+    - **Goal**: Achieve <5% idle CPU while maintaining 1s telemetry accuracy.
 
-## UI/UX Improvements
-- **Animated Transition for Technical Footer**: Add a slide-in or fade-in animation when the sidebar expands to reveal the technical footer.
-- **Sparkline for Traffic Pulse**: Instead of raw numbers, add a 10-second history sparkline for Ingress/Egress in the footer.
-- **Copy-to-Clipboard for All Telemetry**: Allow clicking on any footer item (Node ID, IP) to copy the raw value.
-
-## Architectural Improvements
-- **Telemetry Authentication**: Add a simple API key requirement for the Telemetry API (even on loopback) for production hardening.
-- **Plugin System for Telemetry**: Allow apps to register custom telemetry providers (e.g., Exonomy might want to show minted voucher count).
-- **Persistent Telemetry Logs**: Stream telemetry logs to a circular buffer on disk for post-mortem analysis of failed mesh handshakes.
+## 🏷️ Naming Consistency
+- **Unified Service Management**: We have successfully transitioned from "Kill Switches" to "Service Toggles" and "Conscia Tristate". The `BridgeNode` class could potentially be renamed to `ServiceNode` in a future refactor to reflect its broader role in managing systemd services.

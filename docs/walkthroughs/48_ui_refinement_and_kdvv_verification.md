@@ -57,3 +57,26 @@ The ExoTech Bridge Monitor is now definitively production-ready.
 1. **Observer Model**: Respects mesh persistence with Tristate logic (On/Sleep/Off).
 2. **KDVV**: Responds gracefully and deterministically to remote Keystroke Injection with immediate optimistic UI updates.
 3. **Deployment**: Correctly deployed to the Release path and visually verified via desktop execution.
+
+## 🛠️ Follow-Up Fixes
+
+### 1. Light Mode Aesthetic Correction
+The light mode theme was corrected to remove all pure white backgrounds. We shifted the cards to `0xFFBCC0C5` and the header to `0xFFAEB2B8`, creating a true 'Dashboard Gray' environment that maintains contrast without blinding the user.
+
+![State: Light Mode Fix](/home/exocrat/.gemini/antigravity/brain/11415c00-dbc8-4702-b113-29cad5189023/test_light_mode.png)
+
+### 2. Conscia Tristate Interaction Fix
+The `ConsciaTristateToggle` was previously wrapped in a `GestureDetector` that was swallowing touch events with `HitTestBehavior.opaque`, effectively disabling manual interaction. This wrapper was removed, restoring native gesture control.
+
+### 3. Remote KDVV Verification 
+To definitively prove the Conscia toggle works, we executed a remote deployment and keystroke injection test on the Exonomy laptop:
+
+**Baseline OFF (State 0)**:
+![State: Conscia OFF](/home/exocrat/.gemini/antigravity/brain/11415c00-dbc8-4702-b113-29cad5189023/test_conscia_0_off.png)
+
+**SLEEP Mode (Key 2 once)**:
+![State: Conscia SLEEP](/home/exocrat/.gemini/antigravity/brain/11415c00-dbc8-4702-b113-29cad5189023/test_conscia_1_sleep.png)
+
+**ON Mode (Key 2 twice, Green Light verified)**:
+![State: Conscia ON](/home/exocrat/.gemini/antigravity/brain/11415c00-dbc8-4702-b113-29cad5189023/test_conscia_2_on.png)
+

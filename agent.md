@@ -15,6 +15,7 @@
     1.  Search the `walkthrough.md` files for previous mentions of the problem.
     2.  Review past `implementation_plan.md` artifacts to understand how it was "fixed" before.
     3.  Analyze why the previous solution failed to persist or why it was reverted.
+    4.  **Session Continuity:** Check the `overview.txt` (conversation log) of the *immediately preceding* session to recall exact CLI commands, deployment methods, and architectural context used by the prior agent.
 - **Systemic Resolution**: Do not re-apply the same patch. Investigate the root cause (e.g., layout collisions, missing persistence, incorrect state management) and implement a systemic solution that prevents the issue from ever occurring "again".
 
 ## 3. "Test Before Deliver" Protocol (Mandatory Verification)
@@ -50,6 +51,20 @@ For all remote desktop interactions (Exonomy), follow the **Keystroke-Driven, Vi
 5.  **Scrolling History Enforcement**: Force a scrolling log for all commands to allow historical auditing. Pipe interactive commands to `cat`:
     *   `sudo snap remove code 2>&1 | cat`
 6.  **Visual Synchronization**: Capture desktop screenshots (`scrot`) after each major task phase to synchronize the user's visual state with your internal state.
+
+### 6.1.1 Exonomy SSH & Tunneling (Sovereign Credentials)
+To access the remote Exonomy node from Exocracy:
+- **Password**: `.` (Single Dot)
+- **Direct Access**: `sshpass -p "." ssh -o StrictHostKeyChecking=no exocrat@exonomy.local`
+- **RDP Tunneling**: `sshpass -p "." ssh -o StrictHostKeyChecking=no -fNL 3389:localhost:3389 exocrat@exonomy.local`
+
+### 6.1.2 Deployment Pathway (Exocracy → Exonomy)
+- **Local Compilation**: All code is developed and compiled locally on the Exocracy workstation. Do NOT attempt to build code on the Exonomy laptop unless specifically instructed.
+- **Bundle Transfer**: Once compiled (e.g., `flutter build linux --release`), you MUST deploy only the built binary/bundle to the Exonomy laptop using `scp` (e.g., `sshpass -p "." scp -r ...`). Do not use `rsync` to sync raw source code.
+- **Desktop Icon Verification**: 
+    1. Check for `~/Desktop/exotech_bridge.desktop` on Exonomy.
+    2. Verify `Exec` path points to the exact transferred bundle path.
+    3. Ensure `chmod +x` is applied.
 
 ### 6.2 Local Desktop Capability
 - **Window Discovery**: `DISPLAY=:1 wmctrl -l` — lists all open windows with IDs and titles.

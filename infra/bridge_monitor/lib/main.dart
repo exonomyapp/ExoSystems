@@ -60,7 +60,7 @@ class ExoTechBridgeApp extends StatelessWidget {
             colorScheme: ColorScheme.fromSeed(
               seedColor: const Color(0xFF00C9A7),
               brightness: Brightness.light,
-              surface: const Color(0xFFE8E9EB), // Soft light gray surfaces
+              surface: const Color(0xFFBCC0C5), // Non-white surface
             ),
             textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme).copyWith(
               displayLarge: GoogleFonts.outfit(color: const Color(0xFF3D4446), fontWeight: FontWeight.w900),
@@ -101,7 +101,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     super.initState();
     _initStorage();
     _initDiscovery();
-    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (_) => _performScan());
+    _refreshTimer = Timer.periodic(const Duration(seconds: 1), (_) => _performScan());
   }
 
   @override
@@ -153,9 +153,9 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
         stopCmd: "systemctl --user stop exotalk-signaling",
       ),
       BridgeNode(
-        id: "beacon-1", name: "Conscia Beacon", machine: _localHost, role: "P2P Mesh Node (Sovereign)", port: 3000, icon: Icons.radar_outlined,
-        startCmd: "nohup bash -c 'cd /home/exocrat/code/exotalk/exotalk_engine/conscia && cargo run --release > /home/exocrat/conscia.log 2>&1' &",
-        stopCmd: "pkill -f 'conscia'",
+        id: "conscia-1", name: "Conscia Beacon", machine: _localHost, role: "P2P Mesh Node (Sovereign)", port: 3000, icon: Icons.radar_outlined,
+        startCmd: "nohup /home/exocrat/code/exotalk/exotalk_engine/target/release/conscia daemon > /home/exocrat/conscia.log 2>&1 &",
+        stopCmd: "pkill -f 'target/release/conscia'",
       ),
       BridgeNode(
         id: "proxy-1", name: "Public Proxy", machine: "ZROK INFRA", role: "External Gateway (exotalk.tech)", port: 0, icon: Icons.public_outlined,
@@ -176,7 +176,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
         node.isUp = res.exitCode == 0;
         final logs = await _fetchJournalctlLogs("exotalk-signaling");
         _updateLogs(node, logs);
-      } else if (node.id.startsWith("beacon")) {
+      } else if (node.id.startsWith("conscia")) {
         if (node.isSleeping) {
           node.isUp = false;
           continue;
@@ -290,23 +290,23 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     } else if (key == '1') {
       // Toggle Signaling
       final node = _nodes.firstWhere((n) => n.id == 'signaling-1');
-      _triggerToggle(node);
+      _toggleService(node);
     } else if (key == '2') {
       // Cycle Conscia
-      final node = _nodes.firstWhere((n) => n.id == 'beacon-1');
+      final node = _nodes.firstWhere((n) => n.id == 'conscia-1');
       int current = 0;
       if (node.isSleeping) current = 1;
       else if (node.isUp) current = 2;
       final next = (current + 1) % 3;
-      _triggerConscia(node, next);
+      _cycleConscia(node, next);
     } else if (key == '3') {
       // Toggle Proxy
       final node = _nodes.firstWhere((n) => n.id == 'proxy-1');
-      _triggerToggle(node);
+      _toggleService(node);
     }
   }
 
-  void _triggerToggle(BridgeNode node) {
+  void _toggleService(BridgeNode node) {
     // Optimistic UI update
     setState(() {
       node.isUp = !node.isUp;
@@ -319,9 +319,16 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     Future.delayed(const Duration(seconds: 2), _performScan);
   }
 
-  void _triggerConscia(BridgeNode node, int state) async {
-    // This replicates the logic in ConsciaTristateToggle for remote testing
-    await Process.run('bash', ['-c', "pkill -f 'cargo run' ; pkill -f 'conscia'"]);
+  // --------------------------------------------------------------------------
+  // KEYBOARD-TRIGGERED CONSCIA STATE MACHINE
+  // This method mirrors the ConsciaTristateToggle's click-driven logic but is
+  // invoked via xdotool keyboard shortcuts (Key '2') for KDVV automation.
+  // IMPORTANT: Both this method and _setToggleState() in ConsciaTristateToggle
+  // must use the same absolute binary path to avoid PATH-related failures
+  // when the app is launched from a desktop icon (which lacks ~/.cargo/bin).
+  // --------------------------------------------------------------------------
+  void _cycleConscia(BridgeNode node, int state) async {
+    await Process.run('bash', ['-c', "pkill -f 'target/release/conscia' ; pkill -f 'conscia'"]);
     if (state == 0) {
       setState(() {
         node.isSleeping = false;
@@ -337,11 +344,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
         node.isSleeping = false;
         node.isUp = true;
       });
-      await Process.start('cargo', ['run', '--release'],
-        workingDirectory: '/home/exocrat/code/exotalk/exotalk_engine/conscia',
-        mode: ProcessStartMode.detached,
-        environment: {'HOME': '/home/exocrat', 'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/exocrat/.cargo/bin'},
-      );
+      await Process.run('bash', ['-c', "nohup /home/exocrat/code/exotalk/exotalk_engine/target/release/conscia daemon > /home/exocrat/conscia.log 2>&1 &"]);
     }
     Future.delayed(const Duration(seconds: 1), _performScan);
   }
@@ -394,7 +397,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF141414) : const Color(0xFFF8F9FA),
+        color: isDark ? const Color(0xFF141414) : const Color(0xFFAEB2B8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(isDark ? 0.3 : 0.08),
@@ -721,7 +724,7 @@ class _LogViewerState extends State<LogViewer> {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFF1F3F4),
+        color: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFC8CBD0),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFF00C9A7).withOpacity(0.3), width: 1),
         boxShadow: [
@@ -738,7 +741,7 @@ class _LogViewerState extends State<LogViewer> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
               border: Border(bottom: BorderSide(color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05))),
-              color: isDark ? const Color(0xFF141414) : const Color(0xFFF0F0F0),
+              color: isDark ? const Color(0xFF141414) : const Color(0xFFB8BBC0),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: Row(
@@ -834,7 +837,7 @@ class NodeCard extends StatelessWidget {
     final statusColor = node.isSleeping 
         ? Colors.orange 
         : (node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F));
-    final surfaceColor = isDark ? const Color(0xFF141414) : const Color(0xFFF1F3F4);
+    final surfaceColor = isDark ? const Color(0xFF141414) : const Color(0xFFBCC0C5);
     final textMain = isDark ? const Color(0xFFA5AAB5) : const Color(0xFF2D3436);
     final textMuted = isDark ? const Color(0xFF787C87) : const Color(0xFF5F6368);
     
@@ -915,13 +918,9 @@ class NodeCard extends StatelessWidget {
                   ],
                 ),
                 if (!compact)
-                  GestureDetector(
-                    onTap: () {},
-                    behavior: HitTestBehavior.opaque,
-                    child: node.id.startsWith("beacon")
-                        ? ConsciaTristateToggle(node: node, onToggled: onToggled)
-                        : NodeKillSwitch(node: node, onToggled: onToggled),
-                  ),
+                  node.id.startsWith("conscia")
+                      ? ConsciaTristateToggle(node: node, onToggled: onToggled)
+                      : NodeServiceToggle(node: node, onToggled: onToggled),
               ],
             ),
           ],
@@ -941,7 +940,7 @@ class NodeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final statusColor = node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
-    final surfaceColor = isDark ? const Color(0xFF141414) : const Color(0xFFF1F3F4);
+    final surfaceColor = isDark ? const Color(0xFF141414) : const Color(0xFFBCC0C5);
     final textMain = isDark ? const Color(0xFFA5AAB5) : const Color(0xFF2D3436);
     final textMuted = isDark ? const Color(0xFF787C87) : const Color(0xFF5F6368);
     
@@ -1018,13 +1017,9 @@ class NodeRow extends StatelessWidget {
               width: 170, // Fixed width prevents grid alignment breaking
               child: Align(
                 alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () {},
-                  behavior: HitTestBehavior.opaque,
-                  child: node.id.startsWith("beacon")
-                      ? ConsciaTristateToggle(node: node, onToggled: onToggled)
-                      : NodeKillSwitch(node: node, onToggled: onToggled),
-                ),
+                child: node.id.startsWith("conscia")
+                    ? ConsciaTristateToggle(node: node, onToggled: onToggled)
+                    : NodeServiceToggle(node: node, onToggled: onToggled),
               ),
             ),
             const SizedBox(width: 16),
@@ -1186,8 +1181,8 @@ class _ThemeTristateToggle extends StatelessWidget {
 
     return CupertinoSlidingSegmentedControl<int>(
       groupValue: selectedIndex,
-      backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFDEE0E4),
-      thumbColor: isDark ? const Color(0xFF3A3A3A) : Colors.white,
+      backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFB0B4BA),
+      thumbColor: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE0E2E5),
       padding: const EdgeInsets.all(2),
       children: {
         0: Padding(
@@ -1251,39 +1246,64 @@ class _ViewToggleOption extends StatelessWidget {
   }
 }
 
-class NodeKillSwitch extends StatefulWidget {
+// ============================================================================
+// NODE SERVICE TOGGLE — Binary ON/OFF Service Control
+//
+// Used for system-managed services (Signaling Relay, Zrok Proxy) that are
+// controlled via `systemctl --user start/stop`. Unlike the Conscia Tristate,
+// this is a simple two-state CupertinoSwitch.
+//
+// All toggle interactions are logged to ~/bridge_monitor_clicks.log with
+// the node ID for unified remote verification across all nodes.
+//
+// The _isProcessing guard + IgnorePointer pattern prevents double-taps
+// from issuing concurrent systemctl commands, which could race and leave
+// the service in an indeterminate state.
+// ============================================================================
+class NodeServiceToggle extends StatefulWidget {
   final BridgeNode node;
   final VoidCallback onToggled;
   
-  const NodeKillSwitch({super.key, required this.node, required this.onToggled});
+  const NodeServiceToggle({super.key, required this.node, required this.onToggled});
 
   @override
-  State<NodeKillSwitch> createState() => _NodeKillSwitchState();
+  State<NodeServiceToggle> createState() => _NodeServiceToggleState();
 }
 
-class _NodeKillSwitchState extends State<NodeKillSwitch> {
+class _NodeServiceToggleState extends State<NodeServiceToggle> {
   bool _isProcessing = false;
 
   Future<void> _toggle() async {
     if (_isProcessing) return;
     setState(() => _isProcessing = true);
 
-    if (widget.node.isUp) {
-      // STOP: always use bash for stop (pkill / systemctl stop)
-      final stopCmd = widget.node.stopCmd;
-      if (stopCmd != null) {
-        await Process.run('bash', ['-c', stopCmd]);
+    try {
+      final action = widget.node.isUp ? 'OFF' : 'ON';
+      await File('/home/exocrat/bridge_monitor_clicks.log').writeAsString(
+        '${DateTime.now().toIso8601String()} - [${widget.node.id}] USER CLICK: $action\n',
+        mode: FileMode.append,
+      );
+
+      if (widget.node.isUp) {
+        // STOP: always use bash for stop (pkill / systemctl stop)
+        final stopCmd = widget.node.stopCmd;
+        if (stopCmd != null) {
+          await Process.run('bash', ['-c', stopCmd]);
+        }
+      } else {
+        // START: use bash for systemctl
+        final startCmd = widget.node.startCmd;
+        if (startCmd != null) {
+          await Process.run('bash', ['-c', startCmd]);
+        }
       }
-    } else {
-      // START: use bash for systemctl; detached for Conscia is handled in ConsciaTristateToggle
-      final startCmd = widget.node.startCmd;
-      if (startCmd != null) {
-        await Process.run('bash', ['-c', startCmd]);
+      await Future.delayed(const Duration(milliseconds: 800));
+    } finally {
+      widget.onToggled();
+      if (mounted) {
+        setState(() => _isProcessing = false);
       }
     }
-    await Future.delayed(const Duration(milliseconds: 800));
-    widget.onToggled();
-    setState(() => _isProcessing = false);
   }
 
   @override
@@ -1306,6 +1326,27 @@ class _NodeKillSwitchState extends State<NodeKillSwitch> {
   }
 }
 
+// ============================================================================
+// CONSCIA TRISTATE TOGGLE — Interactive 3-State Service Control
+//
+// This widget manages the Conscia Beacon's lifecycle through three states:
+//   OFF (0/Red)   → Hard pkill of the conscia process at the OS level.
+//   SLEEP (1/Orange) → Observer Mode: UI ignores telemetry but the OS
+//                      process remains alive for other bridge clients.
+//   ON (2/Green)  → Actively monitored. Launches the pre-compiled binary
+//                      if not already running.
+//
+// CRITICAL DESIGN DECISIONS:
+// 1. We use the absolute path to the pre-compiled binary
+//    (/home/exocrat/.../target/release/conscia) instead of `cargo run`
+//    because desktop-launched apps do not inherit ~/.cargo/bin in PATH.
+// 2. The entire state transition is wrapped in try/finally to guarantee
+//    that `_isProcessing` is always reset, even if a Process.run throws.
+//    Without this, an unhandled ProcessException would permanently freeze
+//    the widget in its disabled (IgnorePointer) state.
+// 3. Click events are logged to ~/bridge_monitor_clicks.log for remote
+//    programmatic verification via the KDVV protocol.
+// ============================================================================
 class ConsciaTristateToggle extends StatefulWidget {
   final BridgeNode node;
   final VoidCallback onToggled;
@@ -1317,43 +1358,59 @@ class ConsciaTristateToggle extends StatefulWidget {
 }
 
 class _ConsciaTristateToggleState extends State<ConsciaTristateToggle> {
+  /// Guards against concurrent state transitions. When true, the widget
+  /// wraps itself in IgnorePointer + 50% opacity to signal processing.
   bool _isProcessing = false;
 
   Future<void> _setToggleState(int state) async {
     if (_isProcessing) return;
     setState(() => _isProcessing = true);
 
-    if (state == 0) {
-      // OFF (Red) — GLOBAL SHUTDOWN: hard OS-level kill
-      await Process.run('bash', ['-c', "pkill -f 'cargo run' ; pkill -f 'conscia'"]);
-      widget.node.isSleeping = false;
-      widget.node.isUp = false;
-    } else if (state == 1) {
-      // SLEEP (Orange) — OBSERVER MODEL: We ignore telemetry, but leave the process alive
-      // for other potential bridge instances or background tasks.
-      widget.node.isSleeping = true;
-      widget.node.isUp = false;
-    } else if (state == 2) {
-      // ON (Green) — Start only if not already operational
-      widget.node.isSleeping = false;
-      
-      // Check if process is already running via pgrep before starting a new one
-      final check = await Process.run('pgrep', ['conscia']);
-      if (check.exitCode != 0) {
-        await Process.start(
-          'cargo',
-          ['run', '--release'],
-          workingDirectory: '/home/exocrat/code/exotalk/exotalk_engine/conscia',
-          mode: ProcessStartMode.detached,
-          environment: {'HOME': '/home/exocrat', 'PATH': '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/exocrat/.cargo/bin'},
-        );
-        // Give it a moment to bind its port
-        await Future.delayed(const Duration(seconds: 2));
+    // CRITICAL: try/finally ensures _isProcessing is always reset.
+    // Without this, a failed Process.run (e.g., binary not found)
+    // would leave the widget permanently disabled.
+    try {
+      if (state == 0) {
+        await File('/home/exocrat/bridge_monitor_clicks.log').writeAsString('${DateTime.now().toIso8601String()} - [${widget.node.id}] USER CLICK: Power OFF (0)\n', mode: FileMode.append);
+        // OFF (Red) — GLOBAL SHUTDOWN: hard OS-level kill
+        await Process.run('bash', ['-c', "pkill -f 'target/release/conscia' ; pkill -f 'conscia'"]);
+        setState(() {
+          widget.node.isSleeping = false;
+          widget.node.isUp = false;
+        });
+      } else if (state == 1) {
+        await File('/home/exocrat/bridge_monitor_clicks.log').writeAsString('${DateTime.now().toIso8601String()} - [${widget.node.id}] USER CLICK: SLEEP (1)\n', mode: FileMode.append);
+        // SLEEP (Orange) — OBSERVER MODEL: UI ignores telemetry,
+        // but the OS process remains alive for other bridge instances.
+        setState(() {
+          widget.node.isSleeping = true;
+          widget.node.isUp = false;
+        });
+      } else if (state == 2) {
+        await File('/home/exocrat/bridge_monitor_clicks.log').writeAsString('${DateTime.now().toIso8601String()} - [${widget.node.id}] USER CLICK: Power ON (2)\n', mode: FileMode.append);
+        // ON (Green) — Start only if not already operational.
+        // Optimistic UI update: show green immediately.
+        setState(() {
+          widget.node.isSleeping = false;
+          widget.node.isUp = true;
+        });
+        
+        // Check if process is already running to avoid duplicate instances
+        final check = await Process.run('pgrep', ['-f', 'target/release/conscia']);
+        if (check.exitCode != 0) {
+          // Launch using absolute path — NOT `cargo run` — because desktop
+          // launchers do not inherit the user's shell PATH.
+          await Process.run('bash', ['-c', "nohup /home/exocrat/code/exotalk/exotalk_engine/target/release/conscia daemon > /home/exocrat/conscia.log 2>&1 &"]);
+          // Give the daemon a moment to bind its port before the next poll
+          await Future.delayed(const Duration(seconds: 2));
+        }
+      }
+    } finally {
+      widget.onToggled();
+      if (mounted) {
+        setState(() => _isProcessing = false);
       }
     }
-
-    widget.onToggled();
-    setState(() => _isProcessing = false);
   }
 
   @override
@@ -1382,8 +1439,8 @@ class _ConsciaTristateToggleState extends State<ConsciaTristateToggle> {
         opacity: _isProcessing ? 0.5 : 1.0,
         child: CupertinoSlidingSegmentedControl<int>(
           groupValue: currentState,
-          backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFDEE0E4),
-          thumbColor: isDark ? const Color(0xFF3A3A3A) : Colors.white,
+          backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFB0B4BA),
+          thumbColor: isDark ? const Color(0xFF3A3A3A) : const Color(0xFFE0E2E5),
           padding: const EdgeInsets.all(2),
           children: {
             0: Padding(
