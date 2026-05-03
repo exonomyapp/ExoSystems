@@ -28,6 +28,7 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 - **[20. Distribution Control Panel](20_distribution_control_panel.md)**: **Master Hub** for App IDs, Docker naming, and acquisition syntax.
 - **[21. Distribution Strategy](21_distribution_and_acquisition_strategy.md)**: (Coming Soon) Unified strategy for Flatpak, Docker, and App Stores.
 - **[19. Verification Telemetry API](19_verification_telemetry_api.md)**: Port 11434 sidecar for automated health auditing.
+- **[Telemetry Verification (Live)](telemetry_verification.md)**: Real-time results of the programmatic infrastructure stress test.
 
 ---
 
@@ -42,6 +43,13 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 - **[Legacy Archive](legacy/)**: Preserved individual app distribution specs.
 - **[Conscia Management](conscia_manage.md)**: Specific operations for the Conscia node.
 - **[Mesh Delivery Decisions](mesh_delivery_decisions.md)**: Rationale behind low-level networking choices.
+
+---
+
+### 🚀 Strategy & Evolution
+- **[27. Storage Infrastructure Matrix](27_storage_infrastructure_matrix.md)**: Comparative analysis of S3 and P2P storage solutions.
+- **[28. Sovereign Management Evolution](28_sovereign_management_evolution.md)**: Roadmap from **BridgeNode** to the **ExoMC**.
+- **[29. KDVV Remote Control Protocol](29_kdvv_remote_control_protocol.md)**: Standards for **Programmatic Humanity** and remote orchestration.
 
 ---
 

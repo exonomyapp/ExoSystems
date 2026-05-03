@@ -52,7 +52,7 @@ static void my_application_activate(GApplication* application) {
   g_autofree gchar* exe_dir = exe_path ? g_path_get_dirname(exe_path) : NULL;
   g_autofree gchar* icon_path = exe_dir ? g_build_filename(
       exe_dir, "data", "flutter_assets", "assets",
-      "exotalk_logo_realistic.png", NULL) : NULL;
+      "exotalk_pappus_arabic_green.png", NULL) : NULL;
 
   // Set the window icon for taskbar / alt-tab / Activities overview
   if (icon_path != NULL) {

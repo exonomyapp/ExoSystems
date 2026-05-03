@@ -80,3 +80,7 @@ To access the remote Exonomy node from Exocracy:
 ## 8. Safe Deletion Protocol
 - **Prohibition of `rm` and `rm -rf`**: You are strictly FORBIDDEN from using `rm` or `rm -rf` to delete user files or directories.
 - **Mandatory Trash Usage**: All file and directory deletions must utilize the Ubuntu trash mechanism to allow for user recovery. You must use `gio trash <path>` or `trash-put <path>` instead of standard coreutils deletion commands.
+## 9. Context Window & Session Continuity Protocol
+- **Pruning Awareness**: You MUST be hyper-aware of the session's context window status. Pruning or truncation is a signal that the conversation history is becoming too long for deterministic performance.
+- **Reporting Requirement**: You MUST report to the USER at the end of every turn if a "Truncation" or "Checkpoint" message has been received from the system.
+- **Branching Recommendation**: If pruning is detected, you MUST proactively recommend branching into a new session for subsequent complex tasks to preserve high-fidelity memory of the codebase and recent decisions.

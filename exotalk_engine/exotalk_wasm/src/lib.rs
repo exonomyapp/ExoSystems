@@ -5,35 +5,49 @@ use js_sys::Object;
 // ============================================================================
 // ExoTalk Wasm Engine (Sovereign Session)
 //
-// This module provides the WebAssembly bindings for the ExoTalk engine.
-// It allows the browser to instantiate a "Sovereign Session" which represents
-// a P2P identity and manages the WebRTC connectivity required to join the
-// ExoTalk mesh without relying on a centralized server for data transport.
+// 🧠 EDUCATIONAL CONTEXT:
+// This module provides the WebAssembly (Wasm) bindings for the ExoTalk engine.
+// Wasm allows us to run near-native Rust code inside the browser's sandbox.
+// This is critical for maintaining "Sovereign Identity" because the heavy 
+// cryptographic work (Ed25519 key generation) happens in Rust, but can be 
+// called directly from the Javascript frontend.
+//
+// 🏗️ TECHNOLOGY STACK:
+// - wasm-bindgen: Facilitates high-level interactions between Rust and JS.
+// - web-sys: Provides raw bindings to Browser APIs (WebRTC, Console, DOM).
 // ============================================================================
 
 #[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
-    // Sets up a panic hook to route Rust panics to the browser console.
-    // This is crucial for debugging Wasm modules in the browser.
+    // 💡 PATTERN: The "Panic Hook"
+    // Rust's default panic message goes to stderr. In the browser, that doesn't 
+    // exist. We use `console_error_panic_hook` to redirect Rust panics to the
+    // browser's Developer Console so junior devs can debug Wasm crashes.
     console_error_panic_hook::set_once();
     console::log_1(&"Sovereign Wasm Engine 0.1.0 (Demo Mode) Initialized.".into());
     Ok(())
 }
 
 /// Represents an active session for a user within the browser environment.
-/// This struct is exported to Javascript via `#[wasm_bindgen]`.
+/// 
+/// 💡 CONCEPT: The Sovereign Session
+/// In the Exosystem, a session is not a "login cookie" from a server. It is 
+/// a local-first instantiation of a P2P identity. The browser owns the keys, 
+/// and this struct manages the direct connections to other peers.
 #[wasm_bindgen]
 pub struct SovereignSession {
     /// The user's handle (e.g., "DemoUser")
     handle: String,
-    /// The WebRTC PeerConnection instance used to communicate with the mesh
+    /// The WebRTC PeerConnection instance used to communicate with the mesh.
+    /// We use an `Option` because the connection is initialized asynchronously.
     peer_connection: Option<RtcPeerConnection>,
 }
 
 #[wasm_bindgen]
 impl SovereignSession {
     /// Constructs a new Sovereign Session.
-    /// This constructor is called directly from the Javascript frontend.
+    /// This constructor is called directly from the Javascript frontend:
+    /// `const session = new SovereignSession("Alice");`
     #[wasm_bindgen(constructor)]
     pub fn new(handle: String) -> SovereignSession {
         SovereignSession {
@@ -48,25 +62,30 @@ impl SovereignSession {
     }
 
     /// Synthesizes a Decentralized Identifier (DID) locally.
-    /// In a production environment, this would involve generating an Ed25519
-    /// keypair and formatting the public key according to the `did:peer` spec.
-    /// For the demo, we generate a deterministic placeholder.
+    /// 
+    /// 🛡️ SOVEREIGNTY NOTE:
+    /// In the "Solid Identity" standard, identities are synthesized (built) 
+    /// rather than "requested." By generating the DID locally, we ensure 
+    /// that no central authority can revoke or track the initial birth 
+    /// of an identity.
     pub fn synthesize_did(&self) -> String {
+        // For the demo, we generate a deterministic placeholder.
+        // Production will use Ed25519 key derivation.
         format!("did:peer:2.Ez6LS...{}...{}", &self.handle, "demo")
     }
 
     /// Initiates a connection to the Sovereign Mesh.
     /// 
-    /// This method sets up the initial WebRTC configuration and prepares the
-    /// `RtcPeerConnection`. It expects a `signal_url` which points to the
-    /// lightweight Python signaling relay (e.g., the zrok tunnel) used to
-    /// exchange SDP offers/answers.
+    /// 💡 LIFECYCLE: The WebRTC Handshake
+    /// 1. STUN: Browser discovers its own public IP/Port.
+    /// 2. SIGNALING: Browser sends an "Offer" (SDP) to the relay.
+    /// 3. ANSWER: Browser receives an "Answer" (SDP) from a peer.
+    /// 4. P2P: Direct data channel is established; signaling relay is bypassed.
     pub async fn connect_to_mesh(&mut self, signal_url: &str) -> Result<String, JsValue> {
         console::log_1(&format!("Initializing WebRTC Handshake via {}...", signal_url).into());
         
-        // Configure WebRTC with public STUN servers.
-        // STUN is necessary for the browser to discover its public IP address
-        // so it can establish direct P2P connections (hole punching).
+        // 🔧 CONFIGURATION:
+        // We use public Google STUN servers to "hole-punch" through standard home routers (NAT).
         let mut config = RtcConfiguration::new();
         let ice_servers = js_sys::Array::new();
         
@@ -76,12 +95,14 @@ impl SovereignSession {
         
         config.ice_servers(&ice_servers);
         
-        // Initialize the WebRTC connection object.
+        // Initialize the WebRTC connection object using browser-native APIs.
         let pc = RtcPeerConnection::new_with_configuration(&config)?;
         self.peer_connection = Some(pc);
         
-        // Note: The actual signaling logic (creating offers, sending via WebSocket/HTTP,
+        // 🚧 FUTURE WORK:
+        // The actual signaling logic (creating offers, sending via WebSocket/HTTP,
         // and handling answers) will be implemented in subsequent phases.
+        // This is where we will use `web_sys::fetch` to talk to the Python relay.
         Ok("Mesh Handshake Initiated".into())
     }
 }

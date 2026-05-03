@@ -28,8 +28,9 @@ These crates bypass FFI entirely and use `exotalk_core` as a native Rust library
 *   **`republet_desktop`**: The Rust backend for the RepubLet SvelteKit desktop app.
 *   **`exocracy_desktop`**: The Rust backend for the Exocracy SvelteKit desktop app.
 
-### 5. Standalone Binaries
+### 5. Standalone Binaries & Wasm
 *   **`conscia`**: A headless daemon/beacon designed to run on a Linux server to act as an always-on relay node perfectly routing traffic between peer devices.
+*   **[`exotalk_wasm`](exotalk_wasm/README.md)**: The WebAssembly core for browser-based Sovereign Sessions.
 
 ## Building
 To verify all 12 isolated parts compile harmoniously:

@@ -30,6 +30,7 @@ We believe that technical documentation should be as engaging as the software it
 *   **[exotalk_engine/](exotalk_engine/README.md)**: The Rust-powered P2P heart.
     - **[conscia/](exotalk_engine/conscia/README.md)**: **The Sovereign Lifeline.** Headless beacon & HA relay daemon.
 *   **[cmc/](cmc/README.md)**: **Conscia Management Console.** High-density node governance UI.
+*   **[infra/](infra/README.md)**: **Sovereign Support Systems.** Signaling relays and diagnostic bridges.
 
 ### Shared Modules
 *   **[exoauth/](exoauth/README.md)**: **The Universal Passport.** The "Solid Front Door" identity package.
@@ -39,6 +40,7 @@ Each application operates on a 3-tier model. See [Specification 22](docs/spec/22
 
 **ExoTalk** — Sovereign Messaging
 *   **[exotalk_flutter/](exotalk_flutter/README.md)**: Desktop messaging client.
+*   **[exotalk_web/](exotalk_web/README.md)**: Web-based entry point (Wasm).
 
 **Exonomy** — Social Voucher Exchange
 *   **[exonomy_lite/](exonomy_lite/README.md)**: Mobile P2P client.
