@@ -4,13 +4,15 @@ metadata:
   name: qdrant
   namespace: default
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: qdrant
   ports:
   - name: rest
     port: 6333
     targetPort: 6333
+    nodePort: 32333
   - name: grpc
     port: 6334
     targetPort: 6334
+    nodePort: 32334

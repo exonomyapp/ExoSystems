@@ -23,3 +23,16 @@ To preserve the speed and integrity of the Exocracy development workstation, all
 
 *   **Purpose**: To uphold the "Test Before Deliver" standard for LLM prompts.
 *   **Mechanic**: Deployed as a web service on Minikube. When a developer or agent commits a change to a BAML prompt schema, a webhook triggers Promptfoo to run hundreds of regression evaluations. Results are surfaced via the Promptfoo UI on Exonomy.
+
+## 5. Live Endpoints
+
+Because Minikube on Exonomy utilizes the Docker driver, the cluster's internal IP (`192.168.49.2`) is isolated to the Exonomy host. To access these tools from the Exocracy development workstation, agents must establish SSH port-forwarding tunnels (e.g., `ssh -L 32333:192.168.49.2:32333 exocrat@exonomy.local`) targeting the `NodePort` values defined below.
+
+| Tool | Purpose | NodePort | Minikube IP Binding |
+|---|---|---|---|
+| **Qdrant REST** | Agent vector memory (LlamaIndex) | `32333` | `192.168.49.2:32333` |
+| **Qdrant gRPC** | High-performance agent queries | `32334` | `192.168.49.2:32334` |
+| **Arize Phoenix UI** | Trace visualization | `32556` | `192.168.49.2:32556` |
+| **Phoenix OTel gRPC**| Agent span ingestion | `32263` | `192.168.49.2:32263` |
+| **Phoenix OTel HTTP**| Agent span ingestion | `32234` | `192.168.49.2:32234` |
+| **Promptfoo UI** | Prompt regression evaluation | `32300` | `192.168.49.2:32300` |

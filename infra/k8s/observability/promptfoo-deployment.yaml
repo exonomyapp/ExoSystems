@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: promptfoo
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: promptfoo
+  template:
+    metadata:
+      labels:
+        app: promptfoo
+    spec:
+      containers:
+        - name: promptfoo
+          image: ghcr.io/promptfoo/promptfoo:0.120.6
+          args: ["promptfoo", "view", "--port", "3000", "--no-open"]
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
