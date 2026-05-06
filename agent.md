@@ -21,6 +21,10 @@ You are operating within an **Event-Driven Multi-Agent SDLC**. Depending on the 
 - **Visual Execution Only**: Once the user approves a fix or provides a terminal window, you MUST use `xdotool` or other explicitly visible methods to type and execute the solution right in front of the user's eyes. Never bypass the visual terminal to save time. Time spent learning is immeasurable; time saved by bypassing the user is a total failure of this protocol.
 - **Visual Verification (Screenshotting)**: After any visual terminal command completes, you MUST capture a screenshot of the desktop (`scrot`) and analyze it (using OCR like `tesseract`) so that you programmatically know and see exactly what the user sees. **Before capturing the screenshot, you MUST explicitly bring the target terminal window back to the front of the desktop (e.g., using `wmctrl -i -a <WID>`) to ensure the terminal is actually visible in the screenshot, preventing you from capturing an obscured window.** This prevents blind assumptions about the success of visual commands.
 
+## 1.2 Exonomy Deployment Node Boundary
+- **No Remote Source Code**: The `Exonomy` node is strictly a deployment and infrastructure target. You are STRICTLY PROHIBITED from executing `mkdir code`, cloning git repositories, or creating local development workspace architectures on Exonomy.
+- **Formal Deployment Paths**: All deployment artifacts, such as Kubernetes manifests or built binaries, must be placed in a user-approved, formal deployment directory (e.g., `~/deployments/`).
+- **Exocracy is Ground Zero**: All development, LLM engineering, and codebase manipulation must occur locally on the `Exocracy` development machine. Remote orchestration should be visually commanded from the Exocracy terminal.
 ## 2. Regression & "Again" Protocol (Groundhog Day Prevention)
 - **Keyword Trigger**: If the user uses the word **"again"** or implies that a problem is repeating, you MUST treat this as a high-priority architectural regression.
 - **Mandatory Research**: Before proposing a new fix for a repeating issue, you MUST:

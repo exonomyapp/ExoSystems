@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phoenix
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phoenix
+  template:
+    metadata:
+      labels:
+        app: phoenix
+    spec:
+      containers:
+      - name: phoenix
+        image: arizeai/phoenix:latest
+        ports:
+        - containerPort: 6006
+        - containerPort: 4317
+        - containerPort: 4318
+        env:
+        - name: PHOENIX_ALLOW_EXTERNAL_RESOURCES
+          value: "false"
