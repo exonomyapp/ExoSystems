@@ -53,9 +53,28 @@ class TelemetryUtil {
     }
   }
 
+  /// 🧠 Educational Context: Traffic Sensing
+  /// Check for active TCP connections.
+  /// If port > 0, we check for established connections on that source port.
+  /// If port is 0, we scan for any established connections matching the service pattern.
+  static bool hasActiveTraffic(int port, {String? pattern}) {
+    try {
+      if (port > 0) {
+        final result = Process.runSync('ss', ['-tnH', 'sport', '=', ':$port']);
+        return result.exitCode == 0 && result.stdout.toString().trim().isNotEmpty;
+      } else if (pattern != null) {
+        // For zrok, we check for any established connections by the process.
+        final result = Process.runSync('ss', ['-tnH']);
+        return result.exitCode == 0 && result.stdout.toString().contains(pattern);
+      }
+    } catch (_) {}
+    return false;
+  }
+
   static int _parseKb(String line) {
     final parts = line.split(RegExp(r'\s+'));
     if (parts.length > 1) return int.tryParse(parts[1]) ?? 0;
     return 0;
   }
 }
+
