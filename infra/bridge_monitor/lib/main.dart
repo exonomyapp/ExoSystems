@@ -8,22 +8,14 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 import 'dart:math' as math;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'src/rust/frb_generated.dart';
-import 'src/rust/api.dart' as rust;
 import 'utils/telemetry_util.dart';
 import 'widgets/exo_zoom.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    File('/home/exocrat/bridge_monitor_clicks.log').writeAsStringSync('${DateTime.now().toIso8601String()} | STARTUP | v1.4.0-MOSES\n', mode: FileMode.append);
+    File('/home/exocrat/bridge_monitor_clicks.log').writeAsStringSync('${DateTime.now().toIso8601String()} | STARTUP | v1.4.0-STATIC\n', mode: FileMode.append);
   } catch (_) {}
-  
-  // In the production bundle the .so lives alongside the binary in lib/.
-  // forceSameCodegenVersion: false bypasses the runtime hash check which
-  // fails when Dart and Rust are compiled in the same pipeline but deployed separately.
-  await RustLib.init(forceSameCodegenVersion: false);
   
   runApp(const ExoTechBridgeApp());
 }
@@ -266,7 +258,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("EXOTECH BRIDGE", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 28)),
-              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.4.0-MOSES", style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.4.0-STATIC", style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
               ValueListenableBuilder<int>(
                 valueListenable: buildCountNotifier,
                 builder: (context, count, _) => Text("BUILD COUNT: $count", style: const TextStyle(fontSize: 9, color: Color(0xFF664400))),
@@ -274,10 +266,63 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
             ],
           ),
           const Spacer(),
+          _buildViewToggle(isDark),
+          const SizedBox(width: 24),
           _buildCenteredHUD(isDark),
+          const SizedBox(width: 24),
+          _buildThemeToggle(isDark),
           const Spacer(),
         ],
       ),
+    );
+  }
+
+  Widget _buildViewToggle(bool isDark) {
+    return CupertinoSlidingSegmentedControl<bool>(
+      groupValue: _isGridView,
+      backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFDEE0E4),
+      thumbColor: isDark ? const Color(0xFF3A3A3A) : Colors.white,
+      padding: const EdgeInsets.all(2),
+      children: {
+        true: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.grid_view, size: 16, color: _isGridView ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38))),
+        false: Padding(padding: const EdgeInsets.all(8), child: Icon(Icons.view_list, size: 16, color: !_isGridView ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38))),
+      },
+      onValueChanged: (v) { if (v != null) { setState(() { _isGridView = v; }); _saveState(); } },
+    );
+  }
+
+  Widget _buildThemeToggle(bool isDark) {
+    final currentMode = themeModeNotifier.value;
+    final selectedIndex = currentMode == ThemeMode.light ? 0 : currentMode == ThemeMode.system ? 1 : 2;
+
+    return CupertinoSlidingSegmentedControl<int>(
+      groupValue: selectedIndex,
+      backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFDEE0E4),
+      thumbColor: isDark ? const Color(0xFF3A3A3A) : Colors.white,
+      padding: const EdgeInsets.all(2),
+      children: {
+        0: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Icon(CupertinoIcons.sun_max_fill, size: 14,
+            color: selectedIndex == 0 ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38)),
+        ),
+        1: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Icon(CupertinoIcons.circle_lefthalf_fill, size: 14,
+            color: selectedIndex == 1 ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38)),
+        ),
+        2: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Icon(CupertinoIcons.moon_fill, size: 14,
+            color: selectedIndex == 2 ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38)),
+        ),
+      },
+      onValueChanged: (v) { 
+        if (v != null) {
+          themeModeNotifier.value = v == 0 ? ThemeMode.light : (v == 1 ? ThemeMode.system : ThemeMode.dark); 
+          _saveState(); 
+        } 
+      },
     );
   }
 
@@ -525,40 +570,33 @@ class _StatusIndicator extends StatelessWidget {
     final darkUnlitGreen = const Color(0xFF003D33);
     final intenseNeonGreen = const Color(0xFF00FFC9);
     final staticRed = const Color(0xFFFF5F5F);
-    final yellowSleep = Colors.orange;
+    final staticYellow = Colors.orange;
 
     if (!isUp) {
-      return _buildDot(staticRed, 1.0);
+      return _buildDot(staticRed);
     }
 
     if (isSleeping) {
-      return StreamBuilder<double>(
-        stream: rust.breathingPulseStream(),
-        builder: (context, snapshot) {
-          final opacity = (snapshot.data ?? 1.0) * 0.6 + 0.4;
-          return _buildDot(yellowSleep, opacity);
-        },
-      );
+      return _buildDot(staticYellow);
     }
 
     final color = hasTraffic ? intenseNeonGreen : darkUnlitGreen;
-    return _buildDot(color, 1.0);
+    return _buildDot(color);
   }
 
-  Widget _buildDot(Color color, double opacity) {
+  Widget _buildDot(Color color) {
     return Container(
       width: 14,
       height: 14,
       decoration: BoxDecoration(
-        color: color.withOpacity(opacity),
+        color: color,
         shape: BoxShape.circle,
         boxShadow: [
-          if (opacity > 0.8) 
-            BoxShadow(
-              color: color.withOpacity(0.5 * opacity),
-              blurRadius: 8,
-              spreadRadius: 2,
-            ),
+          BoxShadow(
+            color: color.withOpacity(0.5),
+            blurRadius: 8,
+            spreadRadius: 2,
+          ),
         ],
       ),
     );

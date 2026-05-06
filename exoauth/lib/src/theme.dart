@@ -3,10 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Conscia Design System Tokens
-/// 
+// 🧠 Educational Context: The Conscia Design System
 /// These colors and styles are derived from the Conscia Beacon Dashboard
-/// to ensure a unified "Sovereign" aesthetic across the exosystem.
+/// to ensure a unified "Sovereign" aesthetic across the exosystem. 
+/// We utilize high-contrast, solid-identity surfaces to convey security 
+/// and deterministic clarity, eschewing transparency and glassmorphism.
 class ConsciaTheme {
   // Dark Palette (Internal constants)
   static const Color _darkBackground = Color(0xFF0D1117);
@@ -170,7 +171,10 @@ class ConsciaTheme {
     );
   }
   
-  // Typography helpers that respect scale and context
+  // 🧠 Educational Context: Typographic Integrity
+  // All text styles are scaled using a common multiplier to ensure that 
+  // the typographic hierarchy remains balanced across all display sizes,
+  // from mobile handhelds to high-DPI desktop environments.
   static TextStyle headingStyle(BuildContext context, double scale) => GoogleFonts.inter(
     fontSize: 21.0 * scale,
     fontWeight: FontWeight.w700,

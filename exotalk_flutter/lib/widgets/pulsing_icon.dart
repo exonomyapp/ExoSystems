@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../src/theme.dart';
 
+// 🧠 Educational Context: The Visual Heartbeat
+/// A specialized widget that provides deterministic visual feedback for 
+/// the node's operational state. By varying the pulse duration and target 
+/// luminescence (lerp), we convey "Sleep" vs "Active" states without 
+/// requiring the user to read text labels.
 class PulsingNodeIcon extends StatefulWidget {
   final bool isSleeping;
   final double scale;

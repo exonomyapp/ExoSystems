@@ -2,7 +2,11 @@ import 'package:exoauth/exoauth.dart';
 import '../src/rust/api/network.dart' as net;
 import '../src/rust/api/willow.dart' as rust;
 
+// 🧠 Educational Context: The Identity FFI Bridge
 /// Implementation of [IdentityService] that delegates to the Rust backend.
+/// This service acts as the legislative intermediary, translating sovereign 
+/// identity requests from the Flutter UI into deterministic Rust FFI calls 
+/// that operate directly on the local JSON identity vault.
 class RustIdentityService implements IdentityService {
   @override
   Future<DeviceManifest> getDeviceManifest() async {

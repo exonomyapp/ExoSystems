@@ -55,7 +55,11 @@ pub struct OAuthLink {
     pub linked_at_ms: i64,
 }
 
-/// Represents a loaded Node Identity (Keypair)
+// 🧠 Educational Context: The Identity Vault
+/// Represents a loaded Node Identity (Keypair).
+/// This structure is the "Legislative Seal" of the user's presence in the mesh.
+/// It contains the local root secret (ed25519) from which all sub-capabilities 
+/// and message signatures are derived.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct IdentityVault {
     pub did: String,
@@ -327,7 +331,11 @@ pub async fn switch_active_profile(did: String) -> Result<bool, String> {
     Err("Profile not found on disk".to_string())
 }
 
-/// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier
+// 🧠 Educational Context: Cryptographic Self-Generation
+/// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier.
+/// This is the "Big Bang" of a sovereign session. By generating keys 
+/// locally on the device's CSPRNG (OsRng), we ensure that no central 
+/// authority ever sees the private secret, fulfilling the "Own Your Data" mandate.
 pub async fn generate_new_identity() -> IdentityVault {
     // IMPORTANT: Clear any active profile before generating a new one
     sign_out_profile().await;

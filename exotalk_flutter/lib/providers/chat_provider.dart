@@ -61,7 +61,11 @@ class UserProfile {
 
 // --- PROVIDERS ---
 
-/// Manages the active user's identity and profile.
+// 🧠 Educational Context: The Sovereign State Hub
+/// Manages the active user's identity and profile. This notifier is the single 
+/// source of truth for identity state across the application, ensuring that 
+/// all components (Sidebar, Settings, Mesh Meter) react instantly to identity 
+/// changes or vault mutations.
 class UserProfileNotifier extends Notifier<UserProfile> {
   @override
   UserProfile build() {
@@ -212,8 +216,12 @@ final filteredConversationsProvider = Provider<List<Conversation>>((ref) {
   }).toList();
 });
 
+// 🧠 Educational Context: Scoped Message Persistence
 /// Manages messages for a SPECIFIC conversation.
-/// This prevents one chat's updates from rebuilding other parts of the app.
+/// By utilizing FamilyNotifier keyed to the conversation ID, we achieve 
+/// total isolation of message streams. This prevents "cross-chat" rebuild 
+/// pollution and ensures that UI performance remains deterministic even 
+/// with dozens of active mesh conversations.
 class MessageListNotifier extends FamilyNotifier<List<Message>, String> {
   @override
   List<Message> build(String arg) {

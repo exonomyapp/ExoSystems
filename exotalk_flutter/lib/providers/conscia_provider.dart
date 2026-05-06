@@ -21,9 +21,12 @@ import 'package:exoauth/exoauth.dart';
 import '../src/rust/api/network.dart';
 import '../src/rust/api/willow.dart';
 
+// 🧠 Educational Context: The Mesh Lifeline Monitor
 /// Provider that periodically polls the Rust engine for the Conscia connection status.
+/// This implementation uses a low-overhead stream to provide high-fidelity 
+/// liveness detection (500ms intervals) for the user's sovereign persistence 
+/// node, bridging the asynchronous Rust FFI to the synchronous UI layer.
 final consciaStatusProvider = StreamProvider<ConsciaStatus>((ref) async* {
-  // Watch identity to trigger a provider restart on every sign-in/switch
   final identity = ref.watch(identityProvider);
   
   // If no one is signed in, we are disconnected by definition
