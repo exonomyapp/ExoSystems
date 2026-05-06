@@ -1,4 +1,4 @@
-# Walkthrough: Centralization of Project Documentation
+# Walkthrough 05: Centralization of Project Documentation
 
 I have successfully relocated all project documentation from the Flutter subdirectory to a centralized `docs/` folder at the repository root.
 

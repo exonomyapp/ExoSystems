@@ -1,4 +1,4 @@
-# Walkthrough: Sovereign Saga Narrative & Scenario Reorganization
+# Walkthrough 43: Sovereign Saga Narrative & Scenario Reorganization
 
 ## Accomplishments
 - **Narrative Enrichment**: Finalized the **Sovereign Saga** ([sovereign_saga.md](file:///home/exocrat/code/exotalk/docs/scenarios/sovereign_saga.md)) with references to **Palantir**, the **IMF**, and **Amnesty International**.

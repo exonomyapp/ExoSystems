@@ -1,4 +1,4 @@
-# Walkthrough: Walkthrough Consolidation & Documentation Workflow
+# Walkthrough 04: Walkthrough Consolidation & Documentation Workflow
 
 I have centralized all historical AI session documentation and established a formal workflow for future development.
 

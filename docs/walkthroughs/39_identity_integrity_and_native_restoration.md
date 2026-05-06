@@ -1,4 +1,4 @@
-# Identity Integrity & Technical Excellence Walkthrough
+# Walkthrough 39: Identity Integrity & Technical Excellence Walkthrough
 
 In this session, I implemented a "hardware-level" fix for the unauthorized identity issues and resolved UI inconsistencies in the Account Manager.
 

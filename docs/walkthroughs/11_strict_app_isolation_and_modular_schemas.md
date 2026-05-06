@@ -1,4 +1,4 @@
-# 11. Strict App Isolation & Modular Schemas
+# Walkthrough 11: Strict App Isolation & Modular Schemas
 
 *This document serves as the historical record of our transition from a "Universal FFI" model to a strictly isolated schema Exosystem, guaranteeing zero app bloat.*
 

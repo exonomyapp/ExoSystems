@@ -1,4 +1,4 @@
-# Legacy Walkthrough: Next.js to Flutter Migration
+# Walkthrough 00: Next.js to Flutter Migration
 
 This document summarizes the foundational work performed during the initial phases of the ExoTalk project (previously EarthTalk), before the centralized walkthrough system was established.
 

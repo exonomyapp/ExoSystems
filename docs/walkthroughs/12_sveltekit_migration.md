@@ -1,4 +1,4 @@
-# 12. The SvelteKit Migration
+# Walkthrough 12: The SvelteKit Migration
 
 *This document records the replacement of React/Next.js with Svelte/SvelteKit for all heavyweight desktop applications in the Sovereign Exosystem.*
 

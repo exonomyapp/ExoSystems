@@ -1,4 +1,4 @@
-# Rebranding Completion Walkthrough: Exotalk
+# Walkthrough 02: Rebranding Completion Walkthrough: Exotalk
 
 The codebase has been successfully rebranded from "Earthtalk" to "Exotalk".
 

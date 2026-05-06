@@ -1,4 +1,4 @@
-# Walkthrough: Dynamic Identity Proof Optimization
+# Walkthrough 06: Dynamic Identity Proof Optimization
 
 I have successfully implemented dynamic identity proof optimization, allowing users to specify a character limit for their destination platform. ExoTalk now automatically selects the most verbose cryptographic proof that fits within that limit.
 

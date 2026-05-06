@@ -1,4 +1,4 @@
-# Walkthrough: Exosystem Cleanup & Standardization
+# Walkthrough 45: Exosystem Cleanup & Standardization
 
 This session focused on refining the technical and narrative foundations of the Sovereign Exosystem. We standardized naming conventions, analyzed future architectural options, and formalized the narrative "north star" that guides our development.
 

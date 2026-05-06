@@ -1,4 +1,4 @@
-# Walkthrough: Real-Time Telemetry & Global UI Scaling
+# Walkthrough 13: Real-Time Telemetry & Global UI Scaling
 
 I have successfully transitioned the Conscia dashboard from a static binary status to a multi-stage network health diagnostic system and implemented global accessibility scaling for the ExoTalk Flutter application.
 

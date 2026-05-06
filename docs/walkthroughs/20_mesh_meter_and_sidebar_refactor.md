@@ -1,4 +1,4 @@
-# Mesh Stabilization & Telemetry Walkthrough
+# Walkthrough 20: Mesh Stabilization & Telemetry Walkthrough
 
 We have successfully stabilized the Conscia Federation Mesh and overhauled the telemetry visualization to ensure high-fidelity monitoring of cross-node traffic.
 

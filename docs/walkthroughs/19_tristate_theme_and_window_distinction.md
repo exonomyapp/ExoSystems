@@ -1,4 +1,4 @@
-# Walkthrough — Theme UI Relocation & Aesthetic Refinement
+# Walkthrough 19: Theme UI Relocation & Aesthetic Refinement
 
 I have relocated the theme controls to the Sidebar and refined the Light Mode aesthetic to ensure a cohesive, professional "Solid Identity" experience.
 

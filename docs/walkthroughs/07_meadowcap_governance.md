@@ -1,4 +1,4 @@
-# Walkthrough: Meadowcap Capability Governance Implementation
+# Walkthrough 07: Meadowcap Capability Governance Implementation
 
 I have successfully finished implementing the **Meadowcap capability system**, migrating the ExoTalk P2P mesh from a hardcoded governance placeholder to a robust, cryptographically enforced access control system.
 

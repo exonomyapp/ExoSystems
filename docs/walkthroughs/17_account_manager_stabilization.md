@@ -1,4 +1,4 @@
-# 17 — Account Manager Stabilization & Menu Interaction Fix
+# Walkthrough 17: Account Manager Stabilization & Menu Interaction Fix
 
 ## Summary
 This session repaired a structural regression in `account_manager.dart` that had introduced duplicate class definitions, resolved a stale API parameter, and corrected the context menu positioning and sizing behaviour for the unified `_ConsciaMenuButton` component.

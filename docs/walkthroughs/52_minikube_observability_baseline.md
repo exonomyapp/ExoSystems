@@ -1,4 +1,4 @@
-# Exonomy Minikube Observability Baseline & Visual Protocol Enforcement
+# Walkthrough 52: Exonomy Minikube Observability Baseline & Visual Protocol Enforcement
 
 ## Overview
 This session focused on transitioning the **Exonomy node** to a clean Docker environment to support the **Minikube SDLC observability stack**, while strictly enforcing a new pedagogical **Strict Visual Interactive Protocol**.

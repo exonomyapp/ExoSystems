@@ -1,4 +1,4 @@
-# ExoTech Bridge & Infrastructure Stabilization
+# Walkthrough 46: ExoTech Bridge & Infrastructure Stabilization
 
 This walkthrough summarizes the actions taken to recover the testing infrastructure on the Exonomy laptop, decouple the monitor from the Conscia core project, and implement a premium diagnostic dashboard.
 

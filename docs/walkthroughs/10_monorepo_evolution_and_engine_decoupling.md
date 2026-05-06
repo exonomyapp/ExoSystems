@@ -1,4 +1,4 @@
-# 10. Monorepo Evolution & Engine Decoupling
+# Walkthrough 10: Monorepo Evolution & Engine Decoupling
 
 *This document serves as the historical record of the architectural leap from a single application to a multiversal Sovereign Engine Exosystem.*
 

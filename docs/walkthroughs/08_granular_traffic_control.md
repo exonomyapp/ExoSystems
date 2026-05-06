@@ -1,4 +1,4 @@
-# 🚦 Granular Traffic Control Walkthrough
+# Walkthrough 08: Granular Traffic Control Walkthrough
 
 I have successfully finished implementing the **Granular Traffic Control** system, replacing the global "Flight Mode" state with independent Inbound/Outbound toggles.
 

@@ -1,4 +1,4 @@
-# UI Health & Interaction Stability Walkthrough
+# Walkthrough 01: UI Health & Interaction Stability Walkthrough
 
 We have successfully resolved the "unhealthy" UI behaviors (stuck cursors, hindered hovering) by aligning the EarthTalk Flutter architecture with industry best practices for high-performance reactive applications.
 

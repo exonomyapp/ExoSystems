@@ -1,4 +1,4 @@
-# 📚 Documentation Overhaul Walkthrough
+# Walkthrough 09: Documentation Overhaul Walkthrough
 
 We have successfully overhauled the ExoTalk documentation suite to clearly delineate the philosophical vision from the rigorous technical blueprint, and audited the specs to ensure they match our current codebase.
 
