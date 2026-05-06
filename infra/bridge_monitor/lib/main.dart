@@ -4,10 +4,8 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
-import 'dart:isolate';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
-import 'dart:ui' as ui; // 🧠 Mechanical: FragmentShader loading
 import 'dart:math' as math;
 import 'utils/telemetry_util.dart';
 import 'widgets/exo_zoom.dart';
@@ -16,7 +14,6 @@ void main() {
   runApp(const ExoTechBridgeApp());
 }
 
-final pulseNotifier = ValueNotifier<double>(0.0);
 final buildCountNotifier = ValueNotifier<int>(0);
 final themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
 final agentModeNotifier = ValueNotifier<bool>(true);
@@ -25,8 +22,6 @@ final memRssNotifier = ValueNotifier<String>("0/0 MB");
 final currentIntervalNotifier = ValueNotifier<int>(1000);
 final debugPaintNotifier = ValueNotifier<bool>(false);
 final resetFlashNotifier = ValueNotifier<String?>(null);
-
-ui.FragmentProgram? heartbeatProgram;
 
 class ExoTechBridgeApp extends StatelessWidget {
   const ExoTechBridgeApp({super.key});
@@ -78,8 +73,6 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   bool _isScanning = false;
   int _consecutiveSteadyStates = 0;
   File? _sessionLogFile;
-  Timer? _heartbeatTimer; // 🧠 Mechanical: 30Hz Process Clock
-  int _lastPulseUpdate = 0;
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _keyboardFocusNode = FocusNode();
@@ -97,13 +90,6 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
     super.initState();
     _heartbeatController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
     
-    ui.FragmentProgram.fromAsset('assets/shaders/heartbeat.frag').then((program) {
-      heartbeatProgram = program;
-      if (mounted) setState(() {});
-    });
-    
-    _scheduleNextTick();
-    
     _initStorage();
     _loadState().then((_) {
       setState(() { _localHost = Platform.localHostname.toUpperCase(); });
@@ -111,17 +97,6 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
       _performScan();
     });
     _startPolling(const Duration(seconds: 5));
-  }
-
-  void _scheduleNextTick() {
-    bool hasActiveNodes = _nodes.any((n) => n.isUp && !n.isSleeping);
-    int targetInterval = hasActiveNodes ? 33 : 200; // 30Hz Active / 5Hz Idle
-    
-    _heartbeatTimer = Timer(Duration(milliseconds: targetInterval), () {
-      if (!mounted) return;
-      pulseNotifier.value = DateTime.now().millisecondsSinceEpoch / 1000.0;
-      _scheduleNextTick();
-    });
   }
 
   Future<void> _syncSystemStates() async {
@@ -140,7 +115,6 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   @override
   void dispose() {
     _heartbeatController.dispose();
-    _heartbeatTimer?.cancel(); // 🧠 Mechanical Cleanup
     _refreshTimer?.cancel();
     _scrollController.dispose();
     _keyboardFocusNode.dispose();
@@ -308,7 +282,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("EXOTECH BRIDGE", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 28)),
-              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.3.0-LEGISLATOR", style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.3.1+2-LEGISLATOR", style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
               ValueListenableBuilder<int>(
                 valueListenable: buildCountNotifier,
                 builder: (context, count, _) => Text("BUILD COUNT: $count", style: const TextStyle(fontSize: 9, color: Color(0xFF664400))),
@@ -354,27 +328,27 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
                     valueListenable: currentIntervalNotifier,
                     builder: (context, interval, _) => Text(
                       "AGENT MODE | INTERVAL: ${interval}ms | STEADY: $_consecutiveSteadyStates",
-                      style: const TextStyle(fontSize: 10, color: Colors.purpleAccent, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   ValueListenableBuilder<List<String>>(
                     valueListenable: topCpuNotifier,
                     builder: (context, top, _) => Text(
                       top.take(1).join(", "),
-                      style: const TextStyle(fontSize: 9, color: Color(0xFFCC7A00)),
+                      style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7)),
                     ),
                   ),
                 ],
               ),
               const SizedBox(width: 16),
-              Container(width: 1, height: 24, color: isDark ? Colors.white24 : Colors.black26),
+              Container(width: 1, height: 32, color: isDark ? Colors.white24 : Colors.black26),
               const SizedBox(width: 16),
               ValueListenableBuilder<String>(
                 valueListenable: memRssNotifier,
                 builder: (context, rss, _) => Text(
                   "MEM: $rss",
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 16, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -581,54 +555,29 @@ class _StatusIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (heartbeatProgram == null) return const SizedBox(width: 14, height: 14);
+    final Color color;
+    if (isUp && !isSleeping) {
+      color = const Color(0xFF00C9A7);
+    } else if (isSleeping) {
+      color = Colors.orange;
+    } else {
+      color = const Color(0xFFFF5F5F);
+    }
     
-    final color = isSleeping ? Colors.orange : (isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F));
-    
-    return ValueListenableBuilder<double>(
-      valueListenable: pulseNotifier,
-      builder: (context, timeValue, _) => CustomPaint(
-        size: const Size(14, 14),
-        painter: _HeartbeatPainter(
-          shader: heartbeatProgram!.fragmentShader(),
-          time: timeValue,
-          color: color,
-          isActive: isUp && !isSleeping,
+    // 🧠 Educational Context: True Zero-Overhead Purity
+    // By eliminating all runtime animation controllers, recursive timers, shaders,
+    // and C++ image-decoding pipelines, we achieve the absolute mathematical minimum 
+    // computational footprint required to display node status. The engine rests.
+    return Opacity(
+      opacity: 0.8,
+      child: Container(
+        width: 14, height: 14, 
+        decoration: BoxDecoration(
+          shape: BoxShape.circle, 
+          color: color, 
+          boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 4)]
         ),
       ),
     );
-  }
-}
-
-class _HeartbeatPainter extends CustomPainter {
-  final ui.FragmentShader shader;
-  final double time;
-  final Color color;
-  final bool isActive;
-
-  _HeartbeatPainter({
-    required this.shader, 
-    required this.time, 
-    required this.color,
-    required this.isActive,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    shader.setFloat(0, size.width);
-    shader.setFloat(1, size.height);
-    shader.setFloat(2, isActive ? time : 0.0); // Stop pulse if not active
-    shader.setFloat(3, color.red / 255.0);
-    shader.setFloat(4, color.green / 255.0);
-    shader.setFloat(5, color.blue / 255.0);
-    shader.setFloat(6, color.alpha / 255.0);
-    
-    final paint = Paint()..shader = shader;
-    canvas.drawRect(Offset.zero & size, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _HeartbeatPainter old) {
-    return old.time != time || old.color != color || old.isActive != isActive;
   }
 }
