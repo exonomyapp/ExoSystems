@@ -509,12 +509,22 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   }
 
   void _setNodeState(BridgeNode node, int state) async {
+    // 🧠 Educational Context: The "Legislator" Role
+    // As of v1.1.7, the Bridge Monitor acts as the native "Legislator" of the
+    // Exonomy node. We have purged all legacy 'sshpass' wrappers that were used 
+    // when the monitor was remote. It now issues direct, native 'systemctl' 
+    // commands to the local host, ensuring deterministic service state control.
     if (state == 0) {
       setState(() { node.isSleeping = false; node.isUp = false; });
       await Process.run('systemctl', ['--user', 'stop', node.serviceName]);
     } else if (state == 1) {
+      // 🧠 Educational Context: The Observer Model
+      // The "Sleep" state (1) implements the Observer Model. We update the UI 
+      // to reflect a sleeping state, but we DO NOT stop the background daemon. 
+      // This allows the service to remain active for background tasks (like 
+      // telemetry or P2P handshakes) while informing the user that active 
+      // UI-driven orchestration is paused.
       setState(() { node.isSleeping = true; node.isUp = false; });
-      // Observer Model: Do not stop the service. Let it run in the background.
     } else if (state == 2) {
       setState(() { node.isSleeping = false; node.isUp = true; });
       await Process.run('systemctl', ['--user', 'start', node.serviceName]);

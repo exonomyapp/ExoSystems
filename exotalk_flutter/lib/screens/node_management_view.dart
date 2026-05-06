@@ -72,6 +72,10 @@ class _DashboardGrid extends StatelessWidget {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         
+        // 🧠 Educational Context: Deterministic Grid Layout
+        // We use LayoutGrid to achieve CSS Grid-like deterministic spacing 
+        // that handles complex fractional ratios (5:4:2) across different 
+        // screen resolutions far more reliably than standard Flutter Column/Row.
         if (width < 850) {
           // Mobile: 1-column stack
           return LayoutGrid(
@@ -436,7 +440,10 @@ class _AdminTelemetry extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final activityAsync = ref.watch(nodeActivityProvider);
 
+    // 🧠 Educational Context: Terminal Abundance
     // Systemic Fix: Use a pure terminal look that fills the card frame edge-to-edge.
+    // This provides the "Admin" persona with a high-density information environment 
+    // that mirrors the raw FFI activity logs from the underlying Rust engine.
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -565,7 +572,10 @@ class _GhostButton extends StatelessWidget {
   }
 }
 
+/// 🧠 Educational Context: Meadowcap Delegation
 /// Manages and displays Meadowcap capability delegations for the selected node.
+/// This implements the "Identity is Permission" model where a user's DID 
+/// acts as their cryptographic key for authorizing node operations.
 class _CapabilityCard extends ConsumerStatefulWidget {
   final double scale;
   final PeerInfo peer;

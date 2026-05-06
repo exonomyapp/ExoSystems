@@ -57,7 +57,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       return true;
     }
 
+    // 🧠 Educational Context: Local Node Control
     // Dev shortcut: CTRL+S — toggle node sleep
+    // This allows the user to manually simulate the Conscia node going into 
+    // standby mode, which in turn gates the UI's mesh traffic visualization 
+    // to ensure total state consistency across the triad.
     if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyS) {
       final isSleeping = ref.read(nodeSleepProvider);
       ref.read(nodeSleepProvider.notifier).state = !isSleeping;
@@ -492,14 +496,14 @@ class _MeshMeterState extends ConsumerState<_MeshMeter>
     final user = ref.read(userProfileProvider);
     final status = ref.read(consciaStatusProvider).value;
     
+    // 🧠 Educational Context: The Mesh Gating Pattern
     // Activity criteria: toggles are on AND (we are connected OR we have peers OR we just started)
     // We assume activity if toggles are on to show the node is "alive" and searching.
-    // Activity criteria: toggles are on AND (we are connected OR we have peers OR we just started)
     final bool isIngressActive = user.ingressEnabled;
     final bool isEgressActive = user.egressEnabled;
-    // If unreachable, absolute zero (flatline).
-    // If connected but no peers, show searching blips (0.15 - 0.3).
-    // If connected with peers, show strong activity (0.5 - 1.0).
+    
+    // If unreachable or sleeping, we force absolute zero (flatline) on the meter.
+    // This provides deterministic visual feedback that the mesh is inactive.
     final bool isSleeping = ref.read(nodeSleepProvider);
     final bool canFlow = (status?.isConnected ?? false) && !isSleeping;
     

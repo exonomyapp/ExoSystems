@@ -7,12 +7,15 @@ class TelemetryUtil {
   /// Efficiently check for the presence of specific service patterns.
   static Set<String> getActiveProcesses() {
     try {
-      // Surgically search only for the processes we are monitoring.
-      // Surgically search for the processes we are monitoring, including full command lines.
+      // 🧠 Educational Context: Surgical Telemetry
+      // We use 'pgrep -af' to retrieve both the PID and the full command line
+      // for specific service patterns. This is far more efficient than 'ps aux'
+      // or broad 'pgrep' calls as it minimizes subprocess overhead and allows 
+      // us to distinguish between different scripts (e.g., 'signaling_server.py')
+      // without false positives, helping maintain a sub-10% CPU baseline.
       const pattern = 'signaling_server|conscia|zrok|qdrant|arize|nginx';
       final result = Process.runSync('pgrep', ['-af', pattern]);
       if (result.exitCode == 0) {
-        // Return the list of matched command lines as a set of strings.
         return result.stdout.toString().split('\n').where((s) => s.isNotEmpty).toSet();
       }
     } catch (_) {}

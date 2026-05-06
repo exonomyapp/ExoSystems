@@ -37,6 +37,12 @@ class ExoAuthView extends ConsumerStatefulWidget {
 class _ExoAuthViewState extends ConsumerState<ExoAuthView> {
   final MenuController _menuController = MenuController();
 
+  // 🧠 Educational Context: The OAuth-to-Sovereign Bridge
+  // This function facilitates the transition from centralized OAuth providers 
+  // (Google/GitHub) to decentralized Sovereign identities (did:peer). 
+  // It checks if a linked local persona already exists; if not, it triggers 
+  // the creation of a new, local-only vault that is permanently associated 
+  // with the cryptographic hash of the OAuth 'sub' field.
   Future<void> _linkAndLogin(OAuthProviderConfig config) async {
     try {
       final result = await OAuthService.authenticate(config);
@@ -181,6 +187,11 @@ class _ExoAuthViewState extends ConsumerState<ExoAuthView> {
                 padding: EdgeInsets.symmetric(horizontal: isMobile ? 16.0 * scale : 24.0 * scale, vertical: 32.0 * scale),
                 child: Container(
                   key: const Key('welcome_screen_card'),
+                  // 🧠 Educational Context: The Solid Front Door (Spec 17)
+                  // We apply a non-elastic frame via hard-coded constraints scaled 
+                  // by 'uiScaleProvider'. This ensures that the onboarding 
+                  // experience feels heavy, intentional, and physically stable 
+                  // regardless of window size regressions.
                   constraints: BoxConstraints(
                     minWidth: isMobile ? 0 : 440.0 * scale,
                     maxWidth: isMobile ? double.infinity : 600.0 * scale,

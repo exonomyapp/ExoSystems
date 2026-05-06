@@ -50,6 +50,10 @@ class _ChatWindowScreenState extends ConsumerState<ChatWindowScreen> {
     final messages = ref.watch(messagesProvider(activeConvoId));
     final scale = ref.watch(uiScaleProvider);
 
+    // 🧠 Educational Context: Reactive Message Scrolling
+    // We listen to the messages provider and trigger a scroll-to-bottom 
+    // whenever the message count changes. This ensures the user is always 
+    // viewing the most recent sovereign handshake/message.
     ref.listen<int>(
       messagesProvider(activeConvoId).select((msgs) => msgs.length),
       (prev, next) {
@@ -125,6 +129,10 @@ class _ChatHeader extends ConsumerWidget {
                   children: [
                     Container(width: 6.0 * scale, height: 6.0 * scale, decoration: BoxDecoration(color: ConsciaTheme.accent(context), shape: BoxShape.circle)),
                     SizedBox(width: 6.0 * scale),
+                    // 🧠 Educational Context: Protocol Visibility
+                    // We explicitly surface the protocol state in the header 
+                    // to reassure the user that their conversation is being 
+                    // managed by the Willow P2P layer, not a centralized cloud.
                     Text("Willow Protocol Active", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.accent(context), fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                   ],
                 ),

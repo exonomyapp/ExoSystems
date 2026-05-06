@@ -34,7 +34,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
   
-  // Initialize the sovereign engines before UI startup
+  // 🧠 Educational Context: The Sovereign Boot Sequence
+  // Before the Flutter UI can even paint, we must ensure the underlying 
+  // sovereign engines (Willow P2P, Identity Vault, Rust FFI) are fully 
+  // initialized. This ensures that the user's local identity and mesh 
+  // state are the source of truth from the first frame.
   try {
     await initWillowDatabase();
     
@@ -119,7 +123,11 @@ class AppRouter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final identity = ref.watch(identityProvider);
     
-    // If we have an active DID, show the Home Screen
+    // 🧠 Educational Context: Deterministic Routing
+    // The AppRouter acts as the ultimate gatekeeper. If no active identity 
+    // is found in the local vault (DID is null), the user is routed to 
+    // the ExoAuthView. Once an identity is selected/created, the HomeScreen 
+    // is swapped in with a smooth transition, locking the session to that DID.
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       switchInCurve: Curves.easeInOutCubic,
