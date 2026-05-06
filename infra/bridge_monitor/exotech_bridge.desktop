@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=ExoTech Bridge
+Comment=Deterministic Mesh Monitoring
+Exec=/home/exocrat/deployments/bridge_monitor/bundle/exotech_bridge
+Icon=/home/exocrat/deployments/bridge_monitor/bundle/data/flutter_assets/assets/exotalk_pappus_color.png
+Terminal=false
+Type=Application
+Categories=Development;

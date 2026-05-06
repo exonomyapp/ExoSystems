@@ -53,5 +53,16 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 
 ---
 
+### 🤖 Agentic SDLC & Automation (The 3x Series)
+- **[30. Agentic SDLC Architecture](30_agentic_sdlc_architecture.md)**: Master blueprint for BMAD, Archon, and BAML integration.
+- **[31. BMAD Agile Methodology](31_bmad_agile_methodology.md)**: Definition of the AI Workforce, Personas, and Event-Driven Observers.
+- **[32. Archon Workflow Standard](32_archon_workflow_standard.md)**: Strict YAML DAG execution guidelines.
+- **[33. BAML Type Safety Protocol](33_baml_type_safety_protocol.md)**: Schema enforcement and prompt reliability layer.
+- **[34. GitHub Projects Governance](34_github_projects_governance.md)**: Issue lifecycles, webhooks, and the Flutter Web Cockpit.
+- **[35. Observability & Memory Vault](35_observability_and_memory_vault.md)**: Minikube hardware split for Arize Phoenix, Qdrant, and Promptfoo.
+- **[36. Exonomy Deployment Standard](36_exonomy_deployment_standard.md)**: Standardized deployment patterns for the Exonomy suite.
+
+---
+
 ## 🛠 Usage
 These specifications are the "Ground Truth" for the development of ExoTalk and its sister applications. Any significant architectural change must first be reflected in these documents before implementation.

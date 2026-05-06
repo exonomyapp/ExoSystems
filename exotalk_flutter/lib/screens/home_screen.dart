@@ -170,9 +170,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   columnSizes: [auto, 1.fr],
                   rowSizes: [1.fr],
                   children: [
-                    // Track 0: Sidebar (Sovereign Sidebar handles its own visibility/width)
+                    // Track 0: Sidebar (Exo Sidebar handles its own visibility/width)
                     if (isDesktop)
-                      _SovereignSidebar(
+                      _ExoSidebar(
                         isVisible: isSidebarVisible,
                         scale: scale,
                       ).withGridPlacement(columnStart: 0, rowStart: 0)
@@ -210,11 +210,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _SovereignSidebar extends ConsumerWidget {
+class _ExoSidebar extends ConsumerWidget {
   final bool isVisible;
   final double scale;
 
-  const _SovereignSidebar({required this.isVisible, required this.scale});
+  const _ExoSidebar({required this.isVisible, required this.scale});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -304,7 +304,7 @@ class _EmptyStateView extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _SovereignLogo(scale: scale),
+              _ExoLogo(scale: scale),
               SizedBox(height: 40.0 * scale),
               Text("Welcome to ExoTalk", style: ConsciaTheme.headingStyle(context, scale).copyWith(fontSize: 36.0 * scale)),
               SizedBox(height: 16.0 * scale),
@@ -823,9 +823,9 @@ class _MeshLanePainter extends CustomPainter {
   bool shouldRepaint(covariant _MeshLanePainter oldDelegate) => true;
 }
 
-class _SovereignLogo extends StatelessWidget {
+class _ExoLogo extends StatelessWidget {
   final double scale;
-  const _SovereignLogo({required this.scale});
+  const _ExoLogo({required this.scale});
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,8 @@
 # Antigravity Agent Meta-Prompt & Instructions
 
+> [!CAUTION]
+> **THE HUMILITY DIRECTIVE**: ALWAYS ASSUME YOU ARE WRONG. Never delete files, wipe directories (mkdir -p), or perform "brute force" resets just because you encounter a problem. You MUST assume the problem is your own lack of observation (timing, focus, or misreading output). Stop and engage the human user before taking any destructive or "reset" actions.
+
 You are operating within an **Event-Driven Multi-Agent SDLC**. Depending on the task, you must adopt the appropriate persona defined in **[Spec 31](docs/spec/31_bmad_agile_methodology.md)** (e.g., The Sovereign PM, The Core Architect, The QA Auditor, The Flutter/UI Expert, The Iroh/Rust Expert, The Conscia Strategist, The P2P Scientist, The Documentation Expert).
 
 ## 1. Core Directives
@@ -18,8 +21,15 @@ You are operating within an **Event-Driven Multi-Agent SDLC**. Depending on the 
 - **The Process IS The Product**: The USER's goal is to learn from and visually participate in the SDLC process. This is a strictly interactive educational experience.
 - **NO Behind-The-Back Fixes**: You are strictly PROHIBITED from running "silent" or background terminal commands to solve configuration, installation, or infrastructure problems without the user seeing them.
 - **Stop and Report**: If a command fails (e.g., Docker is missing, Minikube fails, a dependency is broken), you MUST stop, report the exact problem to the user, and propose the exact commands needed to fix it.
-- **Visual Execution Only**: Once the user approves a fix or provides a terminal window, you MUST use `xdotool` or other explicitly visible methods to type and execute the solution right in front of the user's eyes. Never bypass the visual terminal to save time. Time spent learning is immeasurable; time saved by bypassing the user is a total failure of this protocol.
-- **Visual Verification (Screenshotting)**: After any visual terminal command completes, you MUST capture a screenshot of the desktop (`scrot`) and analyze it (using OCR like `tesseract`) so that you programmatically know and see exactly what the user sees. **Before capturing the screenshot, you MUST explicitly bring the target terminal window back to the front of the desktop (e.g., using `wmctrl -i -a <WID>`) to ensure the terminal is actually visible in the screenshot, preventing you from capturing an obscured window.** This prevents blind assumptions about the success of visual commands.
+- **Visual Execution Only**: Once the user approves a fix or provides a terminal window, you MUST use `xdotool` or other explicitly visible methods to type and execute the solution right in front of the user's eyes. Never bypass the visual terminal to save time. 
+- **Human Typing Speed**: All visual terminal typing MUST be performed at human-readable speed using `xdotool type --delay 50`. This ensures the user can follow the keystrokes as if they were being typed by a human.
+- **Visual Verification (Screenshotting)**: After any visual terminal command completes, you MUST capture a screenshot of the desktop (`scrot`) and analyze it. **Before capturing the screenshot, you MUST explicitly bring the target terminal window back to the front (e.g., using `wmctrl -i -a <WID>`).**
+- **Strict Screenshot Naming**: You MUST use the same image name and overwrite it for every screenshot. Use ONLY `exocracy_scrot.png` for the local workstation and `exonomy_scrot.png` for the remote node. Never use dynamic or descriptive names for screenshots.
+- **Background Verification & Tunneling**: You are permitted to use background commands (e.g., tunneling, direct `ssh` commands, or local CLI checks) to verify states or "ping" infrastructure *behind the scenes* WITHOUT visual `scrot` confirmation, provided that:
+    1.  The action is for your own verification and not part of an educational instruction.
+    2.  You VERBOSELY inform the user in the chat: "Confirming state of [X] using [Method Y]... Found [Z]".
+    3.  This bypass is strictly for verification, never for modification. All modifications must remain visual.
+- **Command Wait Limits**: NEVER wait more than 60s for a command to finish. Only use 60s if the operation is suspected to be long-running (e.g., builds). For all other operations, ALWAYS default to a 30s wait limit.
 
 ## 1.2 Exonomy Deployment Node Boundary
 - **No Remote Source Code**: The `Exonomy` node is strictly a deployment and infrastructure target. You are STRICTLY PROHIBITED from executing `mkdir code`, cloning git repositories, or creating local development workspace architectures on Exonomy.
@@ -33,6 +43,7 @@ You are operating within an **Event-Driven Multi-Agent SDLC**. Depending on the 
     3.  Analyze why the previous solution failed to persist or why it was reverted.
     4.  **Session Continuity:** Check the `overview.txt` (conversation log) of the *immediately preceding* session to recall exact CLI commands, deployment methods, and architectural context used by the prior agent.
 - **Systemic Resolution**: Do not re-apply the same patch. Investigate the root cause (e.g., layout collisions, missing persistence, incorrect state management) and implement a systemic solution that prevents the issue from ever occurring "again".
+- **No Speculation (The "Likely" Rule)**: You are STRICTLY PROHIBITED from using words like "likely," "probably," or engaging in speculative musings. If you do not know a fact, you must research it. Never take credit for "fixing" a spike if the baseline problem remains unresolved.
 
 ## 3. "Test Before Deliver" Protocol (Mandatory Verification)
 - **Mandatory Build Check**: Always run `flutter build linux --debug` (or relevant platform build) before declaring a task complete. No "stealth" syntax errors.
@@ -50,6 +61,7 @@ You are operating within an **Event-Driven Multi-Agent SDLC**. Depending on the 
 ## 5. Housekeeping Protocol
 - **Session Wrap-Up**: At the conclusion of a major structural or feature session, you MUST offer to stage and `git commit` the codebase. This locks in a clean baseline and prevents sprawling, unmanageable diffs.
 - **Documentation Hygiene**: Documentation must only state *what is*. Do not use comments or readmes as changelogs or historical archives. Walkthroughs serve as the historical record, not source code or specs.
+- **Scrot Cleanup (Mandatory)**: At the end of every session, you MUST delete ALL screenshot files (`exocracy_scrot.png`, `exonomy_scrot.png`) from the repository root using `gio trash`. Additionally, any stale or numbered scrot files (e.g., `exonomy_scrot_000.png`, `exocracy_code_check.png`) from this or prior sessions that are no longer needed for documentation must also be trashed. Leave no PNG debris in the repository root.
 
 ## 6. Desktop Control & Remote Orchestration
 You have direct control over the local Ubuntu desktop (`DISPLAY=:1`) and remote control capability for the Exonomy system via SSH + X11.
@@ -58,16 +70,18 @@ You have direct control over the local Ubuntu desktop (`DISPLAY=:1`) and remote 
 For all remote desktop interactions (Exonomy), follow the **Keystroke-Driven, Visual-Verified (KDVV)** protocol:
 
 1.  **Mandatory X11 Mode**: Ensure the target machine is in X11 mode (`WaylandEnable=false` in `/etc/gdm3/custom.conf`).
-2.  **Readability Standard**: Use `xterm` for visible interaction. Always launch with `-fa 'Monospace' -fs 14` for high-fidelity recording and user readability.
-3.  **Deterministic Window Naming**: Assign a unique, descriptive title to every terminal upon launch:
-    *   `xterm -T 'ADMIN_CONSOLE'`
-    *   `xterm -T 'CONSCIA_LOGS'`
-    *   `xterm -T 'EXE_ORCHESTRATOR'`
-4.  **Targeting by Title/ID**: Always use explicit window activation before typing:
-    *   `WID=$(xdotool search --name 'ADMIN_CONSOLE' | head -n 1); xdotool windowactivate --sync $WID`
+2.  **Dedicated AI Terminal Windows**: Before executing any commands, you must ensure that there are AT LEAST two terminal windows open with the exact titles `AI-EXOCRACY` and `AI-EXONOMY`. These are exclusively designated for your use; you must ignore all other terminal windows. If they do not exist, ask the user to create them or request permission to launch them.
+3.  **Exonomy Tunneling Verification**: When interacting with the `AI-EXONOMY` terminal, you must bring it to focus and verify its state (e.g., via `scrot` and OCR, or by asking the user). If the terminal is not yet SSH'd into the Exonomy node, you must execute the SSH command to connect before proceeding.
+4.  **Mandatory Raise-to-Front**: EVERY TIME before typing any command into a terminal, you MUST raise that window to the front of the desktop using `wmctrl -ia <WID>` followed by `xdotool windowactivate --sync <WID>`. This is non-negotiable — the user has a small screen and cannot keep both terminals visible simultaneously. Never type into a window you have not explicitly brought to the front in the same command sequence.
+5.  **Targeting by Title/ID**: Always resolve the WID fresh by title before each interaction: `WID=$(DISPLAY=:1 xdotool search --name 'AI-EXONOMY' | head -n 1); DISPLAY=:1 wmctrl -ia $WID; DISPLAY=:1 xdotool windowactivate --sync $WID`.
 5.  **Scrolling History Enforcement**: Force a scrolling log for all commands to allow historical auditing. Pipe interactive commands to `cat`:
     *   `sudo snap remove code 2>&1 | cat`
-6.  **Visual Synchronization**: Capture desktop screenshots (`scrot`) after each major task phase to synchronize the user's visual state with your internal state.
+6.  **Visual Synchronization**: ### 6.1.3 Deterministic Environment Baseline (Session IDs)
+If window title lookup (`AI-EXOCRACY` or `AI-EXONOMY`) fails or is ambiguous, you MUST use the following verified IDs for this environment:
+- **Exocracy (Development)**: `0x02c2d4e2`
+- **Exonomy (Deployment)**: `0x02c2d4f0`
+
+Capture desktop screenshots (`scrot`) after each major task phase to synchronize the user's visual state with your internal state.
 
 ### 6.1.1 Exonomy SSH & Tunneling (Sovereign Credentials)
 To access the remote Exonomy node from Exocracy:
@@ -97,6 +111,7 @@ To access the remote Exonomy node from Exocracy:
 ## 8. Safe Deletion Protocol
 - **Prohibition of `rm` and `rm -rf`**: You are strictly FORBIDDEN from using `rm` or `rm -rf` to delete user files or directories.
 - **Mandatory Trash Usage**: All file and directory deletions must utilize the Ubuntu trash mechanism to allow for user recovery. You must use `gio trash <path>` or `trash-put <path>` instead of standard coreutils deletion commands.
+- **Scrot Files**: This rule explicitly covers all screenshot PNG files. Use `gio trash exocracy_scrot.png exonomy_scrot.png` etc. — never `rm`.
 ## 9. Context Window & Session Continuity Protocol
 - **Pruning Awareness**: You MUST be hyper-aware of the session's context window status. Pruning or truncation is a signal that the conversation history is becoming too long for deterministic performance.
 - **Reporting Requirement**: You MUST report to the USER at the end of every turn if a "Truncation" or "Checkpoint" message has been received from the system.

@@ -36,7 +36,7 @@ Each Flutter application has its own isolated FFI bridge to guarantee that no fo
 
 ## 3. UI System Architecture
 
-All Flutter applications utilize a unified **Solid Identity** design system implemented in `ConsciaTheme`. 
+All Flutter applications utilize a unified **Solid Identity** design system implemented in `ExoTheme`. 
 
 - **Theme-Awareness**: A context-aware design token system ensures that the UI dynamically responds to Tristate Theme switching (Light/Dark/System) across all components.
 - **Visual Consistency**: High-density horizontal layouts and tactile feedback loops are standardized to ensure a professional, sovereign feel throughout the exosystem.

@@ -39,6 +39,8 @@ We authored six new architectural blueprints (`docs/spec/30`-`35`) to act as the
 
 > [!IMPORTANT]
 > **AI in the Product vs. AI in the Process:** We established a strict demarcation. We will use heavy SLMs (hosted on Exocracy) to power our SDLC tools. Conversely, we are planning to embed *ultra-tiny* models (1.5B parameters) directly into ExoTalk to act as "Intent Brokers" that negotiate with 8B SLMs hosted on remote Conscia nodes, saving mobile battery and bandwidth.
+> 
+> **Retrospective Correction (Session 56)**: The "Project Cockpit" mentioned in this architecture is a **distinct SDLC governance tool**. It must never be conflated with or implemented within the **Bridge Monitor** product.
 
 ---
 

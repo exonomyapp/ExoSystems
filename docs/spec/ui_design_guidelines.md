@@ -22,10 +22,10 @@ To ensure ExoTalk feels like a premium, state-of-the-art sovereign application, 
 *   **Surface Consistency**: Use a single, unified border and background logic. No "stacked" shadows or doubled-up borders.
 
 ## 4. Visual Language
-*   **Accent Color**: Use `ConsciaTheme.accent` (green) for active/functional states.
-*   **Error Color**: Use `ConsciaTheme.error` (red) **exclusively** for the Danger Zone and destructive actions.
+*   **Accent Color**: Use `ExoTheme.accent` (green) for active/functional states.
+*   **Error Color**: Use `ExoTheme.error` (red) **exclusively** for the Danger Zone and destructive actions.
 *   **Toggles**: All switches must be uniformly scaled to 0.7x of default size to maintain high density. They should never be standalone but always labeled horizontally or within a list tile.
-*   **Solid Identity**: Avoid all transparency and glassmorphism. Use opaque surfaces (`ConsciaTheme.surface` and `ConsciaTheme.background`) with high-contrast borders (`ConsciaTheme.border`) to create depth and professional clarity.
+*   **Solid Identity**: Avoid all transparency and glassmorphism. Use opaque surfaces (`ExoTheme.surface` and `ExoTheme.background`) with high-contrast borders (`ExoTheme.border`) to create depth and professional clarity.
 *   **Window Distinction**: To prevent "flatness" when windows are stacked, use `surfaceElevated` and `borderStrong` for dialogs and modals. This provides necessary visual separation in dark mode without relying on shadows or transparency.
 *   **Tristate Theme Modes**: Support Light, Dark, and System modes. All themes must adhere to the "Solid Identity" mandate. Light mode uses a "Paper & Ink" palette (white/light-grey background with high-contrast dark borders).
 

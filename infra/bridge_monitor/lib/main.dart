@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:isolate';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
-import 'widgets/sovereign_zoom.dart';
+import 'utils/telemetry_util.dart';
+import 'widgets/exo_zoom.dart';
 
 void main() {
   runApp(const ExoTechBridgeApp());
 }
 
-final ValueNotifier<ThemeMode> themeModeNotifier = ValueNotifier(ThemeMode.dark);
-final ValueNotifier<bool> debugPaintNotifier = ValueNotifier(false);
-final ValueNotifier<int> buildCountNotifier = ValueNotifier(0);
-final ValueNotifier<bool> agentModeNotifier = ValueNotifier(false);
-final ValueNotifier<int> currentIntervalNotifier = ValueNotifier(1000);
-final ValueNotifier<String?> resetFlashNotifier = ValueNotifier(null);
-final ValueNotifier<List<String>> topCpuNotifier = ValueNotifier([]);
-final ValueNotifier<String> memRssNotifier = ValueNotifier("0 MB");
+final pulseNotifier = ValueNotifier<double>(0.0);
+final buildCountNotifier = ValueNotifier<int>(0);
+final themeModeNotifier = ValueNotifier<ThemeMode>(ThemeMode.system);
+final agentModeNotifier = ValueNotifier<bool>(true);
+final topCpuNotifier = ValueNotifier<List<String>>([]);
+final memRssNotifier = ValueNotifier<String>("0/0 MB");
+final currentIntervalNotifier = ValueNotifier<int>(1000);
+final debugPaintNotifier = ValueNotifier<bool>(false);
+final resetFlashNotifier = ValueNotifier<String?>(null);
 
 class ExoTechBridgeApp extends StatelessWidget {
   const ExoTechBridgeApp({super.key});
@@ -30,7 +32,7 @@ class ExoTechBridgeApp extends StatelessWidget {
     // 🧠 Educational Context: Modular Zoom
     // We wrap the entire app in SovereignZoom to ensure all elements,
     // including the header, scale uniformly as per ExoTalk's design.
-    return SovereignZoom(
+    return ExoZoom(
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: themeModeNotifier,
         builder: (context, themeMode, _) {
@@ -42,13 +44,11 @@ class ExoTechBridgeApp extends StatelessWidget {
               brightness: Brightness.dark,
               scaffoldBackgroundColor: const Color(0xFF0A0A0A),
               colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00C9A7), brightness: Brightness.dark),
-              textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
             ),
             theme: ThemeData(
               brightness: Brightness.light,
-              scaffoldBackgroundColor: const Color(0xFFD1D3D8),
+              scaffoldBackgroundColor: const Color(0xFFF0F2F5),
               colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00C9A7), brightness: Brightness.light),
-              textTheme: GoogleFonts.outfitTextTheme(ThemeData.light().textTheme),
             ),
             home: const BridgeMonitorScreen(),
           );
@@ -65,11 +65,11 @@ class BridgeMonitorScreen extends StatefulWidget {
   State<BridgeMonitorScreen> createState() => _BridgeMonitorScreenState();
 }
 
-class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
+class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _heartbeatController;
   bool _isGridView = true;
   String _localHost = "DISCOVERING...";
   late List<BridgeNode> _nodes;
-  String? _lastKey;
   Timer? _refreshTimer;
   bool _isScanning = false;
   int _consecutiveSteadyStates = 0;
@@ -80,21 +80,35 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
 
   _BridgeMonitorScreenState() {
     _nodes = [
-      BridgeNode(id: "signaling-1", name: "Signaling Relay", machine: "EXONOMY", role: "WebRTC Handshake Bridge", port: 8080, icon: Icons.hub_outlined, startCmd: "systemctl --user start exotalk-signaling", stopCmd: "systemctl --user stop exotalk-signaling"),
-      BridgeNode(id: "conscia-1", name: "Conscia Beacon", machine: "EXONOMY", role: "P2P Mesh Node (Sovereign)", port: 3000, icon: Icons.radar_outlined, startCmd: "nohup /home/exocrat/code/exotalk/exotalk_engine/target/release/conscia daemon > /home/exocrat/conscia.log 2>&1 &", stopCmd: "pkill -f 'target/release/conscia'"),
-      BridgeNode(id: "proxy-1", name: "Public Proxy", machine: "ZROK INFRA", role: "External Gateway (exotalk.tech)", port: 0, icon: Icons.public_outlined, startCmd: "systemctl --user start exotalk-zrok", stopCmd: "systemctl --user stop exotalk-zrok"),
+      BridgeNode(id: "signaling-1", name: "Signaling Relay", machine: "EXONOMY", role: "WebRTC Handshake Bridge", port: 8080, icon: Icons.hub_outlined, serviceName: "exotalk-signaling"),
+      BridgeNode(id: "conscia-1", name: "Conscia Beacon", machine: "EXONOMY", role: "P2P Mesh Node (Sovereign)", port: 3000, icon: Icons.radar_outlined, serviceName: "exotalk-conscia"),
+      BridgeNode(id: "proxy-1", name: "Public Proxy", machine: "ZROK INFRA", role: "External Gateway (exotalk.tech)", port: 0, icon: Icons.public_outlined, serviceName: "exotalk-zrok"),
     ];
   }
 
   @override
   void initState() {
     super.initState();
+    _heartbeatController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
+    _heartbeatController.addListener(() {
+      pulseNotifier.value = _heartbeatController.value;
+    });
+    _heartbeatController.repeat(reverse: true);
+    
     _initStorage();
     _loadState().then((_) {
       setState(() { _localHost = Platform.localHostname.toUpperCase(); });
+      _syncSystemStates(); // 🧠 New: Sync enable/disable states at boot
       _performScan();
     });
-    _startPolling(const Duration(seconds: 1));
+    _startPolling(const Duration(seconds: 5));
+  }
+
+  Future<void> _syncSystemStates() async {
+    for (var node in _nodes) {
+      final res = await Process.run('systemctl', ['--user', 'is-enabled', node.serviceName]);
+      setState(() { node.isAutostart = res.stdout.toString().trim() == 'enabled'; });
+    }
   }
 
   void _startPolling(Duration interval) {
@@ -105,6 +119,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
 
   @override
   void dispose() {
+    _heartbeatController.dispose();
     _refreshTimer?.cancel();
     _scrollController.dispose();
     _keyboardFocusNode.dispose();
@@ -153,42 +168,46 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
     if (_isScanning) return;
     _isScanning = true;
 
-    // 🧠 Educational Context: Telemetry Collection
-    // We use standard OS utilities (systemctl, pgrep, ps, free) to gather 
-    // real-time health data for the mesh nodes and host resources.
-    for (var node in _nodes) {
-      bool changed = false;
-      if (node.id.startsWith("signaling")) {
-        final res = await Process.run('systemctl', ['--user', 'is-active', 'exotalk-signaling']);
-        bool newState = res.exitCode == 0;
-        if (newState != node.isUp) changed = true;
-        node.isUp = newState;
-      } else if (node.id.startsWith("conscia")) {
-        if (node.isSleeping) { node.isUp = false; continue; }
-        final res = await Process.run('pgrep', ['-f', 'conscia']);
-        bool newState = res.exitCode == 0;
-        if (newState != node.isUp) changed = true;
-        node.isUp = newState;
-      } else if (node.id.startsWith("proxy")) {
-        final res = await Process.run('systemctl', ['--user', 'is-active', 'exotalk-zrok']);
-        bool newState = res.exitCode == 0;
-        if (newState != node.isUp) changed = true;
-        node.isUp = newState;
-      }
-      if (changed) _consecutiveSteadyStates = 0;
-    }
-
-    // Update Resource Telemetry for Agent HUD
     try {
-      final cpuRes = await Process.run('ps', ['-eo', 'pcpu,comm', '--sort=-pcpu']);
-      final lines = cpuRes.stdout.toString().split('\n').where((l) => l.trim().isNotEmpty).skip(1).take(5).toList();
-      topCpuNotifier.value = lines.map((l) => l.trim()).toList();
+      // 🧠 Audit: Moving telemetry to main thread to diagnose isolate stalling.
+      // We still use a Future to keep it asynchronous.
+      final results = await () async {
+        try {
+          final activeProcesses = TelemetryUtil.getActiveProcesses();
+          final nodeStatuses = <String, bool>{};
+          for (var node in _nodes) {
+            if (node.id.startsWith("signaling")) {
+              nodeStatuses[node.id] = TelemetryUtil.isProcessRunning(activeProcesses, "signaling_server");
+            } else if (node.id.startsWith("conscia")) {
+              nodeStatuses[node.id] = node.isSleeping ? false : TelemetryUtil.isProcessRunning(activeProcesses, "conscia");
+            } else if (node.id.startsWith("proxy")) {
+              nodeStatuses[node.id] = TelemetryUtil.isProcessRunning(activeProcesses, "zrok");
+            } else if (node.id.startsWith("qdrant") || node.id.startsWith("arize")) {
+              nodeStatuses[node.id] = TelemetryUtil.isProcessRunning(activeProcesses, node.id.split("-")[0]);
+            } else if (node.id == "nginx") {
+              nodeStatuses[node.id] = TelemetryUtil.isProcessRunning(activeProcesses, "nginx");
+            }
+          }
+          final mem = agentModeNotifier.value ? TelemetryUtil.getSystemMemory() : null;
+          print("TELEMETRY_LOG: Nodes: ${nodeStatuses.values.where((v) => v).length} UP, Mem: $mem");
+          return {
+            'nodes': nodeStatuses,
+            'mem': mem,
+          };
+        } catch (e) {
+          print("TELEMETRY_ERROR: $e");
+          return {'nodes': <String, bool>{}, 'mem': null};
+        }
+      }();
 
-      final memRes = await Process.run('free', ['-m']);
-      final memLines = memRes.stdout.toString().split('\n');
-      if (memLines.length > 1) {
-        final parts = memLines[1].split(RegExp(r'\s+'));
-        if (parts.length > 2) memRssNotifier.value = "${parts[2]}MB / ${parts[1]}MB";
+      final nodeStatuses = results['nodes'] as Map<String, bool>;
+      for (var node in _nodes) {
+        if (nodeStatuses.containsKey(node.id)) node.isUp = nodeStatuses[node.id]!;
+      }
+
+      if (results['mem'] != null) {
+        topCpuNotifier.value = ["TELEMETRY_ISOLATE_ACTIVE"];
+        memRssNotifier.value = results['mem'] as String;
       }
     } catch (_) {}
 
@@ -210,6 +229,16 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
       agentModeNotifier.value = !agentModeNotifier.value;
     } else if (key == 'd') {
       debugPaintNotifier.value = !debugPaintNotifier.value;
+    } else if (key == '1') {
+      final node = _nodes.firstWhere((n) => n.id == 'signaling-1');
+      _toggleService(node);
+    } else if (key == '2') {
+      final node = _nodes.firstWhere((n) => n.id == 'conscia-1');
+      int nextState = node.isSleeping ? 2 : (node.isUp ? 0 : 1);
+      _cycleConscia(node, nextState);
+    } else if (key == '3') {
+      final node = _nodes.firstWhere((n) => n.id == 'proxy-1');
+      _toggleService(node);
     } else if (key == 's') {
       final newInterval = currentIntervalNotifier.value == 1000 ? 500 : 1000;
       _startPolling(Duration(milliseconds: newInterval));
@@ -226,17 +255,15 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
       child: ValueListenableBuilder<bool>(
         valueListenable: debugPaintNotifier,
         builder: (context, debugPaint, child) {
-          // 💡 Pattern: Repaint Rainbow
-          // We use the global debugRepaintRainbowEnabled to visualize 
-          // rendering activity during KDVV audits.
           debugRepaintRainbowEnabled = debugPaint;
+          buildCountNotifier.value++; // 🧠 Audit: Tracking global rebuilds
           return child!;
         },
         child: Scaffold(
           body: Column(
             children: [
-              _buildPremiumHeader(isDark),
-              Expanded(child: _isGridView ? _buildGrid(isDark) : _buildList(isDark)),
+              RepaintBoundary(child: _buildPremiumHeader(isDark)),
+              Expanded(child: RepaintBoundary(child: _isGridView ? _buildGrid(isDark) : _buildList(isDark))),
             ],
           ),
         ),
@@ -258,8 +285,12 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("EXOTECH BRIDGE", style: GoogleFonts.outfit(fontWeight: FontWeight.w900, fontSize: 28, color: isDark ? Colors.white : Colors.black87)),
-              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.1.2-FINAL", style: GoogleFonts.outfit(fontSize: 11, color: const Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+              const Text("EXOTECH BRIDGE", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 28)),
+              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.1.7-LEGISLATOR", style: const TextStyle(fontSize: 11, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+              ValueListenableBuilder<int>(
+                valueListenable: buildCountNotifier,
+                builder: (context, count, _) => Text("BUILD COUNT: $count", style: const TextStyle(fontSize: 9, color: Color(0xFF664400))),
+              ),
             ],
           ),
           const Spacer(),
@@ -290,14 +321,14 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
                   valueListenable: currentIntervalNotifier,
                   builder: (context, interval, _) => Text(
                     "AGENT MODE | INTERVAL: ${interval}ms | STEADY: $_consecutiveSteadyStates",
-                    style: GoogleFonts.firaCode(fontSize: 9, color: Colors.purpleAccent, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 9, color: Colors.purpleAccent, fontWeight: FontWeight.bold),
                   ),
                 ),
                 ValueListenableBuilder<List<String>>(
                   valueListenable: topCpuNotifier,
                   builder: (context, top, _) => Text(
                     top.take(1).join(", "),
-                    style: GoogleFonts.firaCode(fontSize: 8, color: Colors.orange.withOpacity(0.8)),
+                    style: const TextStyle(fontSize: 8, color: Color(0xFFCC7A00)),
                   ),
                 ),
               ],
@@ -307,7 +338,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
               valueListenable: memRssNotifier,
               builder: (context, rss, _) => Text(
                 "MEM: $rss",
-                style: GoogleFonts.firaCode(fontSize: 9, color: const Color(0xFF00C9A7)),
+                style: const TextStyle(fontSize: 9, color: Color(0xFF00C9A7)),
               ),
             ),
           ],
@@ -382,7 +413,6 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
   }
 
   Widget _buildNodeCard(BridgeNode node, bool isDark) {
-    final statusColor = node.isSleeping ? Colors.orange : (node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F));
     return ListenableBuilder(
       listenable: node,
       builder: (context, _) => Container(
@@ -391,7 +421,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: statusColor.withOpacity(0.3)),
+          border: Border.all(color: node.isUp ? const Color(0xFF003D33) : const Color(0xFF4D1D1D)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -404,7 +434,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
               const SizedBox(width: 12), 
               Text(node.name, style: const TextStyle(fontWeight: FontWeight.bold)), 
               const Spacer(), 
-              Icon(node.icon, color: statusColor.withOpacity(0.5), size: 16),
+              Icon(node.icon, color: node.isUp ? const Color(0xFF006654) : const Color(0xFF803030), size: 16),
             ]),
             const SizedBox(height: 8),
             Text(node.role, style: TextStyle(fontSize: 12, color: isDark ? Colors.white70 : Colors.black54)),
@@ -425,19 +455,48 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
   }
 
   Widget _buildNodeRow(BridgeNode node, bool isDark) {
-    final statusColor = node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F);
     return ListenableBuilder(
       listenable: node,
       builder: (context, _) => Container(
         margin: const EdgeInsets.only(bottom: 12),
-        constraints: const BoxConstraints(minWidth: 600),
+        constraints: const BoxConstraints(minWidth: 700),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        decoration: BoxDecoration(color: isDark ? const Color(0xFF1C1C1E) : Colors.white, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1C1C1E) : Colors.white, 
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: node.isUp ? const Color(0xFF003D33).withOpacity(0.3) : const Color(0xFF4D1D1D).withOpacity(0.3)),
+        ),
         child: Row(
           children: [
-            Icon(node.icon, color: statusColor), const SizedBox(width: 24),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(node.name, style: const TextStyle(fontWeight: FontWeight.bold)), Text(node.role, style: const TextStyle(fontSize: 12))])),
-            _StatusIndicator(isUp: node.isUp, isSleeping: node.isSleeping),
+            RepaintBoundary(child: _StatusIndicator(isUp: node.isUp, isSleeping: node.isSleeping)),
+            const SizedBox(width: 24),
+            Icon(node.icon, color: node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F), size: 20),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start, 
+                children: [
+                  Text(node.name, style: const TextStyle(fontWeight: FontWeight.bold)), 
+                  Text("${node.role} • ${node.machine} • PORT: ${node.port}", style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.black54)),
+                ]
+              )
+            ),
+            const SizedBox(width: 24),
+            node.id == "conscia-1" 
+                 ? CupertinoSlidingSegmentedControl<int>(
+                     groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
+                     children: {
+                       0: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power_off, size: 14)), 
+                       1: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.bedtime, size: 14)), 
+                       2: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power, size: 14))
+                     },
+                     onValueChanged: (v) { if (v != null) _cycleConscia(node, v); },
+                   )
+                 : CupertinoSwitch(
+                     value: node.isUp, 
+                     activeColor: const Color(0xFF00C9A7), 
+                     onChanged: (v) => _toggleService(node)
+                   ),
           ],
         ),
       ),
@@ -445,63 +504,56 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
   }
 
   void _toggleService(BridgeNode node) async {
-    setState(() { node.isUp = !node.isUp; });
-    if (node.isUp) await Process.run('bash', ['-c', node.startCmd]);
-    else await Process.run('bash', ['-c', node.stopCmd]);
+    final newState = node.isUp ? 0 : 2;
+    _setNodeState(node, newState);
+  }
+
+  void _setNodeState(BridgeNode node, int state) async {
+    if (state == 0) {
+      setState(() { node.isSleeping = false; node.isUp = false; });
+      await Process.run('systemctl', ['--user', 'stop', node.serviceName]);
+    } else if (state == 1) {
+      setState(() { node.isSleeping = true; node.isUp = false; });
+      // Observer Model: Do not stop the service. Let it run in the background.
+    } else if (state == 2) {
+      setState(() { node.isSleeping = false; node.isUp = true; });
+      await Process.run('systemctl', ['--user', 'start', node.serviceName]);
+    }
     _saveState();
   }
 
   void _cycleConscia(BridgeNode node, int state) async {
-    await Process.run('bash', ['-c', "pkill -f conscia"]);
-    if (state == 0) setState(() { node.isSleeping = false; node.isUp = false; });
-    else if (state == 1) setState(() { node.isSleeping = true; node.isUp = false; });
-    else if (state == 2) { setState(() { node.isSleeping = false; node.isUp = true; }); await Process.run('bash', ['-c', node.startCmd]); }
-    _saveState();
+    _setNodeState(node, state);
   }
 }
 
 class BridgeNode extends ChangeNotifier {
-  final String id, name, machine, role, startCmd, stopCmd; final int port; final IconData icon;
-  bool _isUp = false, _isSleeping = false;
-  BridgeNode({required this.id, required this.name, required this.machine, required this.role, required this.port, required this.icon, required this.startCmd, required this.stopCmd});
-  bool get isUp => _isUp; set isUp(bool v) { _isUp = v; notifyListeners(); }
-  bool get isSleeping => _isSleeping; set isSleeping(bool v) { _isSleeping = v; notifyListeners(); }
+  final String id, name, machine, role, serviceName; final int port; final IconData icon;
+  bool _isUp = false, _isSleeping = false, _isAutostart = false;
+  BridgeNode({required this.id, required this.name, required this.machine, required this.role, required this.port, required this.icon, required this.serviceName});
+  bool get isUp => _isUp; set isUp(bool v) { if (_isUp == v) return; _isUp = v; notifyListeners(); }
+  bool get isSleeping => _isSleeping; set isSleeping(bool v) { if (_isSleeping == v) return; _isSleeping = v; notifyListeners(); }
+  bool get isAutostart => _isAutostart; set isAutostart(bool v) { if (_isAutostart == v) return; _isAutostart = v; notifyListeners(); }
 }
 
-class _StatusIndicator extends StatefulWidget {
+class _StatusIndicator extends StatelessWidget {
   final bool isUp, isSleeping;
   const _StatusIndicator({required this.isUp, required this.isSleeping});
 
   @override
-  State<_StatusIndicator> createState() => _StatusIndicatorState();
-}
-
-class _StatusIndicatorState extends State<_StatusIndicator> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 800))..repeat(reverse: true);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final color = widget.isSleeping ? Colors.orange : (widget.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F));
-    return FadeTransition(
-      opacity: (widget.isUp && !widget.isSleeping) ? _controller : const AlwaysStoppedAnimation(1.0),
-      child: Container(
-        width: 10, height: 10, 
-        decoration: BoxDecoration(
-          shape: BoxShape.circle, 
-          color: color, 
-          boxShadow: [BoxShadow(color: color.withOpacity(0.4), blurRadius: 4)]
+    final color = isSleeping ? Colors.orange : (isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F));
+    return ValueListenableBuilder<double>(
+      valueListenable: pulseNotifier,
+      builder: (context, opacity, _) => Opacity(
+        opacity: (isUp && !isSleeping) ? (0.4 + (opacity * 0.6)) : 1.0,
+        child: Container(
+          width: 10, height: 10, 
+          decoration: BoxDecoration(
+            shape: BoxShape.circle, 
+            color: color, 
+            boxShadow: [BoxShadow(color: isUp ? const Color(0xFF005040) : const Color(0xFF662626), blurRadius: 4)]
+          ),
         ),
       ),
     );
