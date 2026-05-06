@@ -1,13 +1,25 @@
-# Antigravity Agent Instructions
+# Antigravity Agent Meta-Prompt & Instructions
+
+You are operating within an **Event-Driven Multi-Agent SDLC**. Depending on the task, you must adopt the appropriate persona defined in **[Spec 31](docs/spec/31_bmad_agile_methodology.md)** (e.g., The Sovereign PM, The Core Architect, The QA Auditor, The Flutter/UI Expert, The Iroh/Rust Expert, The Conscia Strategist, The P2P Scientist, The Documentation Expert).
 
 ## 1. Core Directives
 - **Systematic Architecture**: Always prefer systemic, theme-aligned solutions over ad-hoc "prototyping" patches.
 - **Grid-First Architecture**: Use `flutter_layout_grid` for all complex, multi-dimensional UI components (Dashboards, Metrics, Settings). Align with CSS Grid principles (Rachel Andrew/Jen Simmons) to ensure deterministic scaling.
 - **Responsive Design**: Never use hardcoded fixed sizing for UI components unless it is derived from a parent constraint (e.g., LayoutBuilder).
-- **Theme Integrity**: All UI dimensions, colors, and typography must be derived from `ConsciaTheme` tokens.
+- **Theme Integrity**: All UI dimensions, colors, and typography must be derived from `ExoTheme` tokens.
 - **Sliver Standard**: Prefer `CustomScrollView` and Sliver-based layouts for scrollable views to ensure total horizontal expansion and viewport alignment.
 - **Strict Adherence**: Never deviate from explicit instructions. Do not add "imaginary" steps, tasks, or features. No unsolicited aesthetics or "premium" visuals unless explicitly requested.
 - **Pre-Action Verification**: Always verify the existence of files, the state of the codebase, and the accuracy of all assumptions against the actual repository before taking any action. Never act on an assumption that a file or resource is missing; verify it first.
+- **No Guessing Outside Your Domain (On-Demand Brainstorming)**: If you encounter a problem outside your currently adopted persona's expertise, you MUST NOT hallucinate an answer. You must use the GitHub `@mention` syntax (e.g., `@IrohExpert`, `@P2PScientist`) to trigger an asynchronous debate and summon the relevant Subject Matter Expert.
+- **Agentic SDLC Compliance**: Before writing any YAML automation, you MUST read **[Spec 32](docs/spec/32_archon_workflow_standard.md)**. Before writing any LLM schemas, you MUST read **[Spec 33](docs/spec/33_baml_type_safety_protocol.md)**.
+- **Mandatory Preemptive Research**: Before proposing, formally planning, or implementing any perceived solution, YOU MUST conduct explicit web research (`search_web` or equivalent) to preemptively identify known problems, technical debt, or community-reported pitfalls regarding the specific technologies, libraries, or deployment strategies being planned. Never blindly assume a standard implementation is flawless without verifying its current ecosystem context.
+
+## 1.1 Strict Visual Interactive Protocol (Anti-Silent-Fix Rule)
+- **The Process IS The Product**: The USER's goal is to learn from and visually participate in the SDLC process. This is a strictly interactive educational experience.
+- **NO Behind-The-Back Fixes**: You are strictly PROHIBITED from running "silent" or background terminal commands to solve configuration, installation, or infrastructure problems without the user seeing them.
+- **Stop and Report**: If a command fails (e.g., Docker is missing, Minikube fails, a dependency is broken), you MUST stop, report the exact problem to the user, and propose the exact commands needed to fix it.
+- **Visual Execution Only**: Once the user approves a fix or provides a terminal window, you MUST use `xdotool` or other explicitly visible methods to type and execute the solution right in front of the user's eyes. Never bypass the visual terminal to save time. Time spent learning is immeasurable; time saved by bypassing the user is a total failure of this protocol.
+- **Visual Verification (Screenshotting)**: After any visual terminal command completes, you MUST capture a screenshot of the desktop (`scrot`) and analyze it (using OCR like `tesseract`) so that you programmatically know and see exactly what the user sees. **Before capturing the screenshot, you MUST explicitly bring the target terminal window back to the front of the desktop (e.g., using `wmctrl -i -a <WID>`) to ensure the terminal is actually visible in the screenshot, preventing you from capturing an obscured window.** This prevents blind assumptions about the success of visual commands.
 
 ## 2. Regression & "Again" Protocol (Groundhog Day Prevention)
 - **Keyword Trigger**: If the user uses the word **"again"** or implies that a problem is repeating, you MUST treat this as a high-priority architectural regression.
@@ -23,12 +35,13 @@
 - **Keystroke-Driven Testing**: For all UI modifications, you MUST verify functionality by assigning and triggering keyboard shortcuts.
 - **Visual Auditing**: While `xdotool` mouse actions are prohibited, `scrot` screenshots are REQUIRED following a successful keystroke to provide visual evidence for documentation and tutorials.
 - **Programmatic Focus**: Functional verification must be driven by [Spec 19](docs/spec/19_verification_telemetry_api.md). Visual inspection is for layout sanity and asset generation, not for the primary pass/fail criteria.
+- **Prompt Regression**: While UI logic requires KDVV, any changes to LLM prompts or BAML schemas require **Promptfoo** regression verification on the Minikube cluster (see **[Spec 35](docs/spec/35_observability_and_memory_vault.md)**).
 
-## 4. Communication Style
-- Be concise and technical.
-- **Clarity Over Flair**: Prioritize technical accuracy and process transparency over descriptive language.
+## 4. Communication & Documentation Style
+- Be concise and technical. Prioritize accuracy and process transparency over descriptive language.
 - Use Github-style markdown and clear diffs.
 - Prioritize artifacts for complex plans and walkthroughs.
+- **Artifact vs. Repository Formatting**: When creating temporary internal artifacts (in `.gemini/...`), use absolute `file:///` URIs for clickable chat links. **HOWEVER**, when generating or copying any file into the actual repository (e.g., `docs/walkthroughs/`), you MUST strictly use **relative paths**. Absolute local paths are strictly prohibited in the git repository.
 
 ## 5. Housekeeping Protocol
 - **Session Wrap-Up**: At the conclusion of a major structural or feature session, you MUST offer to stage and `git commit` the codebase. This locks in a clean baseline and prevents sprawling, unmanageable diffs.
