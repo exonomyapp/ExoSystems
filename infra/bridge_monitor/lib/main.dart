@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
+import 'dart:math' as math; // 🧠 Educational: Added for mechanical sine-wave pulse
 import 'utils/telemetry_util.dart';
 import 'widgets/exo_zoom.dart';
 
@@ -74,6 +75,8 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   bool _isScanning = false;
   int _consecutiveSteadyStates = 0;
   File? _sessionLogFile;
+  Timer? _heartbeatTimer; // 🧠 Mechanical: 30Hz Process Clock
+  int _lastPulseUpdate = 0;
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _keyboardFocusNode = FocusNode();
@@ -90,10 +93,16 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   void initState() {
     super.initState();
     _heartbeatController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
-    _heartbeatController.addListener(() {
-      pulseNotifier.value = _heartbeatController.value;
+    
+    // 🧠 Educational Context: Mechanical 30Hz Ticker
+    // We bypass the 60Hz+ hardware clock by manually driving the pulse 
+    // with a 33ms Timer. The AnimationController remains dormant.
+    _heartbeatTimer = Timer.periodic(const Duration(milliseconds: 33), (timer) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      // Oscillate 0.0 to 1.0 over a 2000ms period (2-second breath)
+      final val = (math.sin(now * 2 * math.pi / 2000) + 1) / 2;
+      pulseNotifier.value = val;
     });
-    _heartbeatController.repeat(reverse: true);
     
     _initStorage();
     _loadState().then((_) {
@@ -120,6 +129,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   @override
   void dispose() {
     _heartbeatController.dispose();
+    _heartbeatTimer?.cancel(); // 🧠 Mechanical Cleanup
     _refreshTimer?.cancel();
     _scrollController.dispose();
     _keyboardFocusNode.dispose();
@@ -286,7 +296,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("EXOTECH BRIDGE", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 28)),
-              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.1.7-LEGISLATOR", style: const TextStyle(fontSize: 11, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.2.0-LEGISLATOR", style: const TextStyle(fontSize: 11, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
               ValueListenableBuilder<int>(
                 valueListenable: buildCountNotifier,
                 builder: (context, count, _) => Text("BUILD COUNT: $count", style: const TextStyle(fontSize: 9, color: Color(0xFF664400))),
