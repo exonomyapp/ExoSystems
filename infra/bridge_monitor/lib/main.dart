@@ -7,7 +7,8 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
-import 'dart:math' as math; // 🧠 Educational: Added for mechanical sine-wave pulse
+import 'dart:ui' as ui; // 🧠 Mechanical: FragmentShader loading
+import 'dart:math' as math;
 import 'utils/telemetry_util.dart';
 import 'widgets/exo_zoom.dart';
 
@@ -24,6 +25,8 @@ final memRssNotifier = ValueNotifier<String>("0/0 MB");
 final currentIntervalNotifier = ValueNotifier<int>(1000);
 final debugPaintNotifier = ValueNotifier<bool>(false);
 final resetFlashNotifier = ValueNotifier<String?>(null);
+
+ui.FragmentProgram? heartbeatProgram;
 
 class ExoTechBridgeApp extends StatelessWidget {
   const ExoTechBridgeApp({super.key});
@@ -48,7 +51,7 @@ class ExoTechBridgeApp extends StatelessWidget {
             ),
             theme: ThemeData(
               brightness: Brightness.light,
-              scaffoldBackgroundColor: const Color(0xFFF0F2F5),
+              scaffoldBackgroundColor: const Color(0xFFAEB2B8), // 🧠 Dashboard Gray
               colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00C9A7), brightness: Brightness.light),
             ),
             home: const BridgeMonitorScreen(),
@@ -94,15 +97,12 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
     super.initState();
     _heartbeatController = AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
     
-    // 🧠 Educational Context: Mechanical 30Hz Ticker
-    // We bypass the 60Hz+ hardware clock by manually driving the pulse 
-    // with a 33ms Timer. The AnimationController remains dormant.
-    _heartbeatTimer = Timer.periodic(const Duration(milliseconds: 33), (timer) {
-      final now = DateTime.now().millisecondsSinceEpoch;
-      // Oscillate 0.0 to 1.0 over a 2000ms period (2-second breath)
-      final val = (math.sin(now * 2 * math.pi / 2000) + 1) / 2;
-      pulseNotifier.value = val;
+    ui.FragmentProgram.fromAsset('assets/shaders/heartbeat.frag').then((program) {
+      heartbeatProgram = program;
+      if (mounted) setState(() {});
     });
+    
+    _scheduleNextTick();
     
     _initStorage();
     _loadState().then((_) {
@@ -111,6 +111,17 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
       _performScan();
     });
     _startPolling(const Duration(seconds: 5));
+  }
+
+  void _scheduleNextTick() {
+    bool hasActiveNodes = _nodes.any((n) => n.isUp && !n.isSleeping);
+    int targetInterval = hasActiveNodes ? 33 : 200; // 30Hz Active / 5Hz Idle
+    
+    _heartbeatTimer = Timer(Duration(milliseconds: targetInterval), () {
+      if (!mounted) return;
+      pulseNotifier.value = DateTime.now().millisecondsSinceEpoch / 1000.0;
+      _scheduleNextTick();
+    });
   }
 
   Future<void> _syncSystemStates() async {
@@ -286,17 +297,18 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 12),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF141414) : const Color(0xFFAEB2B8),
+        color: isDark ? const Color(0xFF141414) : const Color(0xFFE1E4E8),
+        border: Border(bottom: BorderSide(color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFC0C4C8), width: 1)),
       ),
       child: Row(
         children: [
-          Image.asset(isDark ? 'assets/exotalk_pappus_realistic.png' : 'assets/exotalk_pappus_color.png', width: 96, height: 96),
+          Image.asset('assets/exotalk_pappus_desktop.png', width: 96, height: 96),
           const SizedBox(width: 24),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text("EXOTECH BRIDGE", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 28)),
-              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.2.0-LEGISLATOR", style: const TextStyle(fontSize: 11, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.3.0-LEGISLATOR", style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
               ValueListenableBuilder<int>(
                 valueListenable: buildCountNotifier,
                 builder: (context, count, _) => Text("BUILD COUNT: $count", style: const TextStyle(fontSize: 9, color: Color(0xFF664400))),
@@ -322,36 +334,51 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
       valueListenable: agentModeNotifier,
       builder: (context, isVisible, _) {
         if (!isVisible) return const SizedBox.shrink();
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Column(
-              children: [
-                ValueListenableBuilder<int>(
-                  valueListenable: currentIntervalNotifier,
-                  builder: (context, interval, _) => Text(
-                    "AGENT MODE | INTERVAL: ${interval}ms | STEADY: $_consecutiveSteadyStates",
-                    style: const TextStyle(fontSize: 9, color: Colors.purpleAccent, fontWeight: FontWeight.bold),
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1C1C1E).withOpacity(0.8) : Colors.white.withOpacity(0.6),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: isDark ? Colors.white12 : Colors.black12),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ValueListenableBuilder<int>(
+                    valueListenable: currentIntervalNotifier,
+                    builder: (context, interval, _) => Text(
+                      "AGENT MODE | INTERVAL: ${interval}ms | STEADY: $_consecutiveSteadyStates",
+                      style: const TextStyle(fontSize: 10, color: Colors.purpleAccent, fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-                ValueListenableBuilder<List<String>>(
-                  valueListenable: topCpuNotifier,
-                  builder: (context, top, _) => Text(
-                    top.take(1).join(", "),
-                    style: const TextStyle(fontSize: 8, color: Color(0xFFCC7A00)),
+                  const SizedBox(height: 2),
+                  ValueListenableBuilder<List<String>>(
+                    valueListenable: topCpuNotifier,
+                    builder: (context, top, _) => Text(
+                      top.take(1).join(", "),
+                      style: const TextStyle(fontSize: 9, color: Color(0xFFCC7A00)),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 16),
-            ValueListenableBuilder<String>(
-              valueListenable: memRssNotifier,
-              builder: (context, rss, _) => Text(
-                "MEM: $rss",
-                style: const TextStyle(fontSize: 9, color: Color(0xFF00C9A7)),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(width: 16),
+              Container(width: 1, height: 24, color: isDark ? Colors.white24 : Colors.black26),
+              const SizedBox(width: 16),
+              ValueListenableBuilder<String>(
+                valueListenable: memRssNotifier,
+                builder: (context, rss, _) => Text(
+                  "MEM: $rss",
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -447,16 +474,14 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
               Icon(node.icon, color: node.isUp ? const Color(0xFF006654) : const Color(0xFF803030), size: 16),
             ]),
             const SizedBox(height: 8),
-            Text(node.role, style: TextStyle(fontSize: 12, color: isDark ? Colors.white70 : Colors.black54)),
+            Text(node.role, style: TextStyle(fontSize: 12, color: isDark ? Colors.white70 : Colors.black87)),
             const Spacer(),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-               node.id == "conscia-1" 
-                 ? CupertinoSlidingSegmentedControl<int>(
-                     groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
-                     children: {0: const Icon(Icons.power_off, size: 14), 1: const Icon(Icons.bedtime, size: 14), 2: const Icon(Icons.power, size: 14)},
-                     onValueChanged: (v) { if (v != null) _cycleConscia(node, v); },
-                   )
-                 : CupertinoSwitch(value: node.isUp, activeColor: const Color(0xFF00C9A7), onChanged: (v) => _toggleService(node)),
+               CupertinoSlidingSegmentedControl<int>(
+                 groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
+                 children: {0: const Icon(Icons.power_off, size: 14), 1: const Icon(Icons.bedtime, size: 14), 2: const Icon(Icons.power, size: 14)},
+                 onValueChanged: (v) { if (v != null) _setNodeState(node, v); },
+               )
             ]),
           ],
         ),
@@ -487,26 +512,20 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
                 crossAxisAlignment: CrossAxisAlignment.start, 
                 children: [
                   Text(node.name, style: const TextStyle(fontWeight: FontWeight.bold)), 
-                  Text("${node.role} • ${node.machine} • PORT: ${node.port}", style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.black54)),
+                  Text("${node.role} • ${node.machine} • PORT: ${node.port}", style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.black87)),
                 ]
               )
             ),
             const SizedBox(width: 24),
-            node.id == "conscia-1" 
-                 ? CupertinoSlidingSegmentedControl<int>(
-                     groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
-                     children: {
-                       0: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power_off, size: 14)), 
-                       1: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.bedtime, size: 14)), 
-                       2: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power, size: 14))
-                     },
-                     onValueChanged: (v) { if (v != null) _cycleConscia(node, v); },
-                   )
-                 : CupertinoSwitch(
-                     value: node.isUp, 
-                     activeColor: const Color(0xFF00C9A7), 
-                     onChanged: (v) => _toggleService(node)
-                   ),
+            CupertinoSlidingSegmentedControl<int>(
+              groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
+              children: {
+                0: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power_off, size: 14)), 
+                1: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.bedtime, size: 14)), 
+                2: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power, size: 14))
+              },
+              onValueChanged: (v) { if (v != null) _setNodeState(node, v); },
+            ),
           ],
         ),
       ),
@@ -562,20 +581,54 @@ class _StatusIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (heartbeatProgram == null) return const SizedBox(width: 14, height: 14);
+    
     final color = isSleeping ? Colors.orange : (isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F));
+    
     return ValueListenableBuilder<double>(
       valueListenable: pulseNotifier,
-      builder: (context, opacity, _) => Opacity(
-        opacity: (isUp && !isSleeping) ? (0.4 + (opacity * 0.6)) : 1.0,
-        child: Container(
-          width: 10, height: 10, 
-          decoration: BoxDecoration(
-            shape: BoxShape.circle, 
-            color: color, 
-            boxShadow: [BoxShadow(color: isUp ? const Color(0xFF005040) : const Color(0xFF662626), blurRadius: 4)]
-          ),
+      builder: (context, timeValue, _) => CustomPaint(
+        size: const Size(14, 14),
+        painter: _HeartbeatPainter(
+          shader: heartbeatProgram!.fragmentShader(),
+          time: timeValue,
+          color: color,
+          isActive: isUp && !isSleeping,
         ),
       ),
     );
+  }
+}
+
+class _HeartbeatPainter extends CustomPainter {
+  final ui.FragmentShader shader;
+  final double time;
+  final Color color;
+  final bool isActive;
+
+  _HeartbeatPainter({
+    required this.shader, 
+    required this.time, 
+    required this.color,
+    required this.isActive,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    shader.setFloat(0, size.width);
+    shader.setFloat(1, size.height);
+    shader.setFloat(2, isActive ? time : 0.0); // Stop pulse if not active
+    shader.setFloat(3, color.red / 255.0);
+    shader.setFloat(4, color.green / 255.0);
+    shader.setFloat(5, color.blue / 255.0);
+    shader.setFloat(6, color.alpha / 255.0);
+    
+    final paint = Paint()..shader = shader;
+    canvas.drawRect(Offset.zero & size, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeartbeatPainter old) {
+    return old.time != time || old.color != color || old.isActive != isActive;
   }
 }
