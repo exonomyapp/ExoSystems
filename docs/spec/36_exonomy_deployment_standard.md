@@ -18,13 +18,14 @@ The Exonomy node (`exocrat@exonomy.local`) follows a strict **`~/deployments/`**
 ### 2.2 Infrastructure Binaries (Infra)
 - **Path**: `~/deployments/infra/`
 - **Signaling**: `~/deployments/infra/signaling_server.py`
-- **zrok**: `~/deployments/infra/zrok` (Target Version: `v2.0.2+`)
-- **Conscia**: `~/deployments/infra/conscia`
+- **zrok**: `~/deployments/infra/zrok` (Target Version: `v1.1.11 Stable`)
+- **Conscia**: `~/deployments/infra/conscia` (Target Version: `v0.7.7`)
 
 ## 3. Service Orchestration
 - All Python and external binary proxies (Signaling, zrok) MUST be orchestrated via **Systemd User Units**.
-- **Unit Path**: `~/.config/systemd/user/`
+- **Unit Path**: `/etc/systemd/system/` (Root-level for boot persistence)
 - **Naming Convention**: `exotalk-<service>.service`
+- **Stable URL Standard**: `<service><nodename>.share.zrok.io` (e.g., `exotalkberlin`, `conscianikolasee`)
 
 ## 4. Desktop Launcher (Exonomy)
 
