@@ -1,9 +1,12 @@
+# 🧠 EDUCATIONAL CONTEXT: Sovereignty requires stable endpoints. 
+# Using "zrok share reserved" instead of "share public" ensures that the node 
+# identity remains consistent across reboots, which is critical for P2P peering.
 [Unit]
-Description=ExoTalk zrok Public Relay
+Description=ExoTalk zrok Signaling Proxy
 After=exotalk-signaling.service
 
 [Service]
-ExecStart=/home/exocrat/deployments/infra/zrok share public http://localhost:8080 --headless
+ExecStart=/home/exocrat/deployments/infra/zrok share reserved exotalkberlin --headless
 Restart=always
 User=exocrat
 WorkingDirectory=/home/exocrat

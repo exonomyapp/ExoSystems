@@ -1,0 +1,16 @@
+# 🧠 EDUCATIONAL CONTEXT: The Conscia Beacon is the persistent "heartbeat" of the node.
+# It runs in 'daemon' mode to ensure that the P2P mesh and HTTP API are always
+# available, even when the operator is not actively using the CLI.
+[Unit]
+Description=ExoTalk Conscia Beacon
+After=network.target
+
+[Service]
+ExecStart=/home/exocrat/deployments/infra/conscia daemon
+WorkingDirectory=/home/exocrat
+Restart=always
+User=exocrat
+Environment=HOME=/home/exocrat
+
+[Install]
+WantedBy=multi-user.target

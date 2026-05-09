@@ -22,4 +22,19 @@ For assets (videos, audios, images) that are referenced within both the Scenario
 2.  **Type Agnostic**: The sequence number is assigned regardless of whether the asset is a video, audio, or image.
 3.  **Informative Indexing**: This numbering is reflected in the numeric prefix of the suffix (e.g., `.03`, `.04`).
 
-This approach ensures that the file list reflects the "drama" or "story" progression, providing more context to the agent and human reviewers about when each asset is deployed in the production workflow.
+## 3. Infrastructure & URLs
+
+To ensure cross-reboot stability and professional branding, all public-facing sovereign infrastructure must follow the **Stable Service Token** standard.
+
+### 3.1. Public zrok Shares
+All public URLs must be **reserved** using the `zrok reserve` command to prevent ephemeral token rotation.
+
+*   **Format**: `<service><nodename>`
+*   **Rules**: 
+    *   Strictly **lowercase alphanumeric** (a-z, 0-9).
+    *   No dots, hyphens, or underscores (as per stable zrok v1 requirements).
+*   **Examples**:
+    *   Relay: `exotalkberlin` (for `exotalkberlin.share.zrok.io`)
+    *   Conscia: `conscianikolasee` (for `conscianikolasee.share.zrok.io`)
+
+This naming convention prioritizes service identity at the front, followed by the node's geographic or functional name, ensuring that clusters of nodes are grouped naturally in account lists.

@@ -1,3 +1,6 @@
+# 🧠 EDUCATIONAL CONTEXT: P2P connections require an initial "handshake" to 
+# traverse NATs and firewalls. The Signaling Relay provides a neutral 
+# meeting ground for peers to exchange WebRTC session descriptions (SDPs).
 [Unit]
 Description=ExoTalk WebRTC Signaling Relay
 After=network.target
@@ -6,6 +9,7 @@ After=network.target
 ExecStart=/usr/bin/python3 /home/exocrat/code/exotalk/infra/signaling_server.py
 WorkingDirectory=/home/exocrat/code/exotalk/infra
 Restart=always
+User=exocrat
 Environment=PYTHONUNBUFFERED=1
 
 [Install]

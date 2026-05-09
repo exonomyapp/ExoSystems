@@ -1,12 +1,9 @@
+// 🧠 EDUCATIONAL CONTEXT: The Conscia Beacon acts as a sovereign entry point into the mesh.
+// It bridges the gap between raw P2P protocols (Iroh) and human-readable interfaces (Web).
+// By serving an Axum-based HTTP API alongside the P2P engine, we enable "Remote Observability"
+// where any authorized UI (like the Exotech Bridge) can interrogate the node state.
 // =============================================================================
-// main.rs — Conscia Beacon CLI & Server
-// =============================================================================
-// This binary is the "Swiss Army Knife" of the Conscia ecosystem. It serves 
-// three distinct purposes:
-// 1. DAEMON: An always-on server providing mesh persistence (Lifeline).
-// 2. MANAGEMENT: A command-line tool for peer governance (Auth/Peers).
-// 3. ONBOARDING: An interactive TUI wizard for first-time node setup.
-// =============================================================================
+
 
 use axum::{
     extract::Query,

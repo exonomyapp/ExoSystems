@@ -646,7 +646,11 @@ pub async fn get_stats() -> HashMap<String, String> {
         let topics = n.topics.read().await;
         stats.insert("topics_count".to_string(), topics.len().to_string());
 
-        stats.insert("blob_count".to_string(), "Active".to_string());
+        // 🧠 EDUCATIONAL CONTEXT: We renamed 'blob_count' to 'storage_status' to elevate 
+        // the API from an implementation-detail (blobs) to a functional concept (storage).
+        // This aligns with the "Process IS The Product" vision by making the telemetry
+        // human-readable for the Sovereign Dashboard.
+        stats.insert("storage_status".to_string(), "Active".to_string());
     } else {
         stats.insert("status".to_string(), "Offline".to_string());
     }

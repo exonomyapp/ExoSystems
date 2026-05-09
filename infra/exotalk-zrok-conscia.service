@@ -1,0 +1,16 @@
+# 🧠 EDUCATIONAL CONTEXT: The Conscia node is the human interface.
+# Mapping it to a reserved name (conscianikolasee) allows the operator 
+# to access the dashboard from anywhere without re-learning the URL.
+[Unit]
+Description=ExoTalk zrok Conscia Proxy
+After=exotalk-conscia.service
+
+[Service]
+ExecStart=/home/exocrat/deployments/infra/zrok share reserved conscianikolasee --headless
+Restart=always
+User=exocrat
+WorkingDirectory=/home/exocrat
+Environment=HOME=/home/exocrat
+
+[Install]
+WantedBy=multi-user.target

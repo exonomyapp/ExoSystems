@@ -1,0 +1,17 @@
+# 🧠 EDUCATIONAL CONTEXT: Observability is a first-class citizen in the sovereign stack.
+# By starting Minikube on boot, we ensure that the Prometheus/Grafana stack
+# is always available to monitor the health of the P2P network.
+[Unit]
+Description=Minikube Autostart
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/minikube start
+ExecStop=/usr/local/bin/minikube stop
+RemainAfterExit=yes
+User=exocrat
+Environment=HOME=/home/exocrat
+
+[Install]
+WantedBy=multi-user.target

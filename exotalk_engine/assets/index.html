@@ -358,7 +358,10 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <h3>Archived Blobs</h3>
+                <!-- 🧠 EDUCATIONAL CONTEXT: The label "Storage Status" is a functional abstraction.
+                     While the underlying Iroh engine thinks in terms of "Blobs," the human dashboard
+                     presents this as "Storage" to emphasize the utility of the archived data. -->
+                <h3>Storage Status</h3>
                 <div class="value" id="count-blobs">0</div>
             </div>
             <div class="stat-card">
@@ -747,7 +750,7 @@
                 const stats = await response.json();
                 
                 document.getElementById('node-id').textContent = stats.node_id || 'Unknown';
-                document.getElementById('count-blobs').textContent = stats.blob_count || '0';
+                document.getElementById('count-blobs').textContent = stats.storage_status || 'Offline';
                 
                 // Stage 1: Engine
                 const sEngine = document.getElementById('stage-engine');
