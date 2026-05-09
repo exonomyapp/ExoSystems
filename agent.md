@@ -116,3 +116,8 @@ To access the remote Exonomy node from Exocracy:
 - **Pruning Awareness**: You MUST be hyper-aware of the session's context window status. Pruning or truncation is a signal that the conversation history is becoming too long for deterministic performance.
 - **Reporting Requirement**: You MUST report to the USER at the end of every turn if a "Truncation" or "Checkpoint" message has been received from the system.
 - **Branching Recommendation**: If pruning is detected, you MUST proactively recommend branching into a new session for subsequent complex tasks to preserve high-fidelity memory of the codebase and recent decisions.
+
+## Excluded Conversations (Do Not Reference)
+The following conversation IDs are **external and unrelated** to this project. You MUST NOT reference, cite, or incorporate any context from these sessions when making project decisions, writing code, or conducting research:
+
+- `239870b3-7495-4a0c-9d91-167a2ea22a55` — Non-project meta-session. Contains no project-relevant code, architecture, or decisions.

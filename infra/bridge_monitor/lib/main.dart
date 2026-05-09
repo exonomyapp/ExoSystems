@@ -14,7 +14,7 @@ import 'widgets/exo_zoom.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    File('/home/exocrat/bridge_monitor_clicks.log').writeAsStringSync('${DateTime.now().toIso8601String()} | STARTUP | v1.4.0-STATIC\n', mode: FileMode.append);
+    File('/home/exocrat/bridge_monitor_clicks.log').writeAsStringSync('${DateTime.now().toIso8601String()} | STARTUP | v1.5.0-BRIDGE\n', mode: FileMode.append);
   } catch (_) {}
   
   runApp(const ExoTechBridgeApp());
@@ -245,36 +245,79 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   Widget _buildPremiumHeader(bool isDark) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF141414) : const Color(0xFFE1E4E8),
         border: Border(bottom: BorderSide(color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFC0C4C8), width: 1)),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Image.asset('assets/exotalk_pappus_desktop.png', width: 96, height: 96),
-          const SizedBox(width: 24),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          // Logo & Title Group
+          Row(
             children: [
-              const Text("EXOTECH BRIDGE", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 28)),
-              Text("ACTIVE TELEMETRY | NODE: $_localHost | v1.4.0-STATIC", style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
-              ValueListenableBuilder<int>(
-                valueListenable: buildCountNotifier,
-                builder: (context, count, _) => Text("BUILD COUNT: $count", style: const TextStyle(fontSize: 9, color: Color(0xFF664400))),
+              Image.asset('assets/exotalk_pappus_desktop.png', width: 96, height: 96),
+              const SizedBox(width: 24),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("EXOTECH BRIDGE", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 32, letterSpacing: -1)),
+                  const SizedBox(height: 4),
+                  Text("ACTIVE TELEMETRY | NODE: $_localHost", style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                  const SizedBox(height: 2),
+                  const Text("v1.5.0-BRIDGE", style: const TextStyle(fontSize: 12, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+                  ValueListenableBuilder<int>(
+                    valueListenable: buildCountNotifier,
+                    builder: (context, count, _) => Text("BUILD COUNT: $count", style: const TextStyle(fontSize: 9, color: Color(0xFF664400))),
+                  ),
+                ],
               ),
             ],
           ),
-          const Spacer(),
-          _buildViewToggle(isDark),
-          const SizedBox(width: 24),
-          _buildCenteredHUD(isDark),
-          const SizedBox(width: 24),
-          _buildThemeToggle(isDark),
-          const Spacer(),
+          // HUD Center
+          RepaintBoundary(child: _buildCenteredHUD(isDark)),
+          // Controls Right
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Transform.scale(scale: 0.7, alignment: Alignment.centerRight, child: _buildViewToggle(isDark)),
+              const SizedBox(height: 8),
+              Transform.scale(scale: 0.7, alignment: Alignment.centerRight, child: _buildThemeToggle(isDark)),
+              const SizedBox(height: 8),
+              Transform.scale(scale: 0.7, alignment: Alignment.centerRight, child: _buildAgentToggle(isDark)),
+            ],
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildAgentToggle(bool isDark) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: agentModeNotifier,
+      builder: (context, isVisible, _) {
+        return CupertinoSlidingSegmentedControl<bool>(
+          groupValue: isVisible,
+          backgroundColor: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFDEE0E4),
+          thumbColor: isDark ? const Color(0xFF3A3A3A) : Colors.white,
+          padding: const EdgeInsets.all(2),
+          children: {
+            true: Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Text("HUD ON", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isVisible ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38)))),
+            false: Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), child: Text("HUD OFF", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: !isVisible ? const Color(0xFF00C9A7) : (isDark ? Colors.white38 : Colors.black38)))),
+          },
+          onValueChanged: (v) { if (v != null) agentModeNotifier.value = v; },
+        );
+      },
+    );
+  }
+
+  void _cycleNodeState(BridgeNode node) {
+    int currentState = node.isSleeping ? 1 : (node.isUp ? 2 : 0);
+    int nextState = (currentState + 1) % 3;
+    _setNodeState(node, nextState);
   }
 
   Widget _buildViewToggle(bool isDark) {
@@ -332,35 +375,43 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
       builder: (context, isVisible, _) {
         if (!isVisible) return const SizedBox.shrink();
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          width: 250,
+          height: 96,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1C1C1E).withOpacity(0.8) : Colors.white.withOpacity(0.6),
+            color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: isDark ? Colors.white12 : Colors.black12),
+            border: Border.all(color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFC0C4C8), width: 1),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              ValueListenableBuilder<int>(
+                valueListenable: currentIntervalNotifier,
+                builder: (context, interval, _) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("POLL INTERVAL", style: TextStyle(fontSize: 10, color: isDark ? Colors.white54 : Colors.black54, fontWeight: FontWeight.bold)),
+                    Text("${interval}ms", style: const TextStyle(fontSize: 12, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ValueListenableBuilder<int>(
-                    valueListenable: currentIntervalNotifier,
-                    builder: (context, interval, _) => Text(
-                      "AGENT MODE | INTERVAL: ${interval}ms | STEADY: $_consecutiveSteadyStates",
-                      style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  Text("STEADY STATES", style: TextStyle(fontSize: 10, color: isDark ? Colors.white54 : Colors.black54, fontWeight: FontWeight.bold)),
+                  Text("$_consecutiveSteadyStates", style: const TextStyle(fontSize: 12, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
                 ],
               ),
-              const SizedBox(width: 16),
-              Container(width: 1, height: 32, color: isDark ? Colors.white24 : Colors.black26),
-              const SizedBox(width: 16),
               ValueListenableBuilder<String>(
                 valueListenable: memRssNotifier,
-                builder: (context, rss, _) => Text(
-                  "MEM: $rss",
-                  style: const TextStyle(fontSize: 16, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold),
+                builder: (context, rss, _) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("MEMORY RSS", style: TextStyle(fontSize: 10, color: isDark ? Colors.white54 : Colors.black54, fontWeight: FontWeight.bold)),
+                    Text(rss, style: const TextStyle(fontSize: 12, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold)),
+                  ],
                 ),
               ),
             ],
@@ -401,39 +452,45 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   Widget _buildNodeCard(BridgeNode node, bool isDark) {
     return Container(
       constraints: const BoxConstraints(minWidth: 280), height: 180,
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: node.isUp ? const Color(0xFF003D33) : const Color(0xFF4D1D1D)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(children: [
-            RepaintBoundary(
-              child: _StatusIndicator(
-                isUp: node.isUp, 
-                isSleeping: node.isSleeping,
-                hasTraffic: node.hasTraffic,
-              ),
-            ), 
-            const SizedBox(width: 12), 
-            Text(node.name, style: const TextStyle(fontWeight: FontWeight.bold)), 
-            const Spacer(), 
-            Icon(node.icon, color: node.isUp ? const Color(0xFF006654) : const Color(0xFF803030), size: 16),
-          ]),
-          const SizedBox(height: 8),
-          Text(node.role, style: TextStyle(fontSize: 12, color: isDark ? Colors.white70 : Colors.black87)),
-          const Spacer(),
-          Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-             CupertinoSlidingSegmentedControl<int>(
-               groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
-               children: {0: const Icon(Icons.power_off, size: 14), 1: const Icon(Icons.bedtime, size: 14), 2: const Icon(Icons.power, size: 14)},
-               onValueChanged: (v) { if (v != null) _setNodeState(node, v); },
-             )
-          ]),
-        ],
+      child: InkWell(
+        onTap: () => _cycleNodeState(node),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                RepaintBoundary(
+                  child: _StatusIndicator(
+                    isUp: node.isUp, 
+                    isSleeping: node.isSleeping,
+                    hasTraffic: node.hasTraffic,
+                  ),
+                ), 
+                const SizedBox(width: 12), 
+                Text(node.name, style: const TextStyle(fontWeight: FontWeight.bold)), 
+                const Spacer(), 
+                Icon(node.icon, color: node.isUp ? const Color(0xFF006654) : const Color(0xFF803030), size: 16),
+              ]),
+              const SizedBox(height: 8),
+              Text(node.role, style: TextStyle(fontSize: 12, color: isDark ? Colors.white70 : Colors.black87)),
+              const Spacer(),
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                 CupertinoSlidingSegmentedControl<int>(
+                   groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
+                   children: {0: const Icon(Icons.power_off, size: 14), 1: const Icon(Icons.bedtime, size: 14), 2: const Icon(Icons.power, size: 14)},
+                   onValueChanged: (v) { if (v != null) _setNodeState(node, v); },
+                 )
+              ]),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -441,51 +498,55 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   Widget _buildNodeRow(BridgeNode node, bool isDark) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1C1C1E) : Colors.white, 
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: node.isUp ? const Color(0xFF003D33).withOpacity(0.3) : const Color(0xFF4D1D1D).withOpacity(0.3)),
       ),
-      child: Row(
-        children: [
-          RepaintBoundary(
-            child: _StatusIndicator(
-              isUp: node.isUp, 
-              isSleeping: node.isSleeping,
-              hasTraffic: node.hasTraffic,
-            ),
+      child: InkWell(
+        onTap: () => _cycleNodeState(node),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Row(
+            children: [
+              RepaintBoundary(
+                child: _StatusIndicator(
+                  isUp: node.isUp, 
+                  isSleeping: node.isSleeping,
+                  hasTraffic: node.hasTraffic,
+                ),
+              ),
+              const SizedBox(width: 24),
+              Icon(node.icon, color: node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F), size: 20),
+              const SizedBox(width: 24),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start, 
+                  children: [
+                    Text(node.name, style: const TextStyle(fontWeight: FontWeight.bold)), 
+                    Text("${node.role} • ${node.machine} • PORT: ${node.port}", style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.black87)),
+                  ]
+                )
+              ),
+              const SizedBox(width: 24),
+              CupertinoSlidingSegmentedControl<int>(
+                groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
+                children: {
+                  0: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power_off, size: 14)), 
+                  1: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.bedtime, size: 14)), 
+                  2: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power, size: 14))
+                },
+                onValueChanged: (v) { if (v != null) _setNodeState(node, v); },
+              ),
+            ],
           ),
-          const SizedBox(width: 24),
-          Icon(node.icon, color: node.isUp ? const Color(0xFF00C9A7) : const Color(0xFFFF5F5F), size: 20),
-          const SizedBox(width: 24),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start, 
-              children: [
-                Text(node.name, style: const TextStyle(fontWeight: FontWeight.bold)), 
-                Text("${node.role} • ${node.machine} • PORT: ${node.port}", style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.black87)),
-              ]
-            )
-          ),
-          const SizedBox(width: 24),
-          CupertinoSlidingSegmentedControl<int>(
-            groupValue: node.isSleeping ? 1 : (node.isUp ? 2 : 0),
-            children: {
-              0: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power_off, size: 14)), 
-              1: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.bedtime, size: 14)), 
-              2: const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.power, size: 14))
-            },
-            onValueChanged: (v) { if (v != null) _setNodeState(node, v); },
-          ),
-        ],
+        ),
       ),
     );
   }
 
   void _setNodeState(BridgeNode node, int state) async {
-    // 🧠 Educational Context: Click Logging
-    // We log all interactions to a central log file for remote verification.
     try {
       final logFile = File('/home/exocrat/bridge_monitor_clicks.log');
       final timestamp = DateTime.now().toIso8601String();
@@ -497,7 +558,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
       if (node.id == 'conscia') _consciaSleeping = false;
       if (node.id == 'signaling') _signalingSleeping = false;
       if (node.id == 'zrok') _zrokSleeping = false;
-      await Process.run('systemctl', ['--user', 'stop', node.serviceName]);
+      await Process.run('systemctl', ['--user', 'stop', '${node.serviceName}.service']);
     } else if (state == 1) {
       if (node.id == 'conscia') _consciaSleeping = true;
       if (node.id == 'signaling') _signalingSleeping = true;
@@ -506,7 +567,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
       if (node.id == 'conscia') _consciaSleeping = false;
       if (node.id == 'signaling') _signalingSleeping = false;
       if (node.id == 'zrok') _zrokSleeping = false;
-      await Process.run('systemctl', ['--user', 'start', node.serviceName]);
+      await Process.run('systemctl', ['--user', 'start', '${node.serviceName}.service']);
     }
     _performScan();
     _saveState();
@@ -580,8 +641,11 @@ class _StatusIndicator extends StatelessWidget {
       return _buildDot(staticYellow);
     }
 
-    final color = hasTraffic ? intenseNeonGreen : darkUnlitGreen;
-    return _buildDot(color);
+    if (hasTraffic) {
+      return _buildDot(intenseNeonGreen);
+    }
+
+    return _buildDot(darkUnlitGreen);
   }
 
   Widget _buildDot(Color color) {

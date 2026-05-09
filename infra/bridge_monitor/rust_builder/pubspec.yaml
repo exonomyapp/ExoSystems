@@ -1,0 +1,13 @@
+name: rust_lib_bridge_monitor
+description: "Rust library for Bridge Monitor."
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.7.2 <4.0.0'
+
+flutter:
+  plugin:
+    platforms:
+      linux:
+        ffiPlugin: true

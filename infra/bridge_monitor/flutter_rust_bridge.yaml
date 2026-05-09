@@ -1,0 +1,5 @@
+rust_input: "crate::api"
+dart_output: lib/src/rust/
+rust_output: rust_builder/src/frb_generated.rs
+rust_root: rust_builder
+dart_root: .
