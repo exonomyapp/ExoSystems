@@ -33,6 +33,7 @@ use tracing_core::{Event as TracingEvent, Subscriber};
 use tracing_subscriber::{layer::Context, Layer, prelude::*};
 use chrono::Local;
 use metrics_exporter_prometheus::PrometheusBuilder;
+use tower_http::cors::{Any, CorsLayer};
 
 /// CLI Argument Parsing via Clap
 /// This struct defines the "shape" of our terminal commands. 
@@ -299,7 +300,13 @@ async fn start_daemon(config: Config) -> anyhow::Result<()> {
         .route("/api/governance/authorize", post(authorize_peer))
         .route("/api/federation/toggle", post(toggle_federation))
         .route("/api/logs/stream", get(stream_logs))
-        .route("/metrics", get(move || async move { metrics_handle.render() }));
+        .route("/metrics", get(move || async move { metrics_handle.render() }))
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any)
+                .allow_methods(Any)
+                .allow_headers(Any),
+        );
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.http_port));
     let listener = tokio::net::TcpListener::bind(addr).await?;
