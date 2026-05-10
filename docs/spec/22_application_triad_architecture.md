@@ -1,7 +1,7 @@
 # Specification 22: The Application Triad Architecture
 
 ## 1. Overview
-The Sovereign Exosystem comprises several independent applications—ExoTalk (messaging), Exonomy (social voucher exchange), Exocracy (project governance), and RepubLet (scientific publishing)—each addressing distinct domains of increasing content complexity.
+The Sovereign Exosystem comprises several independent applications—ExoTalk (messaging), Exonomy (social voucher exchange), Exocracy (project governance), RepubLet (scientific publishing), and Conscia (Sovereign Beacon)—each addressing distinct domains of increasing content complexity.
 
 To ensure proper access and knowledge exchange while respecting these varying levels of complexity, all advanced ecosystem applications operate on a **3-Tier "Triad" Architecture**:
 

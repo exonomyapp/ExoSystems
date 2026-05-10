@@ -3,7 +3,7 @@
 This document explains how to manage, build, and run the Conscia Beacon node across multiple machines.
 
 > [!NOTE]
-> For core architectural details, high-availability cluster specifications, and native package manager installation instructions (APT, NPM, Snap), please refer to the **[Conscia Engine README](../exotalk_engine/conscia/README.md)**.
+> For core architectural details, high-availability cluster specifications, and native package manager installation instructions (APT, NPM, Snap), please refer to the **[Conscia Engine README](../conscia/README.md)**.
 
 ## Two Ways to Run Conscia
 

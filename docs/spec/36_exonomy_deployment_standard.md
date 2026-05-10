@@ -19,7 +19,7 @@ The Exonomy node (`exocrat@exonomy.local`) follows a strict **`~/deployments/`**
 - **Path**: `~/deployments/infra/`
 - **Signaling**: `~/deployments/infra/signaling_server.py`
 - **zrok**: `~/deployments/infra/zrok` (Target Version: `v1.1.11 Stable`)
-- **Conscia**: `~/deployments/infra/conscia` (Target Version: `v0.7.7`)
+- **Conscia**: `~/deployments/conscia/daemon/conscia` (Target Version: `v0.7.7`)
 
 ## 3. Service Orchestration
 - All Python and external binary proxies (Signaling, zrok) MUST be orchestrated via **Systemd User Units**.

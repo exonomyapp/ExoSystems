@@ -41,7 +41,6 @@ members = [
     "republet_ffi",
     "exonomy_ffi",
     "exocracy_ffi",
-    "conscia",
     "republet_desktop",
     "exocracy_desktop", "exotalk_wasm",
 ]

@@ -20,11 +20,11 @@ variable "ssh_password" {
 variable "binary_source_path" {
   description = "Path to the compiled conscia binary."
   type        = string
-  default     = "../exotalk_engine/target/release/conscia"
+  default     = "../../conscia/target/release/conscia"
 }
 
 variable "target_deployment_dir" {
   description = "Directory on the target host to deploy the beacon."
   type        = string
-  default     = "~/conscia"
+  default     = "~/deployments/conscia/daemon"
 }

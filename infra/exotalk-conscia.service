@@ -6,8 +6,8 @@ Description=ExoTalk Conscia Beacon
 After=network.target
 
 [Service]
-ExecStart=/home/exocrat/deployments/infra/conscia daemon
-WorkingDirectory=/home/exocrat
+ExecStart=/home/exocrat/deployments/conscia/daemon/conscia daemon
+WorkingDirectory=/home/exocrat/deployments/conscia/daemon
 Restart=always
 User=exocrat
 Environment=HOME=/home/exocrat
