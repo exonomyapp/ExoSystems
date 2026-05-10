@@ -2,7 +2,8 @@
 name = "exoauth_core"
 version = "0.1.0"
 edition = "2024"
-
+[lib]
+crate-type = ["cdylib", "staticlib"]
 [dependencies]
 base64 = "0.22.1"
 bs58 = "0.5.1"
