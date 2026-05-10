@@ -26,6 +26,9 @@ clap = { version = "4.5.31", features = ["derive"] }
 inquire = "0.7.5"
 toml = "0.8.20"
 dirs = "6.0.0"
+rand = "0.8"
+bs58 = "0.5"
+ed25519-dalek = { version = "2", features = ["rand_core"] }
 
 [package.metadata.deb]
 maintainer = "ExoSystems Governance <federation@exonomy.local>"

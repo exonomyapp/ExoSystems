@@ -69,9 +69,14 @@ impl SovereignSession {
     /// that no central authority can revoke or track the initial birth 
     /// of an identity.
     pub fn synthesize_did(&self) -> String {
-        // For the demo, we generate a deterministic placeholder.
-        // Production will use Ed25519 key derivation.
-        format!("did:peer:2.Ez6LS...{}...{}", &self.handle, "demo")
+        // 🛡️ SOVEREIGNTY: We generate a real Ed25519 keypair directly inside
+        // the browser sandbox. The private key never leaves this Wasm instance.
+        use ed25519_dalek::SigningKey;
+        use rand::rngs::OsRng;
+        let signing_key = SigningKey::generate(&mut OsRng);
+        let public_key_bytes = signing_key.verifying_key().to_bytes();
+        let public_b58 = bs58::encode(public_key_bytes).into_string();
+        format!("did:peer:{}", public_b58)
     }
 
     /// Initiates a connection to the Sovereign Mesh.

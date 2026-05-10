@@ -240,12 +240,17 @@ fn run_onboarding(path: &std::path::Path) -> anyhow::Result<Config> {
 
     println!("\nGenerating sovereign identity...");
     // IDENTITY SYNTHESIS:
-    // In a production environment, this calls exotalk_core::identity::generate()
-    // to create a unique Ed25519 keypair for the node's did:peer ID.
+    // We generate a real Ed25519 keypair so this node has a mathematically
+    // unique did:peer identity from its very first boot.
+    let signing_key = ed25519_dalek::SigningKey::generate(&mut rand::rngs::OsRng);
+    let secret_b58 = bs58::encode(signing_key.to_bytes()).into_string();
+    let public_b58 = bs58::encode(signing_key.verifying_key().to_bytes()).into_string();
+    let node_did = format!("did:peer:{}", public_b58);
+
     let config = Config {
         node_name: name,
-        did: format!("did:peer:{}", "temp_uuid_for_now"), 
-        secret: "CVh7w1QW9GdThiRskD5SYtCyzGLteP4BC6CXR94CFABC".to_string(),
+        did: node_did,
+        secret: secret_b58,
         http_port: port,
         federation_active: role == "High-Availability Mesh",
     };
@@ -412,8 +417,9 @@ struct DiscoveryResponse {
 
 async fn get_discovery() -> Json<DiscoveryResponse> {
     let stats = network_internal::get_stats().await;
+    let actual_did = network_internal::get_beacon_did().await.unwrap_or_else(|| "Offline".to_string());
     Json(DiscoveryResponse {
-        did: "did:peer:conscia_beacon".to_string(), // Placeholder for actual DID configuration
+        did: actual_did,
         node_id: stats.get("node_id").cloned().unwrap_or_else(|| "Offline".to_string()),
         version: env!("CARGO_PKG_VERSION").to_string(),
     })

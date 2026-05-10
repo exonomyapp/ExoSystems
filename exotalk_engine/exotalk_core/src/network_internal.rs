@@ -75,6 +75,13 @@ pub static PENDING_REQUESTS: Lazy<RwLock<Vec<String>>> = Lazy::new(|| RwLock::ne
 /// Cached secret key for the beacon (used for signing delegations)
 static BEACON_SECRET: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
 
+/// Cached DID for the beacon (used for discovering and signing)
+static BEACON_DID: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
+
+pub async fn get_beacon_did() -> Option<String> {
+    BEACON_DID.read().await.clone()
+}
+
 pub struct IrohNode {
     endpoint: iroh::Endpoint,
     blobs: iroh_blobs::store::fs::Store,
@@ -329,7 +336,7 @@ pub async fn authorize_node(node_id: String, role: String) -> Result<(), String>
     // Use a default global namespace for mesh-level governance
     let namespace = crate::protocol_internal::derive_namespace("conscia_mesh_governance");
     
-    let delegator_did = format!("did:peer:conscia_beacon"); // Placeholder or derived
+    let delegator_did = get_beacon_did().await.ok_or("Beacon DID not set")?;
     
     let cap = crate::protocol_internal::delegate_capability(
         &delegator_did,
@@ -373,8 +380,10 @@ pub async fn revoke_node(node_id: String) -> Result<(), String> {
     save_capabilities().await;
 
     // 2. Broadcast Tombstone
+    let delegator_did = get_beacon_did().await.ok_or("Beacon DID not set")?;
+
     let tombstone = crate::protocol_internal::RevocationTombstone {
-        delegator: format!("did:peer:conscia_beacon"), // Placeholder
+        delegator: delegator_did,
         delegatee: node_id.clone(),
         namespace,
         signature: vec![], // In this version, we don't sign tombstones yet
@@ -443,6 +452,11 @@ pub async fn start_iroh_node(did: String, secret_key_b58: String) -> Result<(), 
     {
         let mut s = BEACON_SECRET.write().await;
         *s = Some(secret_key_b58.clone());
+    }
+
+    {
+        let mut d = BEACON_DID.write().await;
+        *d = Some(did.clone());
     }
 
     load_capabilities().await;
