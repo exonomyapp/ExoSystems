@@ -76,8 +76,15 @@ pub static PENDING_REQUESTS: Lazy<RwLock<Vec<String>>> = Lazy::new(|| RwLock::ne
 static BEACON_SECRET: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
 
 /// Cached DID for the beacon (used for discovering and signing)
+/// 🧠 EDUCATIONAL CONTEXT: Identity Propagation
+/// When the Conscia daemon boots, it reads its DID from config.toml and
+/// stores it here. Every subsystem that needs to sign, delegate, or identify
+/// itself (authorize_node, revoke_node, /api/discovery) reads from this
+/// single source of truth instead of constructing ad-hoc identity strings.
+/// This eliminates the risk of identity divergence across the codebase.
 static BEACON_DID: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
 
+/// Returns the node's actual DID for external consumption (e.g., HTTP API).
 pub async fn get_beacon_did() -> Option<String> {
     BEACON_DID.read().await.clone()
 }

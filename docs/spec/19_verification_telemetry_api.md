@@ -15,8 +15,22 @@ The [Agent Control Harness](../walkthroughs/41_connectivity_and_automated_testin
 
 ### Tier 2: State Inquiry (Milliseconds Verification)
 - **ExoTalk (App)**: Inquire internal state via the **Telemetry API (Port 11434)**.
-- **Conscia (Node)**: Inquire node status via the REST API (`/api/stats`, `/api/logs/stream`) over [SSH Tunnels](../walkthroughs/25_federated_access_and_security_fluidization.md).
+- **Conscia (Node)**: Inquire node status via the REST API (Port 3000) over [SSH Tunnels](../walkthroughs/25_federated_access_and_security_fluidization.md).
 - **Goal**: Sub-500ms confirmation of functional success before proceeding to the next step.
+
+#### 1.1.1 Conscia Node API (Port 3000)
+The Conscia daemon exposes both internal telemetry and external federation endpoints.
+
+| Endpoint | Method | Data Returned | Purpose |
+| :--- | :--- | :--- | :--- |
+| `/api/stats` | GET | Node ID, status, relay, peers, topics, storage | Internal node telemetry. |
+| `/api/discovery` | GET | DID, Node ID, version | Public identity for unauthenticated discovery. |
+| `/api/capabilities` | GET | Node role, performance target, SDUI widget list | Server-Driven UI blueprint for client rendering. |
+| `/api/capabilities/petition` | POST | — | Submit a DID-based JoinRequest for operator approval. |
+| `/api/capabilities/verify` | POST | Permission level (Admin/Write/Read/None) | Verify authorization status of an external DID. |
+| `/api/index/metadata` | POST | — | Inject signed public metadata for blind indexing. |
+| `/api/index/search` | GET | Content hashes, author DIDs | Query the node's public metadata index. |
+| `/api/logs/stream` | GET (SSE) | Real-time log payloads | Stream filtered system logs to the dashboard. |
 
 #### 1.1 Telemetry API (Local Sidecar)
 The ExoTalk application runs a lightweight, read-only HTTP server on `127.0.0.1:11434` specifically for agent-driven verification and high-density UI updates.

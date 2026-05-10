@@ -22,8 +22,12 @@ Revocation in a chain creates a cascading effect: if Malik's capability is revok
 
 ## 11.4 Federated Join Requests
 - **JoinRequest struct**: `JoinRequest { node_id: Did, timestamp_ms: i64 }`
-- **Workflow**: 
+- **Gossip Path** (for Iroh-capable nodes):
     1. A new node broadcasts a `JoinRequest` JSON to the `conscia_mesh_governance` topic.
     2. The Conscia beacon (operating in Federation mode) receives the request and queues it for the operator.
     3. The operator reviews the request on the dashboard and authorizes the node, which triggers a `Capability` delegation broadcast.
-- **Trust Model**: This provides a human-in-the-loop gate for joining private meshes while maintaining decentralized enforcement.
+- **HTTP Path** (for external host apps without the Iroh stack):
+    1. An external app (e.g., ThreeSteps) holding an `exoauth`-generated DID submits a petition to `POST /api/capabilities/petition`.
+    2. The Conscia daemon injects this into the same `PENDING_REQUESTS` queue, unifying governance regardless of transport.
+    3. The app polls `POST /api/capabilities/verify` to discover when its petition has been approved.
+- **Trust Model**: Both paths converge on the same human-in-the-loop gate, ensuring decentralized enforcement regardless of whether the petitioner arrives over gossip or HTTP.

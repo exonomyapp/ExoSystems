@@ -408,6 +408,10 @@ struct LogParams {
 // These endpoints allow them to securely "Discover" the Conscia node, query
 // its capabilities, and fetch the exact UI components they are allowed to paint.
 
+/// 🧠 EDUCATIONAL CONTEXT: Discovery Response
+/// This is the public "business card" of the Conscia node. Any app on the 
+/// local network (or over a stable zrok tunnel) can call GET /api/discovery 
+/// to learn who this node is, without needing any credentials.
 #[derive(Serialize)]
 struct DiscoveryResponse {
     did: String,
@@ -451,12 +455,21 @@ async fn get_capabilities() -> Json<CapabilitiesResponse> {
     })
 }
 
+/// 🧠 EDUCATIONAL CONTEXT: Petition Payload
+/// When an external app like ThreeSteps wants to join the mesh, it submits
+/// its exoauth-generated DID along with the role it is requesting. The node
+/// operator then reviews this petition on the Conscia Dashboard before
+/// granting a Meadowcap capability token.
 #[derive(Deserialize)]
 struct PetitionPayload {
     did: String,
     role_requested: String,
 }
 
+/// 💡 MENTOR TIP: This handler bridges the HTTP world with the P2P governance
+/// model. External apps cannot broadcast JoinRequests over gossip because they 
+/// lack the Iroh stack. So we accept the petition over REST and inject it into
+/// the same PENDING_REQUESTS queue that gossip-based JoinRequests use.
 async fn submit_petition(Json(payload): Json<PetitionPayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
     let mut pending = network_internal::PENDING_REQUESTS.write().await;
     if !pending.contains(&payload.did) {
@@ -476,6 +489,9 @@ struct VerifyResponse {
     permission_level: String,
 }
 
+/// 💡 MENTOR TIP: This is the inverse of the petition flow. After an operator
+/// has authorized a DID, the host app can poll this endpoint to discover its
+/// PermissionLevel. The app uses this to unlock features in its own UI.
 async fn verify_capability(Json(payload): Json<VerifyPayload>) -> Json<VerifyResponse> {
     let store = network_internal::CAPABILITY_STORE.read().await;
     // We use the mesh governance namespace for base access level checks
@@ -494,6 +510,12 @@ async fn verify_capability(Json(payload): Json<VerifyPayload>) -> Json<VerifyRes
     Json(VerifyResponse { permission_level })
 }
 
+/// 🧠 EDUCATIONAL CONTEXT: Metadata Payload
+/// This is the "decoration" that content authors attach to their encrypted 
+/// payloads. The Conscia node stores these tags for search but is strictly 
+/// "blind" to the actual content — it never receives the decryption keys.
+/// The signature field allows the node to verify that the metadata was truly
+/// authored by the claimed DID, preventing spoofed tag injection.
 #[derive(Deserialize, Serialize, Clone)]
 struct MetadataPayload {
     author_did: String,
@@ -521,6 +543,10 @@ struct SearchQuery {
     query: String,
 }
 
+/// 💡 MENTOR TIP: This search is intentionally simple — a case-insensitive
+/// substring match across metadata tags. For a production HA Mesh node, this
+/// would be backed by a persistent full-text search engine. The simplicity
+/// here ensures the endpoint contract is stable while the backend evolves.
 async fn search_metadata(Query(params): Query<SearchQuery>) -> Json<Vec<MetadataPayload>> {
     let index = METADATA_INDEX.read().await;
     let query_lower = params.query.to_lowercase();
