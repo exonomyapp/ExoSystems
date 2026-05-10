@@ -32,6 +32,10 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  # 🧠 EDUCATIONAL CONTEXT:
+  # This plugin configuration tells the Flutter toolchain that this package contains native C/Rust
+  # code that needs to be compiled. Without it, the `rust/` directory is ignored by the host app,
+  # and the resulting dynamic library (e.g., libexoauth_core.so) is never built or bundled.
   plugin:
     platforms:
       android:

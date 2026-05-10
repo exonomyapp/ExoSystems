@@ -3,6 +3,10 @@ name = "exoauth_core"
 version = "0.1.0"
 edition = "2024"
 [lib]
+# 🧠 EDUCATIONAL CONTEXT:
+# Flutter Rust Bridge (FRB) requires the native bindings to be compiled as a shared library (.so, .dylib, .dll) 
+# for dynamic linking at runtime on Linux/Windows/Android/macOS, and as a static library (.a) for iOS.
+# If omitted, Cargo defaults to `rlib`, causing the FFI to silently fail to bundle into the final app.
 crate-type = ["cdylib", "staticlib"]
 [dependencies]
 base64 = "0.22.1"
