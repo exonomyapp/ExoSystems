@@ -63,7 +63,10 @@ You are operating within an **Event-Driven Multi-Agent SDLC**. Depending on the 
 ## 5. Housekeeping Protocol
 - **Session Wrap-Up**: At the conclusion of a major structural or feature session, you MUST offer to stage and `git commit` the codebase. This locks in a clean baseline and prevents sprawling, unmanageable diffs.
 - **Documentation Hygiene**: Documentation must only state *what is*. Do not use comments or readmes as changelogs or historical archives. Walkthroughs serve as the historical record, not source code or specs.
-- **Scrot Cleanup (Mandatory)**: At the end of every session, you MUST delete ALL screenshot files (`exocracy_scrot.png`, `exonomy_scrot.png`) from the repository root using `gio trash`. Additionally, any stale or numbered scrot files (e.g., `exonomy_scrot_000.png`, `exocracy_code_check.png`) from this or prior sessions that are no longer needed for documentation must also be trashed. Leave no PNG debris in the repository root.
+- **Environmental Hygiene (Mandatory & Strict)**: At the end of every session, you MUST sweep BOTH the **Exocracy** (local) and **Exonomy** (remote) environments for any "working files." 
+    - **CRITICAL RESTRICTION**: You may ONLY delete files or revert states that were **explicitly created or modified by you during the current session**. 
+    - You are strictly prohibited from deleting pre-existing files, folders, or "sweeping" directories based on assumptions that they are unrelated to the project. If you didn't create or modify it in this session, do not touch it.
+    - Cleanup targets include screenshots (`exocracy_scrot.png`), testing scripts, and temporary log files generated during your immediate diagnostics. All deletions must use `gio trash`.
 
 ## 6. Desktop Control & Remote Orchestration
 You have direct control over the local Ubuntu desktop (`DISPLAY=:1`) and remote control capability for the Exonomy system via SSH + X11.
