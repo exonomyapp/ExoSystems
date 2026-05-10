@@ -53,13 +53,6 @@ pub async fn join_conversation_topic(namespace: [u8; 32]) -> Result<(), String> 
 
 pub async fn set_associated_conscia(node_id: String) -> Result<(), String> {
     network_internal::set_associated_conscia(node_id.clone()).await?;
-    
-    // Also persist to manifest
-    let mut manifest = crate::api::willow::get_device_manifest().await;
-    if manifest.associated_conscia_id != Some(node_id.clone()) {
-        manifest.associated_conscia_id = Some(node_id);
-        crate::api::willow::save_device_manifest(manifest).await;
-    }
     Ok(())
 }
 

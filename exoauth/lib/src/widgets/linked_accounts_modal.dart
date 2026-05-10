@@ -26,6 +26,7 @@ import '../theme.dart';
 import '../providers.dart';
 import '../models.dart';
 import '../identity_service.dart';
+import '../services/oauth_service.dart';
 
 
 class LinkedAccountsModal extends ConsumerStatefulWidget {

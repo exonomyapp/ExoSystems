@@ -19,12 +19,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'src/rust/api/willow.dart';
 import 'src/rust/frb_generated.dart';
 import 'package:exoauth/exoauth.dart';
 import 'screens/home_screen.dart';
 import 'providers/toast_provider.dart';
-import 'services/rust_identity_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -40,7 +38,8 @@ Future<void> main() async {
   // initialized. This ensures that the user's local identity and mesh 
   // state are the source of truth from the first frame.
   try {
-    await initWillowDatabase();
+    // P2P messaging is initialized lazily after profile selection
+    // via initWillowDatabase(did, secret) in the identity flow.
     
     // Window management for desktop
     await windowManager.ensureInitialized();

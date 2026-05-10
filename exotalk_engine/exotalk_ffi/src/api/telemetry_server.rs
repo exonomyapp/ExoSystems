@@ -11,7 +11,7 @@ use serde::Serialize;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
 use exotalk_core::network_internal;
-use crate::api::willow;
+
 
 #[derive(Serialize)]
 pub struct IdentityResponse {
@@ -75,10 +75,9 @@ pub async fn start_telemetry_server() -> Result<(), String> {
 
 async fn handle_identity() -> Json<IdentityResponse> {
     let node_id = network_internal::get_node_id().await;
-    let active_did = willow::get_active_did_internal().await;
     
     Json(IdentityResponse {
-        active_did,
+        active_did: None,
         node_id,
         is_initialized: true,
     })

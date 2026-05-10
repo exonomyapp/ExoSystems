@@ -16,7 +16,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../src/rust/api/willow.dart';
+import 'package:exoauth/exoauth.dart';
 import '../../src/theme.dart' hide NameRecord, VerifiedLink;
 
 class VerifiedLinksCard extends StatelessWidget {

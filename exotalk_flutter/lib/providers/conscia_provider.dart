@@ -19,7 +19,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:exoauth/exoauth.dart';
 import '../src/rust/api/network.dart';
-import '../src/rust/api/willow.dart';
 
 // 🧠 Educational Context: The Mesh Lifeline Monitor
 /// Provider that periodically polls the Rust engine for the Conscia connection status.

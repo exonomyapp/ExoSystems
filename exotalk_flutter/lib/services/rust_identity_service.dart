@@ -1,6 +1,6 @@
 import 'package:exoauth/exoauth.dart';
+import 'package:exoauth/exoauth.dart' as rust;
 import '../src/rust/api/network.dart' as net;
-import '../src/rust/api/willow.dart' as rust;
 
 // 🧠 Educational Context: The Identity FFI Bridge
 /// Implementation of [IdentityService] that delegates to the Rust backend.

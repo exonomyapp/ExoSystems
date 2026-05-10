@@ -6,36 +6,39 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `default_true`, `generate_proof_string_for_format`, `get_active_did_internal`, `get_active_identity_sync`, `load_oauth_links`, `save_db_to_disk`, `save_oauth_links`, `storage_path`, `update_device_manifest`, `verify_raw_sig`
+// These functions are ignored because they are not marked as `pub`: `default_true`, `generate_proof_string_for_format`, `get_active_did_internal`, `get_active_identity_sync`, `load_oauth_links`, `save_oauth_links`, `storage_path`, `update_device_manifest`, `verify_raw_sig`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `ProfileMetadata`, `UserIdentity`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
 
 Future<DeviceManifest> getDeviceManifest() =>
-    RustLib.instance.api.crateApiWillowGetDeviceManifest();
+    RustLib.instance.api.crateApiIdentityGetDeviceManifest();
 
 Future<void> saveDeviceManifest({required DeviceManifest manifest}) =>
-    RustLib.instance.api.crateApiWillowSaveDeviceManifest(manifest: manifest);
+    RustLib.instance.api.crateApiIdentitySaveDeviceManifest(manifest: manifest);
 
 /// Closes the active databases, unloads identity, and signals network shutdown
 Future<void> signOutProfile() =>
-    RustLib.instance.api.crateApiWillowSignOutProfile();
+    RustLib.instance.api.crateApiIdentitySignOutProfile();
 
 /// Sets the given DID as the active profile and boots up its P2P network node.
 Future<bool> switchActiveProfile({required String did}) =>
-    RustLib.instance.api.crateApiWillowSwitchActiveProfile(did: did);
+    RustLib.instance.api.crateApiIdentitySwitchActiveProfile(did: did);
 
-/// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier
+/// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier.
+/// This is the "Big Bang" of a sovereign session. By generating keys
+/// locally on the device's CSPRNG (OsRng), we ensure that no central
+/// authority ever sees the private secret, fulfilling the "Own Your Data" mandate.
 Future<IdentityVault> generateNewIdentity() =>
-    RustLib.instance.api.crateApiWillowGenerateNewIdentity();
+    RustLib.instance.api.crateApiIdentityGenerateNewIdentity();
 
 /// Returns the active node identity. Returns an empty vault if no identity is active.
 Future<IdentityVault> getActiveIdentity() =>
-    RustLib.instance.api.crateApiWillowGetActiveIdentity();
+    RustLib.instance.api.crateApiIdentityGetActiveIdentity();
 
 Future<IdentityVault> updateActiveProfile({
   required String name,
   required String avatar,
-}) => RustLib.instance.api.crateApiWillowUpdateActiveProfile(
+}) => RustLib.instance.api.crateApiIdentityUpdateActiveProfile(
   name: name,
   avatar: avatar,
 );
@@ -47,27 +50,27 @@ Future<IdentityVault> updateActiveProfile({
 Future<String> generateVerificationProof({required String format}) => RustLib
     .instance
     .api
-    .crateApiWillowGenerateVerificationProof(format: format);
+    .crateApiIdentityGenerateVerificationProof(format: format);
 
 /// Evaluates all available proof formats and returns the best one that fits within max_chars.
 Future<String> generateBestProof({required BigInt maxChars}) =>
-    RustLib.instance.api.crateApiWillowGenerateBestProof(maxChars: maxChars);
+    RustLib.instance.api.crateApiIdentityGenerateBestProof(maxChars: maxChars);
 
 /// Verifies any supported ExoTalk proof string locally.
 Future<bool> verifyProofLocally({required String proof}) =>
-    RustLib.instance.api.crateApiWillowVerifyProofLocally(proof: proof);
+    RustLib.instance.api.crateApiIdentityVerifyProofLocally(proof: proof);
 
 Future<IdentityVault> setIngressEnabled({required bool enabled}) =>
-    RustLib.instance.api.crateApiWillowSetIngressEnabled(enabled: enabled);
+    RustLib.instance.api.crateApiIdentitySetIngressEnabled(enabled: enabled);
 
 Future<IdentityVault> setEgressEnabled({required bool enabled}) =>
-    RustLib.instance.api.crateApiWillowSetEgressEnabled(enabled: enabled);
+    RustLib.instance.api.crateApiIdentitySetEgressEnabled(enabled: enabled);
 
 /// Adds a pending (unverified) link to the vault.
 Future<IdentityVault> addVerificationLink({
   required String label,
   required String url,
-}) => RustLib.instance.api.crateApiWillowAddVerificationLink(
+}) => RustLib.instance.api.crateApiIdentityAddVerificationLink(
   label: label,
   url: url,
 );
@@ -76,34 +79,34 @@ Future<IdentityVault> addVerificationLink({
 Future<IdentityVault> confirmVerificationLink({
   required String url,
   required bool verified,
-}) => RustLib.instance.api.crateApiWillowConfirmVerificationLink(
+}) => RustLib.instance.api.crateApiIdentityConfirmVerificationLink(
   url: url,
   verified: verified,
 );
 
 /// Removes a link by URL.
 Future<IdentityVault> removeVerificationLink({required String url}) =>
-    RustLib.instance.api.crateApiWillowRemoveVerificationLink(url: url);
+    RustLib.instance.api.crateApiIdentityRemoveVerificationLink(url: url);
 
 /// Renames the display label of a link.
 Future<IdentityVault> updateLinkLabel({
   required String url,
   required String newLabel,
-}) => RustLib.instance.api.crateApiWillowUpdateLinkLabel(
+}) => RustLib.instance.api.crateApiIdentityUpdateLinkLabel(
   url: url,
   newLabel: newLabel,
 );
 
 /// Returns the full name history list.
 Future<List<NameRecord>> getNameHistory() =>
-    RustLib.instance.api.crateApiWillowGetNameHistory();
+    RustLib.instance.api.crateApiIdentityGetNameHistory();
 
 /// Links an OAuth account to the active did:peer by signing a binding proof.
 Future<OAuthLink> addOauthLink({
   required String provider,
   required String displayName,
   required String sub,
-}) => RustLib.instance.api.crateApiWillowAddOauthLink(
+}) => RustLib.instance.api.crateApiIdentityAddOauthLink(
   provider: provider,
   displayName: displayName,
   sub: sub,
@@ -111,18 +114,18 @@ Future<OAuthLink> addOauthLink({
 
 /// Removes an OAuth link by provider key.
 Future<void> removeOauthLink({required String provider}) =>
-    RustLib.instance.api.crateApiWillowRemoveOauthLink(provider: provider);
+    RustLib.instance.api.crateApiIdentityRemoveOauthLink(provider: provider);
 
 /// Returns all linked OAuth accounts.
 Future<List<OAuthLink>> getOauthLinks() =>
-    RustLib.instance.api.crateApiWillowGetOauthLinks();
+    RustLib.instance.api.crateApiIdentityGetOauthLinks();
 
 /// Finds the did:peer for a given OAuth provider + sub combination.
 /// Returns an empty string if not found.
 Future<String> findDidForOauth({
   required String provider,
   required String sub,
-}) => RustLib.instance.api.crateApiWillowFindDidForOauth(
+}) => RustLib.instance.api.crateApiIdentityFindDidForOauth(
   provider: provider,
   sub: sub,
 );
@@ -130,83 +133,25 @@ Future<String> findDidForOauth({
 /// Generates a short-lived signed pairing token for QR-code device sync.
 /// The token encodes: did + timestamp + signature. Expires after 5 minutes.
 Future<String> generateDevicePairingToken() =>
-    RustLib.instance.api.crateApiWillowGenerateDevicePairingToken();
+    RustLib.instance.api.crateApiIdentityGenerateDevicePairingToken();
 
 /// Verifies a pairing token (checks signature and 5-minute expiry).
 Future<bool> verifyDevicePairingToken({required String token}) =>
-    RustLib.instance.api.crateApiWillowVerifyDevicePairingToken(token: token);
+    RustLib.instance.api.crateApiIdentityVerifyDevicePairingToken(token: token);
 
 /// Exports the full profile + OAuth links as a JSON string (for cross-device transfer).
 /// In a production implementation this would be encrypted; here it is signed.
 Future<String> exportProfileBundle() =>
-    RustLib.instance.api.crateApiWillowExportProfileBundle();
+    RustLib.instance.api.crateApiIdentityExportProfileBundle();
 
 /// Imports a profile bundle from another device (verifies did:peer signature first).
 Future<bool> importProfileBundle({required String bundle}) =>
-    RustLib.instance.api.crateApiWillowImportProfileBundle(bundle: bundle);
-
-Future<bool> initWillowDatabase() =>
-    RustLib.instance.api.crateApiWillowInitWillowDatabase();
-
-Future<List<Conversation>> fetchConversations() =>
-    RustLib.instance.api.crateApiWillowFetchConversations();
-
-Future<Message> sendWillowMessage({
-  required String conversationId,
-  required String authorDid,
-  required String content,
-}) => RustLib.instance.api.crateApiWillowSendWillowMessage(
-  conversationId: conversationId,
-  authorDid: authorDid,
-  content: content,
-);
-
-Future<List<Message>> getMessagesForConversation({required String convoId}) =>
-    RustLib.instance.api.crateApiWillowGetMessagesForConversation(
-      convoId: convoId,
-    );
-
-Future<Conversation> createConversation({
-  required String title,
-  required List<String> peers,
-}) => RustLib.instance.api.crateApiWillowCreateConversation(
-  title: title,
-  peers: peers,
-);
-
-Future<void> deleteConversation({required String convoId}) =>
-    RustLib.instance.api.crateApiWillowDeleteConversation(convoId: convoId);
-
-/// Signs and gossips a new Meadowcap Capability token granting access to a conversation.
-/// 💡 MENTOR TIP: "Delegation" means giving someone else the power to speak.
-/// We use our private key to sign a specialized payload that only we could
-/// have created. When other peers see this token, they'll know the math
-/// proves it came from us.
-Future<String> delegateCapability({
-  required String targetDid,
-  required String namespaceId,
-  required String level,
-}) => RustLib.instance.api.crateApiWillowDelegateCapability(
-  targetDid: targetDid,
-  namespaceId: namespaceId,
-  level: level,
-);
-
-/// Verifies a Meadowcap Capability token mathematically against the delegator's active DID
-Future<bool> verifyCapability({required String capJson}) =>
-    RustLib.instance.api.crateApiWillowVerifyCapability(capJson: capJson);
-
-/// Fetches the current roster of verified peers for a specific conversation.
-Future<Map<String, String>> getCapabilitiesForNamespace({
-  required String namespaceId,
-}) => RustLib.instance.api.crateApiWillowGetCapabilitiesForNamespace(
-  namespaceId: namespaceId,
-);
+    RustLib.instance.api.crateApiIdentityImportProfileBundle(bundle: bundle);
 
 Future<String?> findProfileByOauth({
   required String provider,
   required String sub,
-}) => RustLib.instance.api.crateApiWillowFindProfileByOauth(
+}) => RustLib.instance.api.crateApiIdentityFindProfileByOauth(
   provider: provider,
   sub: sub,
 );
@@ -216,7 +161,7 @@ Future<String> createProfileFromOauth({
   required String sub,
   required String name,
   required String avatar,
-}) => RustLib.instance.api.crateApiWillowCreateProfileFromOauth(
+}) => RustLib.instance.api.crateApiIdentityCreateProfileFromOauth(
   provider: provider,
   sub: sub,
   name: name,
@@ -227,55 +172,11 @@ Future<bool> linkOauthToExistingProfile({
   required String did,
   required String provider,
   required String sub,
-}) => RustLib.instance.api.crateApiWillowLinkOauthToExistingProfile(
+}) => RustLib.instance.api.crateApiIdentityLinkOauthToExistingProfile(
   did: did,
   provider: provider,
   sub: sub,
 );
-
-/// Represents a direct or group conversation
-class Conversation {
-  final String id;
-  final String title;
-  final List<String> peers;
-  final PlatformInt64 lastActive;
-  final int unreadCount;
-  final String avatar;
-  final bool isGroup;
-
-  const Conversation({
-    required this.id,
-    required this.title,
-    required this.peers,
-    required this.lastActive,
-    required this.unreadCount,
-    required this.avatar,
-    required this.isGroup,
-  });
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      title.hashCode ^
-      peers.hashCode ^
-      lastActive.hashCode ^
-      unreadCount.hashCode ^
-      avatar.hashCode ^
-      isGroup.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Conversation &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          title == other.title &&
-          peers == other.peers &&
-          lastActive == other.lastActive &&
-          unreadCount == other.unreadCount &&
-          avatar == other.avatar &&
-          isGroup == other.isGroup;
-}
 
 /// Core device settings and manifest of all local profiles.
 class DeviceManifest {
@@ -303,7 +204,10 @@ class DeviceManifest {
           associatedConsciaId == other.associatedConsciaId;
 }
 
-/// Represents a loaded Node Identity (Keypair)
+/// Represents a loaded Node Identity (Keypair).
+/// This structure is the "Legislative Seal" of the user's presence in the mesh.
+/// It contains the local root secret (ed25519) from which all sub-capabilities
+/// and message signatures are derived.
 class IdentityVault {
   final String did;
   final String secret;
@@ -357,42 +261,6 @@ class IdentityVault {
           nameHistory == other.nameHistory &&
           ingressEnabled == other.ingressEnabled &&
           egressEnabled == other.egressEnabled;
-}
-
-/// A cryptographically signed Willow message payload
-class Message {
-  final String id;
-  final String conversationId;
-  final String authorDid;
-  final String content;
-  final PlatformInt64 timestampMs;
-
-  const Message({
-    required this.id,
-    required this.conversationId,
-    required this.authorDid,
-    required this.content,
-    required this.timestampMs,
-  });
-
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      conversationId.hashCode ^
-      authorDid.hashCode ^
-      content.hashCode ^
-      timestampMs.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Message &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          conversationId == other.conversationId &&
-          authorDid == other.authorDid &&
-          content == other.content &&
-          timestampMs == other.timestampMs;
 }
 
 /// An archived name record kept when the user renames themselves.
@@ -517,7 +385,7 @@ class VerifiedLink {
   });
 
   static Future<VerifiedLink> default_() =>
-      RustLib.instance.api.crateApiWillowVerifiedLinkDefault();
+      RustLib.instance.api.crateApiIdentityVerifiedLinkDefault();
 
   @override
   int get hashCode =>

@@ -3,9 +3,9 @@
 
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
+import 'api/messaging.dart';
 import 'api/network.dart';
 import 'api/telemetry_server.dart';
-import 'api/willow.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'frb_generated.dart';
@@ -68,7 +68,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 19129929;
+  int get rustContentHash => -713976098;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -79,17 +79,6 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 }
 
 abstract class RustLibApi extends BaseApi {
-  Future<OAuthLink> crateApiWillowAddOauthLink({
-    required String provider,
-    required String displayName,
-    required String sub,
-  });
-
-  Future<IdentityVault> crateApiWillowAddVerificationLink({
-    required String label,
-    required String url,
-  });
-
   Future<void> crateApiNetworkAuthorizeNode({
     required String nodeId,
     required String role,
@@ -100,103 +89,52 @@ abstract class RustLibApi extends BaseApi {
     required String hashStr,
   });
 
-  Future<IdentityVault> crateApiWillowConfirmVerificationLink({
-    required String url,
-    required bool verified,
-  });
-
-  Future<Conversation> crateApiWillowCreateConversation({
+  Future<Conversation> crateApiMessagingCreateConversation({
     required String title,
     required List<String> peers,
   });
 
-  Future<String> crateApiWillowCreateProfileFromOauth({
-    required String provider,
-    required String sub,
-    required String name,
-    required String avatar,
-  });
-
-  Future<String> crateApiWillowDelegateCapability({
+  Future<String> crateApiMessagingDelegateCapability({
+    required String delegatorDid,
+    required String delegatorSecret,
     required String targetDid,
     required String namespaceId,
     required String level,
   });
 
-  Future<void> crateApiWillowDeleteConversation({required String convoId});
+  Future<void> crateApiMessagingDeleteConversation({required String convoId});
 
-  Future<String> crateApiWillowExportProfileBundle();
-
-  Future<List<Conversation>> crateApiWillowFetchConversations();
-
-  Future<String> crateApiWillowFindDidForOauth({
-    required String provider,
-    required String sub,
-  });
-
-  Future<String?> crateApiWillowFindProfileByOauth({
-    required String provider,
-    required String sub,
-  });
+  Future<List<Conversation>> crateApiMessagingFetchConversations();
 
   Future<void> crateApiNetworkForceHandshake();
 
-  Future<String> crateApiWillowGenerateBestProof({required BigInt maxChars});
-
-  Future<String> crateApiWillowGenerateDevicePairingToken();
-
-  Future<IdentityVault> crateApiWillowGenerateNewIdentity();
-
-  Future<String> crateApiWillowGenerateVerificationProof({
-    required String format,
-  });
-
-  Future<IdentityVault> crateApiWillowGetActiveIdentity();
-
   Future<Map<String, String>> crateApiNetworkGetAllCapabilities();
 
-  Future<Map<String, String>> crateApiWillowGetCapabilitiesForNamespace({
+  Future<Map<String, String>> crateApiMessagingGetCapabilitiesForNamespace({
     required String namespaceId,
   });
 
   Future<ConsciaStatus> crateApiNetworkGetConsciaStatus();
 
-  Future<DeviceManifest> crateApiWillowGetDeviceManifest();
-
-  Future<List<Message>> crateApiWillowGetMessagesForConversation({
+  Future<List<Message>> crateApiMessagingGetMessagesForConversation({
     required String convoId,
   });
 
-  Future<List<NameRecord>> crateApiWillowGetNameHistory();
-
   Future<String> crateApiNetworkGetNodeId();
-
-  Future<List<OAuthLink>> crateApiWillowGetOauthLinks();
 
   Future<List<PeerInfo>> crateApiNetworkGetPeerList();
 
   Future<List<String>> crateApiNetworkGetPendingRequests();
 
-  Future<bool> crateApiWillowImportProfileBundle({required String bundle});
-
   Future<void> crateApiSimpleInitApp();
 
-  Future<bool> crateApiWillowInitWillowDatabase();
+  Future<bool> crateApiMessagingInitWillowDatabase({
+    required String did,
+    required String secret,
+  });
 
   Future<void> crateApiNetworkJoinConversationTopic({
     required U8Array32 namespace,
-  });
-
-  Future<bool> crateApiWillowLinkOauthToExistingProfile({
-    required String did,
-    required String provider,
-    required String sub,
-  });
-
-  Future<void> crateApiWillowRemoveOauthLink({required String provider});
-
-  Future<IdentityVault> crateApiWillowRemoveVerificationLink({
-    required String url,
   });
 
   Future<void> crateApiNetworkRequestAccess();
@@ -205,11 +143,7 @@ abstract class RustLibApi extends BaseApi {
 
   Future<String> crateApiNetworkSaveBlob({required List<int> bytes});
 
-  Future<void> crateApiWillowSaveDeviceManifest({
-    required DeviceManifest manifest,
-  });
-
-  Future<Message> crateApiWillowSendWillowMessage({
+  Future<Message> crateApiMessagingSendWillowMessage({
     required String conversationId,
     required String authorDid,
     required String content,
@@ -217,15 +151,7 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiNetworkSetAssociatedConscia({required String nodeId});
 
-  Future<IdentityVault> crateApiWillowSetEgressEnabled({required bool enabled});
-
-  Future<IdentityVault> crateApiWillowSetIngressEnabled({
-    required bool enabled,
-  });
-
   Future<void> crateApiNetworkShutdownNetwork();
-
-  Future<void> crateApiWillowSignOutProfile();
 
   Future<void> crateApiNetworkStartIrohNode({
     required String did,
@@ -234,25 +160,7 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiTelemetryServerStartTelemetryServer();
 
-  Future<bool> crateApiWillowSwitchActiveProfile({required String did});
-
-  Future<IdentityVault> crateApiWillowUpdateActiveProfile({
-    required String name,
-    required String avatar,
-  });
-
-  Future<IdentityVault> crateApiWillowUpdateLinkLabel({
-    required String url,
-    required String newLabel,
-  });
-
-  Future<VerifiedLink> crateApiWillowVerifiedLinkDefault();
-
-  Future<bool> crateApiWillowVerifyCapability({required String capJson});
-
-  Future<bool> crateApiWillowVerifyDevicePairingToken({required String token});
-
-  Future<bool> crateApiWillowVerifyProofLocally({required String proof});
+  Future<bool> crateApiMessagingVerifyCapability({required String capJson});
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -262,77 +170,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required super.generalizedFrbRustBinding,
     required super.portManager,
   });
-
-  @override
-  Future<OAuthLink> crateApiWillowAddOauthLink({
-    required String provider,
-    required String displayName,
-    required String sub,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(provider, serializer);
-          sse_encode_String(displayName, serializer);
-          sse_encode_String(sub, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 1,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_o_auth_link,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowAddOauthLinkConstMeta,
-        argValues: [provider, displayName, sub],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowAddOauthLinkConstMeta => const TaskConstMeta(
-    debugName: "add_oauth_link",
-    argNames: ["provider", "displayName", "sub"],
-  );
-
-  @override
-  Future<IdentityVault> crateApiWillowAddVerificationLink({
-    required String label,
-    required String url,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(label, serializer);
-          sse_encode_String(url, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 2,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowAddVerificationLinkConstMeta,
-        argValues: [label, url],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowAddVerificationLinkConstMeta =>
-      const TaskConstMeta(
-        debugName: "add_verification_link",
-        argNames: ["label", "url"],
-      );
 
   @override
   Future<void> crateApiNetworkAuthorizeNode({
@@ -348,7 +185,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 1,
             port: port_,
           );
         },
@@ -383,7 +220,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 2,
             port: port_,
           );
         },
@@ -405,42 +242,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<IdentityVault> crateApiWillowConfirmVerificationLink({
-    required String url,
-    required bool verified,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(url, serializer);
-          sse_encode_bool(verified, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 5,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowConfirmVerificationLinkConstMeta,
-        argValues: [url, verified],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowConfirmVerificationLinkConstMeta =>
-      const TaskConstMeta(
-        debugName: "confirm_verification_link",
-        argNames: ["url", "verified"],
-      );
-
-  @override
-  Future<Conversation> crateApiWillowCreateConversation({
+  Future<Conversation> crateApiMessagingCreateConversation({
     required String title,
     required List<String> peers,
   }) {
@@ -453,7 +255,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 3,
             port: port_,
           );
         },
@@ -461,60 +263,23 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_conversation,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiWillowCreateConversationConstMeta,
+        constMeta: kCrateApiMessagingCreateConversationConstMeta,
         argValues: [title, peers],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowCreateConversationConstMeta =>
+  TaskConstMeta get kCrateApiMessagingCreateConversationConstMeta =>
       const TaskConstMeta(
         debugName: "create_conversation",
         argNames: ["title", "peers"],
       );
 
   @override
-  Future<String> crateApiWillowCreateProfileFromOauth({
-    required String provider,
-    required String sub,
-    required String name,
-    required String avatar,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(provider, serializer);
-          sse_encode_String(sub, serializer);
-          sse_encode_String(name, serializer);
-          sse_encode_String(avatar, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 7,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiWillowCreateProfileFromOauthConstMeta,
-        argValues: [provider, sub, name, avatar],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowCreateProfileFromOauthConstMeta =>
-      const TaskConstMeta(
-        debugName: "create_profile_from_oauth",
-        argNames: ["provider", "sub", "name", "avatar"],
-      );
-
-  @override
-  Future<String> crateApiWillowDelegateCapability({
+  Future<String> crateApiMessagingDelegateCapability({
+    required String delegatorDid,
+    required String delegatorSecret,
     required String targetDid,
     required String namespaceId,
     required String level,
@@ -523,13 +288,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(delegatorDid, serializer);
+          sse_encode_String(delegatorSecret, serializer);
           sse_encode_String(targetDid, serializer);
           sse_encode_String(namespaceId, serializer);
           sse_encode_String(level, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 4,
             port: port_,
           );
         },
@@ -537,21 +304,33 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_String,
           decodeErrorData: sse_decode_String,
         ),
-        constMeta: kCrateApiWillowDelegateCapabilityConstMeta,
-        argValues: [targetDid, namespaceId, level],
+        constMeta: kCrateApiMessagingDelegateCapabilityConstMeta,
+        argValues: [
+          delegatorDid,
+          delegatorSecret,
+          targetDid,
+          namespaceId,
+          level,
+        ],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowDelegateCapabilityConstMeta =>
+  TaskConstMeta get kCrateApiMessagingDelegateCapabilityConstMeta =>
       const TaskConstMeta(
         debugName: "delegate_capability",
-        argNames: ["targetDid", "namespaceId", "level"],
+        argNames: [
+          "delegatorDid",
+          "delegatorSecret",
+          "targetDid",
+          "namespaceId",
+          "level",
+        ],
       );
 
   @override
-  Future<void> crateApiWillowDeleteConversation({required String convoId}) {
+  Future<void> crateApiMessagingDeleteConversation({required String convoId}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -560,7 +339,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 5,
             port: port_,
           );
         },
@@ -568,21 +347,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_unit,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiWillowDeleteConversationConstMeta,
+        constMeta: kCrateApiMessagingDeleteConversationConstMeta,
         argValues: [convoId],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowDeleteConversationConstMeta =>
+  TaskConstMeta get kCrateApiMessagingDeleteConversationConstMeta =>
       const TaskConstMeta(
         debugName: "delete_conversation",
         argNames: ["convoId"],
       );
 
   @override
-  Future<String> crateApiWillowExportProfileBundle() {
+  Future<List<Conversation>> crateApiMessagingFetchConversations() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -590,34 +369,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiWillowExportProfileBundleConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowExportProfileBundleConstMeta =>
-      const TaskConstMeta(debugName: "export_profile_bundle", argNames: []);
-
-  @override
-  Future<List<Conversation>> crateApiWillowFetchConversations() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 11,
+            funcId: 6,
             port: port_,
           );
         },
@@ -625,85 +377,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_list_conversation,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiWillowFetchConversationsConstMeta,
+        constMeta: kCrateApiMessagingFetchConversationsConstMeta,
         argValues: [],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowFetchConversationsConstMeta =>
+  TaskConstMeta get kCrateApiMessagingFetchConversationsConstMeta =>
       const TaskConstMeta(debugName: "fetch_conversations", argNames: []);
-
-  @override
-  Future<String> crateApiWillowFindDidForOauth({
-    required String provider,
-    required String sub,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(provider, serializer);
-          sse_encode_String(sub, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 12,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowFindDidForOauthConstMeta,
-        argValues: [provider, sub],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowFindDidForOauthConstMeta =>
-      const TaskConstMeta(
-        debugName: "find_did_for_oauth",
-        argNames: ["provider", "sub"],
-      );
-
-  @override
-  Future<String?> crateApiWillowFindProfileByOauth({
-    required String provider,
-    required String sub,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(provider, serializer);
-          sse_encode_String(sub, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 13,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_opt_String,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowFindProfileByOauthConstMeta,
-        argValues: [provider, sub],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowFindProfileByOauthConstMeta =>
-      const TaskConstMeta(
-        debugName: "find_profile_by_oauth",
-        argNames: ["provider", "sub"],
-      );
 
   @override
   Future<void> crateApiNetworkForceHandshake() {
@@ -714,7 +396,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 7,
             port: port_,
           );
         },
@@ -733,154 +415,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "force_handshake", argNames: []);
 
   @override
-  Future<String> crateApiWillowGenerateBestProof({required BigInt maxChars}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_usize(maxChars, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 15,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiWillowGenerateBestProofConstMeta,
-        argValues: [maxChars],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowGenerateBestProofConstMeta =>
-      const TaskConstMeta(
-        debugName: "generate_best_proof",
-        argNames: ["maxChars"],
-      );
-
-  @override
-  Future<String> crateApiWillowGenerateDevicePairingToken() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 16,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiWillowGenerateDevicePairingTokenConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowGenerateDevicePairingTokenConstMeta =>
-      const TaskConstMeta(
-        debugName: "generate_device_pairing_token",
-        argNames: [],
-      );
-
-  @override
-  Future<IdentityVault> crateApiWillowGenerateNewIdentity() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 17,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowGenerateNewIdentityConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowGenerateNewIdentityConstMeta =>
-      const TaskConstMeta(debugName: "generate_new_identity", argNames: []);
-
-  @override
-  Future<String> crateApiWillowGenerateVerificationProof({
-    required String format,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(format, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 18,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiWillowGenerateVerificationProofConstMeta,
-        argValues: [format],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowGenerateVerificationProofConstMeta =>
-      const TaskConstMeta(
-        debugName: "generate_verification_proof",
-        argNames: ["format"],
-      );
-
-  @override
-  Future<IdentityVault> crateApiWillowGetActiveIdentity() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 19,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowGetActiveIdentityConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowGetActiveIdentityConstMeta =>
-      const TaskConstMeta(debugName: "get_active_identity", argNames: []);
-
-  @override
   Future<Map<String, String>> crateApiNetworkGetAllCapabilities() {
     return handler.executeNormal(
       NormalTask(
@@ -889,7 +423,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 20,
+            funcId: 8,
             port: port_,
           );
         },
@@ -908,7 +442,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "get_all_capabilities", argNames: []);
 
   @override
-  Future<Map<String, String>> crateApiWillowGetCapabilitiesForNamespace({
+  Future<Map<String, String>> crateApiMessagingGetCapabilitiesForNamespace({
     required String namespaceId,
   }) {
     return handler.executeNormal(
@@ -919,7 +453,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 21,
+            funcId: 9,
             port: port_,
           );
         },
@@ -927,14 +461,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_Map_String_String_None,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiWillowGetCapabilitiesForNamespaceConstMeta,
+        constMeta: kCrateApiMessagingGetCapabilitiesForNamespaceConstMeta,
         argValues: [namespaceId],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowGetCapabilitiesForNamespaceConstMeta =>
+  TaskConstMeta get kCrateApiMessagingGetCapabilitiesForNamespaceConstMeta =>
       const TaskConstMeta(
         debugName: "get_capabilities_for_namespace",
         argNames: ["namespaceId"],
@@ -949,7 +483,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 22,
+            funcId: 10,
             port: port_,
           );
         },
@@ -968,34 +502,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "get_conscia_status", argNames: []);
 
   @override
-  Future<DeviceManifest> crateApiWillowGetDeviceManifest() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 23,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_device_manifest,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowGetDeviceManifestConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowGetDeviceManifestConstMeta =>
-      const TaskConstMeta(debugName: "get_device_manifest", argNames: []);
-
-  @override
-  Future<List<Message>> crateApiWillowGetMessagesForConversation({
+  Future<List<Message>> crateApiMessagingGetMessagesForConversation({
     required String convoId,
   }) {
     return handler.executeNormal(
@@ -1006,7 +513,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 24,
+            funcId: 11,
             port: port_,
           );
         },
@@ -1014,45 +521,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_list_message,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiWillowGetMessagesForConversationConstMeta,
+        constMeta: kCrateApiMessagingGetMessagesForConversationConstMeta,
         argValues: [convoId],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowGetMessagesForConversationConstMeta =>
+  TaskConstMeta get kCrateApiMessagingGetMessagesForConversationConstMeta =>
       const TaskConstMeta(
         debugName: "get_messages_for_conversation",
         argNames: ["convoId"],
       );
-
-  @override
-  Future<List<NameRecord>> crateApiWillowGetNameHistory() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 25,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_name_record,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowGetNameHistoryConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowGetNameHistoryConstMeta =>
-      const TaskConstMeta(debugName: "get_name_history", argNames: []);
 
   @override
   Future<String> crateApiNetworkGetNodeId() {
@@ -1063,7 +543,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 26,
+            funcId: 12,
             port: port_,
           );
         },
@@ -1082,33 +562,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "get_node_id", argNames: []);
 
   @override
-  Future<List<OAuthLink>> crateApiWillowGetOauthLinks() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 27,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_o_auth_link,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowGetOauthLinksConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowGetOauthLinksConstMeta =>
-      const TaskConstMeta(debugName: "get_oauth_links", argNames: []);
-
-  @override
   Future<List<PeerInfo>> crateApiNetworkGetPeerList() {
     return handler.executeNormal(
       NormalTask(
@@ -1117,7 +570,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 28,
+            funcId: 13,
             port: port_,
           );
         },
@@ -1144,7 +597,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 29,
+            funcId: 14,
             port: port_,
           );
         },
@@ -1163,37 +616,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "get_pending_requests", argNames: []);
 
   @override
-  Future<bool> crateApiWillowImportProfileBundle({required String bundle}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(bundle, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 30,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowImportProfileBundleConstMeta,
-        argValues: [bundle],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowImportProfileBundleConstMeta =>
-      const TaskConstMeta(
-        debugName: "import_profile_bundle",
-        argNames: ["bundle"],
-      );
-
-  @override
   Future<void> crateApiSimpleInitApp() {
     return handler.executeNormal(
       NormalTask(
@@ -1202,7 +624,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 31,
+            funcId: 15,
             port: port_,
           );
         },
@@ -1221,15 +643,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_app", argNames: []);
 
   @override
-  Future<bool> crateApiWillowInitWillowDatabase() {
+  Future<bool> crateApiMessagingInitWillowDatabase({
+    required String did,
+    required String secret,
+  }) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(did, serializer);
+          sse_encode_String(secret, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 32,
+            funcId: 16,
             port: port_,
           );
         },
@@ -1237,15 +664,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_bool,
           decodeErrorData: sse_decode_String,
         ),
-        constMeta: kCrateApiWillowInitWillowDatabaseConstMeta,
-        argValues: [],
+        constMeta: kCrateApiMessagingInitWillowDatabaseConstMeta,
+        argValues: [did, secret],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowInitWillowDatabaseConstMeta =>
-      const TaskConstMeta(debugName: "init_willow_database", argNames: []);
+  TaskConstMeta get kCrateApiMessagingInitWillowDatabaseConstMeta =>
+      const TaskConstMeta(
+        debugName: "init_willow_database",
+        argNames: ["did", "secret"],
+      );
 
   @override
   Future<void> crateApiNetworkJoinConversationTopic({
@@ -1259,7 +689,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 33,
+            funcId: 17,
             port: port_,
           );
         },
@@ -1281,107 +711,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<bool> crateApiWillowLinkOauthToExistingProfile({
-    required String did,
-    required String provider,
-    required String sub,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(did, serializer);
-          sse_encode_String(provider, serializer);
-          sse_encode_String(sub, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 34,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiWillowLinkOauthToExistingProfileConstMeta,
-        argValues: [did, provider, sub],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowLinkOauthToExistingProfileConstMeta =>
-      const TaskConstMeta(
-        debugName: "link_oauth_to_existing_profile",
-        argNames: ["did", "provider", "sub"],
-      );
-
-  @override
-  Future<void> crateApiWillowRemoveOauthLink({required String provider}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(provider, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 35,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowRemoveOauthLinkConstMeta,
-        argValues: [provider],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowRemoveOauthLinkConstMeta =>
-      const TaskConstMeta(
-        debugName: "remove_oauth_link",
-        argNames: ["provider"],
-      );
-
-  @override
-  Future<IdentityVault> crateApiWillowRemoveVerificationLink({
-    required String url,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(url, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 36,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowRemoveVerificationLinkConstMeta,
-        argValues: [url],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowRemoveVerificationLinkConstMeta =>
-      const TaskConstMeta(
-        debugName: "remove_verification_link",
-        argNames: ["url"],
-      );
-
-  @override
   Future<void> crateApiNetworkRequestAccess() {
     return handler.executeNormal(
       NormalTask(
@@ -1390,7 +719,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 37,
+            funcId: 18,
             port: port_,
           );
         },
@@ -1418,7 +747,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 38,
+            funcId: 19,
             port: port_,
           );
         },
@@ -1446,7 +775,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 39,
+            funcId: 20,
             port: port_,
           );
         },
@@ -1465,40 +794,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "save_blob", argNames: ["bytes"]);
 
   @override
-  Future<void> crateApiWillowSaveDeviceManifest({
-    required DeviceManifest manifest,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_box_autoadd_device_manifest(manifest, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 40,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowSaveDeviceManifestConstMeta,
-        argValues: [manifest],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowSaveDeviceManifestConstMeta =>
-      const TaskConstMeta(
-        debugName: "save_device_manifest",
-        argNames: ["manifest"],
-      );
-
-  @override
-  Future<Message> crateApiWillowSendWillowMessage({
+  Future<Message> crateApiMessagingSendWillowMessage({
     required String conversationId,
     required String authorDid,
     required String content,
@@ -1513,7 +809,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 41,
+            funcId: 21,
             port: port_,
           );
         },
@@ -1521,14 +817,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_message,
           decodeErrorData: null,
         ),
-        constMeta: kCrateApiWillowSendWillowMessageConstMeta,
+        constMeta: kCrateApiMessagingSendWillowMessageConstMeta,
         argValues: [conversationId, authorDid, content],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowSendWillowMessageConstMeta =>
+  TaskConstMeta get kCrateApiMessagingSendWillowMessageConstMeta =>
       const TaskConstMeta(
         debugName: "send_willow_message",
         argNames: ["conversationId", "authorDid", "content"],
@@ -1544,7 +840,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 42,
+            funcId: 22,
             port: port_,
           );
         },
@@ -1566,72 +862,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
-  Future<IdentityVault> crateApiWillowSetEgressEnabled({
-    required bool enabled,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_bool(enabled, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 43,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowSetEgressEnabledConstMeta,
-        argValues: [enabled],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowSetEgressEnabledConstMeta =>
-      const TaskConstMeta(
-        debugName: "set_egress_enabled",
-        argNames: ["enabled"],
-      );
-
-  @override
-  Future<IdentityVault> crateApiWillowSetIngressEnabled({
-    required bool enabled,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_bool(enabled, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 44,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowSetIngressEnabledConstMeta,
-        argValues: [enabled],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowSetIngressEnabledConstMeta =>
-      const TaskConstMeta(
-        debugName: "set_ingress_enabled",
-        argNames: ["enabled"],
-      );
-
-  @override
   Future<void> crateApiNetworkShutdownNetwork() {
     return handler.executeNormal(
       NormalTask(
@@ -1640,7 +870,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 45,
+            funcId: 23,
             port: port_,
           );
         },
@@ -1659,33 +889,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "shutdown_network", argNames: []);
 
   @override
-  Future<void> crateApiWillowSignOutProfile() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 46,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_unit,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowSignOutProfileConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowSignOutProfileConstMeta =>
-      const TaskConstMeta(debugName: "sign_out_profile", argNames: []);
-
-  @override
   Future<void> crateApiNetworkStartIrohNode({
     required String did,
     required String secretKeyB58,
@@ -1699,7 +902,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 47,
+            funcId: 24,
             port: port_,
           );
         },
@@ -1729,7 +932,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 48,
+            funcId: 25,
             port: port_,
           );
         },
@@ -1748,135 +951,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "start_telemetry_server", argNames: []);
 
   @override
-  Future<bool> crateApiWillowSwitchActiveProfile({required String did}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(did, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 49,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
-          decodeErrorData: sse_decode_String,
-        ),
-        constMeta: kCrateApiWillowSwitchActiveProfileConstMeta,
-        argValues: [did],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowSwitchActiveProfileConstMeta =>
-      const TaskConstMeta(
-        debugName: "switch_active_profile",
-        argNames: ["did"],
-      );
-
-  @override
-  Future<IdentityVault> crateApiWillowUpdateActiveProfile({
-    required String name,
-    required String avatar,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(name, serializer);
-          sse_encode_String(avatar, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 50,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowUpdateActiveProfileConstMeta,
-        argValues: [name, avatar],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowUpdateActiveProfileConstMeta =>
-      const TaskConstMeta(
-        debugName: "update_active_profile",
-        argNames: ["name", "avatar"],
-      );
-
-  @override
-  Future<IdentityVault> crateApiWillowUpdateLinkLabel({
-    required String url,
-    required String newLabel,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(url, serializer);
-          sse_encode_String(newLabel, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 51,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_identity_vault,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowUpdateLinkLabelConstMeta,
-        argValues: [url, newLabel],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowUpdateLinkLabelConstMeta =>
-      const TaskConstMeta(
-        debugName: "update_link_label",
-        argNames: ["url", "newLabel"],
-      );
-
-  @override
-  Future<VerifiedLink> crateApiWillowVerifiedLinkDefault() {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 52,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_verified_link,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowVerifiedLinkDefaultConstMeta,
-        argValues: [],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowVerifiedLinkDefaultConstMeta =>
-      const TaskConstMeta(debugName: "verified_link_default", argNames: []);
-
-  @override
-  Future<bool> crateApiWillowVerifyCapability({required String capJson}) {
+  Future<bool> crateApiMessagingVerifyCapability({required String capJson}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -1885,7 +960,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 53,
+            funcId: 26,
             port: port_,
           );
         },
@@ -1893,79 +968,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_bool,
           decodeErrorData: sse_decode_String,
         ),
-        constMeta: kCrateApiWillowVerifyCapabilityConstMeta,
+        constMeta: kCrateApiMessagingVerifyCapabilityConstMeta,
         argValues: [capJson],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiWillowVerifyCapabilityConstMeta =>
+  TaskConstMeta get kCrateApiMessagingVerifyCapabilityConstMeta =>
       const TaskConstMeta(
         debugName: "verify_capability",
         argNames: ["capJson"],
-      );
-
-  @override
-  Future<bool> crateApiWillowVerifyDevicePairingToken({required String token}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(token, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 54,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowVerifyDevicePairingTokenConstMeta,
-        argValues: [token],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowVerifyDevicePairingTokenConstMeta =>
-      const TaskConstMeta(
-        debugName: "verify_device_pairing_token",
-        argNames: ["token"],
-      );
-
-  @override
-  Future<bool> crateApiWillowVerifyProofLocally({required String proof}) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(proof, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 55,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
-          decodeErrorData: null,
-        ),
-        constMeta: kCrateApiWillowVerifyProofLocallyConstMeta,
-        argValues: [proof],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiWillowVerifyProofLocallyConstMeta =>
-      const TaskConstMeta(
-        debugName: "verify_proof_locally",
-        argNames: ["proof"],
       );
 
   @protected
@@ -1988,12 +1001,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   bool dco_decode_bool(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as bool;
-  }
-
-  @protected
-  DeviceManifest dco_decode_box_autoadd_device_manifest(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return dco_decode_device_manifest(raw);
   }
 
   @protected
@@ -2027,42 +1034,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  DeviceManifest dco_decode_device_manifest(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 3)
-      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
-    return DeviceManifest(
-      tenancyMode: dco_decode_String(arr[0]),
-      profiles: dco_decode_list_profile_record(arr[1]),
-      associatedConsciaId: dco_decode_opt_String(arr[2]),
-    );
-  }
-
-  @protected
   PlatformInt64 dco_decode_i_64(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dcoDecodeI64(raw);
-  }
-
-  @protected
-  IdentityVault dco_decode_identity_vault(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 10)
-      throw Exception('unexpected arr length: expect 10 but see ${arr.length}');
-    return IdentityVault(
-      did: dco_decode_String(arr[0]),
-      secret: dco_decode_String(arr[1]),
-      displayName: dco_decode_String(arr[2]),
-      avatarUrl: dco_decode_String(arr[3]),
-      proofString: dco_decode_String(arr[4]),
-      verifiedLinks: dco_decode_list_verified_link(arr[5]),
-      oauthLinks: dco_decode_list_o_auth_link(arr[6]),
-      nameHistory: dco_decode_list_name_record(arr[7]),
-      ingressEnabled: dco_decode_bool(arr[8]),
-      egressEnabled: dco_decode_bool(arr[9]),
-    );
   }
 
   @protected
@@ -2084,18 +1058,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<NameRecord> dco_decode_list_name_record(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return (raw as List<dynamic>).map(dco_decode_name_record).toList();
-  }
-
-  @protected
-  List<OAuthLink> dco_decode_list_o_auth_link(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return (raw as List<dynamic>).map(dco_decode_o_auth_link).toList();
-  }
-
-  @protected
   List<PeerInfo> dco_decode_list_peer_info(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_peer_info).toList();
@@ -2114,21 +1076,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<ProfileRecord> dco_decode_list_profile_record(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return (raw as List<dynamic>).map(dco_decode_profile_record).toList();
-  }
-
-  @protected
   List<(String, String)> dco_decode_list_record_string_string(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_record_string_string).toList();
-  }
-
-  @protected
-  List<VerifiedLink> dco_decode_list_verified_link(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return (raw as List<dynamic>).map(dco_decode_verified_link).toList();
   }
 
   @protected
@@ -2147,37 +1097,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  NameRecord dco_decode_name_record(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 6)
-      throw Exception('unexpected arr length: expect 6 but see ${arr.length}');
-    return NameRecord(
-      name: dco_decode_String(arr[0]),
-      proofString: dco_decode_String(arr[1]),
-      verifiedLinks: dco_decode_list_verified_link(arr[2]),
-      activeFromMs: dco_decode_i_64(arr[3]),
-      retiredAtMs: dco_decode_i_64(arr[4]),
-      changeCertificate: dco_decode_String(arr[5]),
-    );
-  }
-
-  @protected
-  OAuthLink dco_decode_o_auth_link(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 5)
-      throw Exception('unexpected arr length: expect 5 but see ${arr.length}');
-    return OAuthLink(
-      provider: dco_decode_String(arr[0]),
-      displayName: dco_decode_String(arr[1]),
-      sub: dco_decode_String(arr[2]),
-      bindingProof: dco_decode_String(arr[3]),
-      linkedAtMs: dco_decode_i_64(arr[4]),
-    );
-  }
-
-  @protected
   String? dco_decode_opt_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_String(raw);
@@ -2192,20 +1111,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     return PeerInfo(
       nodeId: dco_decode_String(arr[0]),
       addresses: dco_decode_list_String(arr[1]),
-    );
-  }
-
-  @protected
-  ProfileRecord dco_decode_profile_record(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
-    return ProfileRecord(
-      did: dco_decode_String(arr[0]),
-      displayName: dco_decode_String(arr[1]),
-      avatarUrl: dco_decode_String(arr[2]),
-      oauthSubs: dco_decode_list_String(arr[3]),
     );
   }
 
@@ -2244,26 +1149,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  BigInt dco_decode_usize(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return dcoDecodeU64(raw);
-  }
-
-  @protected
-  VerifiedLink dco_decode_verified_link(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 4)
-      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
-    return VerifiedLink(
-      platformLabel: dco_decode_String(arr[0]),
-      url: dco_decode_String(arr[1]),
-      isVerified: dco_decode_bool(arr[2]),
-      verifiedAtMs: dco_decode_i_64(arr[3]),
-    );
-  }
-
-  @protected
   Map<String, String> sse_decode_Map_String_String_None(
     SseDeserializer deserializer,
   ) {
@@ -2283,14 +1168,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   bool sse_decode_bool(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8() != 0;
-  }
-
-  @protected
-  DeviceManifest sse_decode_box_autoadd_device_manifest(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return (sse_decode_device_manifest(deserializer));
   }
 
   @protected
@@ -2328,49 +1205,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  DeviceManifest sse_decode_device_manifest(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_tenancyMode = sse_decode_String(deserializer);
-    var var_profiles = sse_decode_list_profile_record(deserializer);
-    var var_associatedConsciaId = sse_decode_opt_String(deserializer);
-    return DeviceManifest(
-      tenancyMode: var_tenancyMode,
-      profiles: var_profiles,
-      associatedConsciaId: var_associatedConsciaId,
-    );
-  }
-
-  @protected
   PlatformInt64 sse_decode_i_64(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getPlatformInt64();
-  }
-
-  @protected
-  IdentityVault sse_decode_identity_vault(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_did = sse_decode_String(deserializer);
-    var var_secret = sse_decode_String(deserializer);
-    var var_displayName = sse_decode_String(deserializer);
-    var var_avatarUrl = sse_decode_String(deserializer);
-    var var_proofString = sse_decode_String(deserializer);
-    var var_verifiedLinks = sse_decode_list_verified_link(deserializer);
-    var var_oauthLinks = sse_decode_list_o_auth_link(deserializer);
-    var var_nameHistory = sse_decode_list_name_record(deserializer);
-    var var_ingressEnabled = sse_decode_bool(deserializer);
-    var var_egressEnabled = sse_decode_bool(deserializer);
-    return IdentityVault(
-      did: var_did,
-      secret: var_secret,
-      displayName: var_displayName,
-      avatarUrl: var_avatarUrl,
-      proofString: var_proofString,
-      verifiedLinks: var_verifiedLinks,
-      oauthLinks: var_oauthLinks,
-      nameHistory: var_nameHistory,
-      ingressEnabled: var_ingressEnabled,
-      egressEnabled: var_egressEnabled,
-    );
   }
 
   @protected
@@ -2412,30 +1249,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<NameRecord> sse_decode_list_name_record(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    var len_ = sse_decode_i_32(deserializer);
-    var ans_ = <NameRecord>[];
-    for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_name_record(deserializer));
-    }
-    return ans_;
-  }
-
-  @protected
-  List<OAuthLink> sse_decode_list_o_auth_link(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    var len_ = sse_decode_i_32(deserializer);
-    var ans_ = <OAuthLink>[];
-    for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_o_auth_link(deserializer));
-    }
-    return ans_;
-  }
-
-  @protected
   List<PeerInfo> sse_decode_list_peer_info(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -2462,20 +1275,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<ProfileRecord> sse_decode_list_profile_record(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    var len_ = sse_decode_i_32(deserializer);
-    var ans_ = <ProfileRecord>[];
-    for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_profile_record(deserializer));
-    }
-    return ans_;
-  }
-
-  @protected
   List<(String, String)> sse_decode_list_record_string_string(
     SseDeserializer deserializer,
   ) {
@@ -2485,20 +1284,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var ans_ = <(String, String)>[];
     for (var idx_ = 0; idx_ < len_; ++idx_) {
       ans_.add(sse_decode_record_string_string(deserializer));
-    }
-    return ans_;
-  }
-
-  @protected
-  List<VerifiedLink> sse_decode_list_verified_link(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    var len_ = sse_decode_i_32(deserializer);
-    var ans_ = <VerifiedLink>[];
-    for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_verified_link(deserializer));
     }
     return ans_;
   }
@@ -2521,42 +1306,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  NameRecord sse_decode_name_record(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_name = sse_decode_String(deserializer);
-    var var_proofString = sse_decode_String(deserializer);
-    var var_verifiedLinks = sse_decode_list_verified_link(deserializer);
-    var var_activeFromMs = sse_decode_i_64(deserializer);
-    var var_retiredAtMs = sse_decode_i_64(deserializer);
-    var var_changeCertificate = sse_decode_String(deserializer);
-    return NameRecord(
-      name: var_name,
-      proofString: var_proofString,
-      verifiedLinks: var_verifiedLinks,
-      activeFromMs: var_activeFromMs,
-      retiredAtMs: var_retiredAtMs,
-      changeCertificate: var_changeCertificate,
-    );
-  }
-
-  @protected
-  OAuthLink sse_decode_o_auth_link(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_provider = sse_decode_String(deserializer);
-    var var_displayName = sse_decode_String(deserializer);
-    var var_sub = sse_decode_String(deserializer);
-    var var_bindingProof = sse_decode_String(deserializer);
-    var var_linkedAtMs = sse_decode_i_64(deserializer);
-    return OAuthLink(
-      provider: var_provider,
-      displayName: var_displayName,
-      sub: var_sub,
-      bindingProof: var_bindingProof,
-      linkedAtMs: var_linkedAtMs,
-    );
-  }
-
-  @protected
   String? sse_decode_opt_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -2573,21 +1322,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_nodeId = sse_decode_String(deserializer);
     var var_addresses = sse_decode_list_String(deserializer);
     return PeerInfo(nodeId: var_nodeId, addresses: var_addresses);
-  }
-
-  @protected
-  ProfileRecord sse_decode_profile_record(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_did = sse_decode_String(deserializer);
-    var var_displayName = sse_decode_String(deserializer);
-    var var_avatarUrl = sse_decode_String(deserializer);
-    var var_oauthSubs = sse_decode_list_String(deserializer);
-    return ProfileRecord(
-      did: var_did,
-      displayName: var_displayName,
-      avatarUrl: var_avatarUrl,
-      oauthSubs: var_oauthSubs,
-    );
   }
 
   @protected
@@ -2625,27 +1359,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  BigInt sse_decode_usize(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getBigUint64();
-  }
-
-  @protected
-  VerifiedLink sse_decode_verified_link(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_platformLabel = sse_decode_String(deserializer);
-    var var_url = sse_decode_String(deserializer);
-    var var_isVerified = sse_decode_bool(deserializer);
-    var var_verifiedAtMs = sse_decode_i_64(deserializer);
-    return VerifiedLink(
-      platformLabel: var_platformLabel,
-      url: var_url,
-      isVerified: var_isVerified,
-      verifiedAtMs: var_verifiedAtMs,
-    );
-  }
-
-  @protected
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
@@ -2676,15 +1389,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_box_autoadd_device_manifest(
-    DeviceManifest self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_device_manifest(self, serializer);
-  }
-
-  @protected
   void sse_encode_conscia_status(ConsciaStatus self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_opt_String(self.nodeId, serializer);
@@ -2705,35 +1409,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_device_manifest(
-    DeviceManifest self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.tenancyMode, serializer);
-    sse_encode_list_profile_record(self.profiles, serializer);
-    sse_encode_opt_String(self.associatedConsciaId, serializer);
-  }
-
-  @protected
   void sse_encode_i_64(PlatformInt64 self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putPlatformInt64(self);
-  }
-
-  @protected
-  void sse_encode_identity_vault(IdentityVault self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.did, serializer);
-    sse_encode_String(self.secret, serializer);
-    sse_encode_String(self.displayName, serializer);
-    sse_encode_String(self.avatarUrl, serializer);
-    sse_encode_String(self.proofString, serializer);
-    sse_encode_list_verified_link(self.verifiedLinks, serializer);
-    sse_encode_list_o_auth_link(self.oauthLinks, serializer);
-    sse_encode_list_name_record(self.nameHistory, serializer);
-    sse_encode_bool(self.ingressEnabled, serializer);
-    sse_encode_bool(self.egressEnabled, serializer);
   }
 
   @protected
@@ -2763,30 +1441,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_message(item, serializer);
-    }
-  }
-
-  @protected
-  void sse_encode_list_name_record(
-    List<NameRecord> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    for (final item in self) {
-      sse_encode_name_record(item, serializer);
-    }
-  }
-
-  @protected
-  void sse_encode_list_o_auth_link(
-    List<OAuthLink> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    for (final item in self) {
-      sse_encode_o_auth_link(item, serializer);
     }
   }
 
@@ -2825,18 +1479,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_profile_record(
-    List<ProfileRecord> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    for (final item in self) {
-      sse_encode_profile_record(item, serializer);
-    }
-  }
-
-  @protected
   void sse_encode_list_record_string_string(
     List<(String, String)> self,
     SseSerializer serializer,
@@ -2849,18 +1491,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_verified_link(
-    List<VerifiedLink> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    for (final item in self) {
-      sse_encode_verified_link(item, serializer);
-    }
-  }
-
-  @protected
   void sse_encode_message(Message self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.id, serializer);
@@ -2868,27 +1498,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.authorDid, serializer);
     sse_encode_String(self.content, serializer);
     sse_encode_i_64(self.timestampMs, serializer);
-  }
-
-  @protected
-  void sse_encode_name_record(NameRecord self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.name, serializer);
-    sse_encode_String(self.proofString, serializer);
-    sse_encode_list_verified_link(self.verifiedLinks, serializer);
-    sse_encode_i_64(self.activeFromMs, serializer);
-    sse_encode_i_64(self.retiredAtMs, serializer);
-    sse_encode_String(self.changeCertificate, serializer);
-  }
-
-  @protected
-  void sse_encode_o_auth_link(OAuthLink self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.provider, serializer);
-    sse_encode_String(self.displayName, serializer);
-    sse_encode_String(self.sub, serializer);
-    sse_encode_String(self.bindingProof, serializer);
-    sse_encode_i_64(self.linkedAtMs, serializer);
   }
 
   @protected
@@ -2906,15 +1515,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.nodeId, serializer);
     sse_encode_list_String(self.addresses, serializer);
-  }
-
-  @protected
-  void sse_encode_profile_record(ProfileRecord self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.did, serializer);
-    sse_encode_String(self.displayName, serializer);
-    sse_encode_String(self.avatarUrl, serializer);
-    sse_encode_list_String(self.oauthSubs, serializer);
   }
 
   @protected
@@ -2948,21 +1548,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_unit(void self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-  }
-
-  @protected
-  void sse_encode_usize(BigInt self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putBigUint64(self);
-  }
-
-  @protected
-  void sse_encode_verified_link(VerifiedLink self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.platformLabel, serializer);
-    sse_encode_String(self.url, serializer);
-    sse_encode_bool(self.isVerified, serializer);
-    sse_encode_i_64(self.verifiedAtMs, serializer);
   }
 
   @protected

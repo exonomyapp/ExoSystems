@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'models.dart';
 import 'identity_service.dart';
+import 'rust_identity_service.dart';
 
 /// The state for the IdentityManager.
 class IdentityState {
@@ -42,9 +43,9 @@ class IdentityState {
 }
 
 /// Abstract provider for the IdentityService implementation.
-/// This must be overridden in the app's ProviderScope.
+/// Defaults to the native Rust-based Identity Service.
 final identityServiceProvider = Provider<IdentityService>((ref) {
-  throw UnimplementedError('identityServiceProvider not overridden');
+  return RustIdentityService();
 });
 
 /// Manages the identity lifecycle, delegated to an IdentityService.

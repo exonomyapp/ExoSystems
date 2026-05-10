@@ -12,5 +12,4 @@
 // =============================================================================
 
 pub mod simple;   // FRB init entrypoint
-pub mod willow;   // Identity vault, proofs, conversations, messages
 pub mod network;  // Network status, flight mode, blob operations

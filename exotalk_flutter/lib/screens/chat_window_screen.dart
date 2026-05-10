@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import '../main.dart';
 import '../providers/chat_provider.dart';
 import '../src/theme.dart';
-import '../src/rust/api/willow.dart';
+import '../src/rust/api/messaging.dart';
 import '../widgets/modals/group_manager.dart';
 import '../providers/toast_provider.dart';
 

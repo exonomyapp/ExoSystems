@@ -22,8 +22,8 @@ use tokio::sync::RwLock;
 use serde::{Serialize, Deserialize};
 use once_cell::sync::Lazy;
 use ed25519_dalek::{SigningKey, VerifyingKey, Signer, Verifier};
-use rand_core::OsRng;
-use exotalk_core::protocol_internal::{Capability, PermissionLevel};
+use rand::rngs::OsRng;
+
 
 /// An independently-verified link between a did:peer and a public URL.
 #[derive(Clone, Debug, Serialize, Deserialize, Default)]
@@ -55,7 +55,11 @@ pub struct OAuthLink {
     pub linked_at_ms: i64,
 }
 
-/// Represents a loaded Node Identity (Keypair)
+// 🧠 Educational Context: The Identity Vault
+/// Represents a loaded Node Identity (Keypair).
+/// This structure is the "Legislative Seal" of the user's presence in the mesh.
+/// It contains the local root secret (ed25519) from which all sub-capabilities 
+/// and message signatures are derived.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct IdentityVault {
     pub did: String,
@@ -66,6 +70,8 @@ pub struct IdentityVault {
     pub proof_string: String,    // Canonical proof for current display_name
     #[serde(default)]
     pub verified_links: Vec<VerifiedLink>,
+    #[serde(default)]
+    pub oauth_links: Vec<OAuthLink>,
     #[serde(default)]
     pub name_history: Vec<NameRecord>,
     #[serde(default = "default_true")]
@@ -82,55 +88,208 @@ pub struct UserIdentity {
     pub alias: String,
 }
 
-/// Represents a direct or group conversation
+
+
+/// Core device settings and manifest of all local profiles.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Conversation {
-    pub id: String,
-    pub title: String,
-    pub peers: Vec<String>,
+pub struct DeviceManifest {
+    pub tenancy_mode: String, // "Isolated" or "Multiplexed"
+    pub profiles: Vec<ProfileRecord>,
+    #[serde(default)]
+    pub associated_conscia_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ProfileRecord {
+    pub did: String,
+    pub display_name: String,
+    pub avatar_url: String,
+    #[serde(default)]
+    pub oauth_subs: Vec<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct ProfileMetadata {
+    pub did: String,
+    pub display_name: String,
+    pub avatar_url: String,
     pub last_active: i64,
-    pub unread_count: u32,
-    pub avatar: String,
-    pub is_group: bool,
+    #[serde(default)]
+    pub oauth_subs: Vec<String>, // Format: "provider:sub"
 }
-
-/// A cryptographically signed Willow message payload
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct Message {
-    pub id: String,
-    pub conversation_id: String,
-    pub author_did: String,
-    pub content: String,
-    pub timestamp_ms: i64,
-}
-
-// Basic Mock Database using a global static map
-static DB_MESSAGES: Lazy<RwLock<Vec<Message>>> = Lazy::new(|| RwLock::new(Vec::new()));
-static DB_CONVERSATIONS: Lazy<RwLock<Vec<Conversation>>> = Lazy::new(|| RwLock::new(Vec::new()));
 
 // Store the active node identity
 static ACTIVE_IDENTITY: Lazy<RwLock<Option<IdentityVault>>> = Lazy::new(|| RwLock::new(None));
 
+pub(crate) async fn get_active_did_internal() -> Option<String> {
+    ACTIVE_IDENTITY.read().await.as_ref().map(|v| v.did.clone())
+}
+
 // --- PERSISTENCE HELPERS ---
-fn storage_path(filename: &str) -> std::path::PathBuf {
+async fn storage_path(filename: &str) -> std::path::PathBuf {
     let mut p = std::path::PathBuf::from("exotalk_storage");
+    let active_identity = { ACTIVE_IDENTITY.read().await.clone() };
+    if let Some(vault) = active_identity {
+        p.push("profiles");
+        p.push(vault.did.replace(":", "_"));
+    }
     let _ = std::fs::create_dir_all(&p);
     p.push(filename);
     p
 }
 
-async fn save_db_to_disk() {
-    if let Ok(c) = serde_json::to_string(&*DB_CONVERSATIONS.read().await) {
-        let _ = std::fs::write(storage_path("db_conversations.json"), c);
+
+
+pub async fn get_device_manifest() -> DeviceManifest {
+    let path = std::path::PathBuf::from("exotalk_storage").join("device_manifest.json");
+    let mut manifest = if let Ok(data) = std::fs::read_to_string(&path) {
+        serde_json::from_str::<DeviceManifest>(&data).unwrap_or(DeviceManifest {
+            tenancy_mode: "Isolated".to_string(),
+            profiles: Vec::new(),
+            associated_conscia_id: None,
+        })
+    } else {
+        DeviceManifest {
+            tenancy_mode: "Isolated".to_string(),
+            profiles: Vec::new(),
+            associated_conscia_id: None,
+        }
+    };
+
+    // Heal the manifest if it's missing profiles or has stale names
+    let mut changed = false;
+    let profiles_dir = std::path::PathBuf::from("exotalk_storage").join("profiles");
+    if let Ok(entries) = std::fs::read_dir(profiles_dir) {
+        for entry in entries.flatten() {
+            if entry.path().is_dir() {
+                let id_path = entry.path().join("identity.json");
+                if let Ok(data) = std::fs::read_to_string(id_path) {
+                    if let Ok(vault) = serde_json::from_str::<IdentityVault>(&data) {
+                        // Check if manifest matches this vault
+                        if let Some(record) = manifest.profiles.iter_mut().find(|p| p.did == vault.did) {
+                            if record.display_name != vault.display_name || record.avatar_url != vault.avatar_url {
+                                record.display_name = vault.display_name;
+                                record.avatar_url = vault.avatar_url;
+                                changed = true;
+                            }
+                        } else {
+                            // Missing from manifest entirely
+                            manifest.profiles.push(ProfileRecord {
+                                did: vault.did,
+                                display_name: vault.display_name,
+                                avatar_url: vault.avatar_url,
+                                oauth_subs: vec![],
+                            });
+                            changed = true;
+                        }
+                    }
+                }
+            }
+        }
     }
-    if let Ok(m) = serde_json::to_string(&*DB_MESSAGES.read().await) {
-        let _ = std::fs::write(storage_path("db_messages.json"), m);
+
+    if changed {
+        save_device_manifest(manifest.clone()).await;
+    }
+
+
+
+    manifest
+}
+
+pub async fn save_device_manifest(manifest: DeviceManifest) {
+    let path = std::path::PathBuf::from("exotalk_storage").join("device_manifest.json");
+    if let Ok(data) = serde_json::to_string_pretty(&manifest) {
+        let _ = std::fs::write(path, data);
     }
 }
 
+async fn update_device_manifest(did: &str, display_name: &str, avatar_url: &str) {
+    let mut manifest = get_device_manifest().await;
+    if let Some(profile) = manifest.profiles.iter_mut().find(|p| p.did == did) {
+        profile.display_name = display_name.to_string();
+        profile.avatar_url = avatar_url.to_string();
+    } else {
+        manifest.profiles.push(ProfileRecord {
+            did: did.to_string(),
+            display_name: display_name.to_string(),
+            avatar_url: avatar_url.to_string(),
+            oauth_subs: vec![],
+        });
+    }
+    save_device_manifest(manifest).await;
+}
 
-/// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier
+/// Closes the active databases, unloads identity, and signals network shutdown
+pub async fn sign_out_profile() {
+    {
+        let mut active = ACTIVE_IDENTITY.write().await;
+        *active = None;
+    }
+
+}
+
+/// Sets the given DID as the active profile and boots up its P2P network node.
+pub async fn switch_active_profile(did: String) -> Result<bool, String> {
+    if let Some(active) = ACTIVE_IDENTITY.read().await.clone() {
+        if active.did == did {
+            return Ok(true);
+        }
+    }
+
+    println!("Switching active profile to: {}", did);
+    sign_out_profile().await;
+    println!("Previous profile signed out. Preparing new profile...");
+    
+    // Temporarily fake ACTIVE_IDENTITY to allow storage_path to resolve to this DID
+    {
+        let mut active = ACTIVE_IDENTITY.write().await;
+        *active = Some(IdentityVault {
+            did: did.clone(),
+            secret: "".to_string(), display_name: "".to_string(), avatar_url: "".to_string(),
+            proof_string: "".to_string(), verified_links: vec![], oauth_links: vec![], name_history: vec![],
+            ingress_enabled: true, egress_enabled: true,
+        });
+    }
+
+    let identity_path = storage_path("identity.json").await;
+    match std::fs::read_to_string(&identity_path) {
+        Ok(data) => {
+            match serde_json::from_str::<IdentityVault>(&data) {
+                Ok(vault) => {
+                    {
+                        let mut active = ACTIVE_IDENTITY.write().await;
+                        *active = Some(vault.clone());
+                    }
+                    println!("Profile switch successful for: {}", did);
+                    return Ok(true);
+                }
+                Err(e) => {
+                    println!("Failed to parse identity JSON: {}", e);
+                    sign_out_profile().await;
+                    return Err(format!("Parse error: {}", e));
+                }
+            }
+        }
+        Err(e) => {
+            println!("Failed to read identity.json: {}", e);
+        }
+    }
+    
+    // Clear fake active identity if it failed
+    sign_out_profile().await;
+    Err("Profile not found on disk".to_string())
+}
+
+// 🧠 Educational Context: Cryptographic Self-Generation
+/// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier.
+/// This is the "Big Bang" of a sovereign session. By generating keys 
+/// locally on the device's CSPRNG (OsRng), we ensure that no central 
+/// authority ever sees the private secret, fulfilling the "Own Your Data" mandate.
 pub async fn generate_new_identity() -> IdentityVault {
+    // IMPORTANT: Clear any active profile before generating a new one
+    sign_out_profile().await;
+
     let mut csprng = OsRng;
     let signing_key: SigningKey = SigningKey::generate(&mut csprng);
     let public_key: VerifyingKey = signing_key.verifying_key();
@@ -140,28 +299,35 @@ pub async fn generate_new_identity() -> IdentityVault {
     
     let did = format!("did:peer:2.Vz{}", pk_b58);
     let vault = IdentityVault { 
-        did, 
-        secret: sk_b58,
-        display_name: "New Peer".to_string(),
+        did: did.clone(), 
+        secret: sk_b58.clone(),
+        display_name: "".to_string(),
         avatar_url: "".to_string(),
         proof_string: "".to_string(),
         verified_links: vec![],
+        oauth_links: vec![],
         name_history: vec![],
         ingress_enabled: true,
         egress_enabled: true,
     };
     
-    if let Ok(j) = serde_json::to_string(&vault) {
-        let _ = std::fs::write(storage_path("identity.json"), j);
+    // Set active session FIRST so storage_path resolves to the correct isolated folder
+    {
+        let mut active = ACTIVE_IDENTITY.write().await;
+        *active = Some(vault.clone());
     }
 
-    // Set as active session
-    let mut active = ACTIVE_IDENTITY.write().await;
-    *active = Some(vault.clone());
+    if let Ok(j) = serde_json::to_string(&vault) {
+        let _ = std::fs::write(storage_path("identity.json").await, j);
+    }
+
+    // Register with the global manifest
+    update_device_manifest(&did, "", "").await;
+
     vault
 }
 
-/// Returns the active node identity or generates a new one if missing
+/// Returns the active node identity. Returns an empty vault if no identity is active.
 pub async fn get_active_identity() -> IdentityVault {
     let active = ACTIVE_IDENTITY.read().await;
     if let Some(vault) = active.as_ref() {
@@ -169,17 +335,27 @@ pub async fn get_active_identity() -> IdentityVault {
     }
     drop(active);
     
-    if let Ok(data) = std::fs::read_to_string(storage_path("identity.json")) {
+    // If no in-memory active identity, try to load the last one from the current storage path
+    if let Ok(data) = std::fs::read_to_string(storage_path("identity.json").await) {
         if let Ok(vault) = serde_json::from_str::<IdentityVault>(&data) {
             let mut active = ACTIVE_IDENTITY.write().await;
             *active = Some(vault.clone());
-            exotalk_core::network_internal::set_ingress_paused(!vault.ingress_enabled).await;
-            exotalk_core::network_internal::set_egress_paused(!vault.egress_enabled).await;
             return vault;
         }
     }
     
-    generate_new_identity().await
+    IdentityVault {
+        did: "".to_string(),
+        display_name: "".to_string(),
+        avatar_url: "".to_string(),
+        secret: "".to_string(),
+        proof_string: "".to_string(),
+        verified_links: vec![],
+        oauth_links: vec![],
+        name_history: vec![],
+        ingress_enabled: true,
+        egress_enabled: true,
+    }
 }
 
 pub async fn update_active_profile(name: String, avatar: String) -> IdentityVault {
@@ -187,7 +363,7 @@ pub async fn update_active_profile(name: String, avatar: String) -> IdentityVaul
     let now_ms = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
 
-    if vault.display_name != name && !vault.display_name.is_empty() && vault.display_name != "New Peer" {
+    if vault.display_name != name && !vault.display_name.is_empty() {
         // Sign a name-change certificate
         let change_cert = if let Ok(sk_bytes) = bs58::decode(&vault.secret).into_vec() {
             if let Ok(sk_arr) = sk_bytes.try_into() as Result<[u8; 32], _> {
@@ -212,13 +388,16 @@ pub async fn update_active_profile(name: String, avatar: String) -> IdentityVaul
         vault.verified_links = vec![];
     }
 
-    vault.display_name = name;
-    vault.avatar_url = avatar;
+    vault.display_name = name.clone();
+    vault.avatar_url = avatar.clone();
     
     if let Ok(j) = serde_json::to_string(&vault) {
-        let _ = std::fs::write(storage_path("identity.json"), j);
+        let _ = std::fs::write(storage_path("identity.json").await, j);
     }
     
+    // Also update the global manifest so the identity picker shows the new name
+    update_device_manifest(&vault.did, &name, &avatar).await;
+
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(vault.clone());
     vault
@@ -230,7 +409,7 @@ pub async fn update_active_profile(name: String, avatar: String) -> IdentityVaul
 /// Format (Minimal): ets1:{SIG_B58}
 pub async fn generate_verification_proof(format: String) -> Result<String, String> {
     let vault = get_active_identity().await;
-    if vault.display_name.is_empty() || vault.display_name == "New Peer" {
+    if vault.display_name.is_empty() {
         return Err("Set a display name before generating a verification proof.".to_string());
     }
 
@@ -247,7 +426,7 @@ pub async fn generate_verification_proof(format: String) -> Result<String, Strin
     let mut updated = vault;
     updated.proof_string = proof.clone();
     if let Ok(j) = serde_json::to_string(&updated) {
-        let _ = std::fs::write(storage_path("identity.json"), j);
+        let _ = std::fs::write(storage_path("identity.json").await, j);
     }
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(updated);
@@ -258,7 +437,7 @@ pub async fn generate_verification_proof(format: String) -> Result<String, Strin
 /// Evaluates all available proof formats and returns the best one that fits within max_chars.
 pub async fn generate_best_proof(max_chars: usize) -> Result<String, String> {
     let vault = get_active_identity().await;
-    if vault.display_name.is_empty() || vault.display_name == "New Peer" {
+    if vault.display_name.is_empty() {
         return Err("Set a display name before generating a verification proof.".to_string());
     }
 
@@ -286,7 +465,7 @@ pub async fn generate_best_proof(max_chars: usize) -> Result<String, String> {
     let mut updated = vault;
     updated.proof_string = best_proof.clone();
     if let Ok(j) = serde_json::to_string(&updated) {
-        let _ = std::fs::write(storage_path("identity.json"), j);
+        let _ = std::fs::write(storage_path("identity.json").await, j);
     }
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(updated);
@@ -371,11 +550,10 @@ pub async fn set_ingress_enabled(enabled: bool) -> IdentityVault {
     let mut vault = get_active_identity().await;
     vault.ingress_enabled = enabled;
     if let Ok(j) = serde_json::to_string(&vault) {
-        let _ = std::fs::write(storage_path("identity.json"), j);
+        let _ = std::fs::write(storage_path("identity.json").await, j);
     }
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(vault.clone());
-    exotalk_core::network_internal::set_ingress_paused(!enabled).await;
     vault
 }
 
@@ -383,11 +561,10 @@ pub async fn set_egress_enabled(enabled: bool) -> IdentityVault {
     let mut vault = get_active_identity().await;
     vault.egress_enabled = enabled;
     if let Ok(j) = serde_json::to_string(&vault) {
-        let _ = std::fs::write(storage_path("identity.json"), j);
+        let _ = std::fs::write(storage_path("identity.json").await, j);
     }
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(vault.clone());
-    exotalk_core::network_internal::set_egress_paused(!enabled).await;
     vault
 }
 
@@ -405,7 +582,7 @@ pub async fn add_verification_link(label: String, url: String) -> IdentityVault 
     if !vault.verified_links.iter().any(|l| l.url == url) {
         vault.verified_links.push(VerifiedLink { platform_label: label, url, is_verified: false, verified_at_ms: 0 });
     }
-    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json").await, j); }
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(vault.clone());
     vault
@@ -420,7 +597,7 @@ pub async fn confirm_verification_link(url: String, verified: bool) -> IdentityV
         link.is_verified = verified;
         link.verified_at_ms = if verified { now_ms } else { 0 };
     }
-    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json").await, j); }
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(vault.clone());
     vault
@@ -430,7 +607,7 @@ pub async fn confirm_verification_link(url: String, verified: bool) -> IdentityV
 pub async fn remove_verification_link(url: String) -> IdentityVault {
     let mut vault = get_active_identity().await;
     vault.verified_links.retain(|l| l.url != url);
-    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json").await, j); }
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(vault.clone());
     vault
@@ -442,7 +619,7 @@ pub async fn update_link_label(url: String, new_label: String) -> IdentityVault 
     if let Some(link) = vault.verified_links.iter_mut().find(|l| l.url == url) {
         link.platform_label = new_label;
     }
-    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json").await, j); }
     let mut active = ACTIVE_IDENTITY.write().await;
     *active = Some(vault.clone());
     vault
@@ -459,7 +636,7 @@ pub async fn get_name_history() -> Vec<NameRecord> {
 static DB_OAUTH: Lazy<RwLock<Vec<OAuthLink>>> = Lazy::new(|| RwLock::new(Vec::new()));
 
 async fn load_oauth_links() {
-    if let Ok(data) = std::fs::read_to_string(storage_path("oauth_links.json")) {
+    if let Ok(data) = std::fs::read_to_string(storage_path("oauth_links.json").await) {
         if let Ok(parsed) = serde_json::from_str::<Vec<OAuthLink>>(&data) {
             let mut db = DB_OAUTH.write().await;
             *db = parsed;
@@ -469,7 +646,7 @@ async fn load_oauth_links() {
 
 async fn save_oauth_links() {
     if let Ok(j) = serde_json::to_string(&*DB_OAUTH.read().await) {
-        let _ = std::fs::write(storage_path("oauth_links.json"), j);
+        let _ = std::fs::write(storage_path("oauth_links.json").await, j);
     }
 }
 
@@ -603,9 +780,9 @@ pub async fn import_profile_bundle(bundle: String) -> bool {
     use ed25519_dalek::Verifier;
     if vk.verify(payload_bytes.as_slice(), &sig).is_err() { return false; }
     // Write to disk
-    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json"), j); }
+    if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json").await, j); }
     if let Ok(oauth) = serde_json::from_value::<Vec<OAuthLink>>(bundle_val["oauth_links"].clone()) {
-        if let Ok(j) = serde_json::to_string(&oauth) { let _ = std::fs::write(storage_path("oauth_links.json"), j); }
+        if let Ok(j) = serde_json::to_string(&oauth) { let _ = std::fs::write(storage_path("oauth_links.json").await, j); }
         let mut db = DB_OAUTH.write().await;
         *db = oauth;
     }
@@ -614,192 +791,97 @@ pub async fn import_profile_bundle(bundle: String) -> bool {
     true
 }
 
-use crate::api::network;
 
-pub async fn init_willow_database() -> Result<bool, String> {
-    // Ensure we have an identity before doing anything
-    get_active_identity().await;
+pub async fn find_profile_by_oauth(provider: String, sub: String) -> Option<String> {
+    let manifest = get_device_manifest().await;
+    let target = format!("{}:{}", provider, sub);
+    for profile in manifest.profiles {
+        if profile.oauth_subs.contains(&target) {
+            return Some(profile.did);
+        }
+    }
+    None
+}
 
-    // Start the P2P networking node using the active identity
-    let vault = get_active_identity().await;
-    network::start_iroh_node(vault.did, vault.secret).await?;
-
-    if let Ok(data) = std::fs::read_to_string(storage_path("db_conversations.json")) {
-        if let Ok(parsed) = serde_json::from_str::<Vec<Conversation>>(&data) {
-            let mut db_c = DB_CONVERSATIONS.write().await;
-            *db_c = parsed;
+pub async fn create_profile_from_oauth(provider: String, sub: String, name: String, avatar: String) -> Result<String, String> {
+    // 1. Generate new identity
+    let vault = generate_new_identity().await;
+    
+    // 2. Update vault with OAuth info
+    {
+        let mut active = ACTIVE_IDENTITY.write().await;
+        if let Some(ref mut v) = *active {
+            v.display_name = name.clone();
+            v.avatar_url = avatar.clone();
+            v.oauth_links.push(OAuthLink {
+                provider: provider.clone(),
+                display_name: name.clone(),
+                sub: sub.clone(),
+                binding_proof: "".to_string(), // In a real app, we'd sign a proof here
+                linked_at_ms: chrono::Utc::now().timestamp_millis(),
+            });
+            
+            // Save updated vault
+            if let Ok(j) = serde_json::to_string(&v) {
+                let _ = std::fs::write(storage_path("identity.json").await, j);
+            }
         }
     }
     
-    if let Ok(data) = std::fs::read_to_string(storage_path("db_messages.json")) {
-        if let Ok(parsed) = serde_json::from_str::<Vec<Message>>(&data) {
-            let mut db_m = DB_MESSAGES.write().await;
-            *db_m = parsed;
+    // 3. Update manifest with oauth_sub for discovery
+    let mut manifest = get_device_manifest().await;
+    let target = format!("{}:{}", provider, sub);
+    for profile in &mut manifest.profiles {
+        if profile.did == vault.did {
+            profile.display_name = name.clone();
+            profile.avatar_url = avatar.clone();
+            profile.oauth_subs.push(target.clone());
         }
     }
+    save_device_manifest(manifest).await;
+    
+    Ok(vault.did)
+}
+
+pub async fn link_oauth_to_existing_profile(did: String, provider: String, sub: String) -> Result<bool, String> {
+    // 1. Switch to the profile to ensure we can edit its vault
+    if !switch_active_profile(did.clone()).await? {
+        return Err("Could not switch to profile".to_string());
+    }
+    
+    // 2. Add OAuth link to vault
+    {
+        let mut active = ACTIVE_IDENTITY.write().await;
+        if let Some(ref mut v) = *active {
+            let target = format!("{}:{}", provider, sub);
+            if !v.oauth_links.iter().any(|l| format!("{}:{}", l.provider, l.sub) == target) {
+                v.oauth_links.push(OAuthLink {
+                    provider: provider.clone(),
+                    display_name: format!("{} account", provider),
+                    sub: sub.clone(),
+                    binding_proof: "".to_string(),
+                    linked_at_ms: chrono::Utc::now().timestamp_millis(),
+                });
+                
+                // Save updated vault
+                if let Ok(j) = serde_json::to_string(&v) {
+                    let _ = std::fs::write(storage_path("identity.json").await, j);
+                }
+            }
+        }
+    }
+    
+    // 3. Update manifest for future discovery
+    let mut manifest = get_device_manifest().await;
+    let target = format!("{}:{}", provider, sub);
+    for profile in &mut manifest.profiles {
+        if profile.did == did {
+            if !profile.oauth_subs.contains(&target) {
+                profile.oauth_subs.push(target.clone());
+            }
+        }
+    }
+    save_device_manifest(manifest).await;
     
     Ok(true)
-}
-
-pub async fn fetch_conversations() -> Vec<Conversation> {
-    let db = DB_CONVERSATIONS.read().await;
-    db.clone()
-}
-
-use exotalk_core::protocol_internal;
-
-pub async fn send_willow_message(conversation_id: String, _author_did: String, content: String) -> Message {
-    // 1. Prepare data OUTSIDE of the lock
-    let vault = get_active_identity().await;
-    let author_did = vault.did;
-    let timestamp = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
-    
-    // 2. Perform async networking OUTSIDE of the lock
-    let encoded = protocol_internal::encode_message(&content, timestamp).unwrap();
-    let blob_hash = network::save_blob(encoded).await.expect("Failed to persist message blob");
-    let namespace = protocol_internal::derive_namespace(&conversation_id);
-    network::broadcast_message_hash(namespace, blob_hash).await.expect("Failed to broadcast message announcement");
-
-    // 3. Update the materialized view DB within a NARROW lock scope
-    let msg = {
-        let mut db = DB_MESSAGES.write().await;
-        let m = Message {
-            id: format!("msg_{}", db.len()),
-            conversation_id,
-            author_did,
-            content,
-            timestamp_ms: timestamp,
-        };
-        db.push(m.clone());
-        m
-    };
-    
-    save_db_to_disk().await;
-    msg
-}
-
-pub async fn get_messages_for_conversation(convo_id: String) -> Vec<Message> {
-    let db = DB_MESSAGES.read().await;
-    db.iter().filter(|m| m.conversation_id == convo_id).cloned().collect()
-}
-
-pub async fn create_conversation(title: String, peers: Vec<String>) -> Conversation {
-    // 1. Prepare namespace OUTSIDE of lock
-    let id_str = {
-        let db = DB_CONVERSATIONS.read().await;
-        format!("convo_{}", db.len())
-    };
-    
-    // 2. Perform async networking OUTSIDE of lock
-    let namespace = protocol_internal::derive_namespace(&id_str);
-    let _ = network::join_conversation_topic(namespace).await;
-
-    // 3. Update DB within NARROW lock scope
-    let avatar_str = format!("https://picsum.photos/seed/{}/200/200", id_str);
-    let c = Conversation {
-        id: id_str,
-        title,
-        peers,
-        last_active: std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64,
-        unread_count: 0,
-        avatar: avatar_str,
-        is_group: false,
-    };
-    
-    {
-        let mut db = DB_CONVERSATIONS.write().await;
-        db.push(c.clone());
-    }
-    
-    save_db_to_disk().await;
-    c
-}
-
-/// Signs and gossips a new Meadowcap Capability token granting access to a conversation.
-/// 💡 MENTOR TIP: "Delegation" means giving someone else the power to speak.
-/// We use our private key to sign a specialized payload that only we could 
-/// have created. When other peers see this token, they'll know the math 
-/// proves it came from us.
-pub async fn delegate_capability(
-    target_did: String,
-    namespace_id: String,
-    level: String, // "Read", "Write", "Admin"
-) -> Result<String, String> {
-    let vault = get_active_identity().await;
-    if vault.secret.is_empty() {
-        return Err("No active identity to delegate from".into());
-    }
-
-    let sk_bytes = bs58::decode(&vault.secret).into_vec().map_err(|e| e.to_string())?;
-    let sk_arr: [u8; 32] = sk_bytes.try_into().map_err(|_| "Invalid secret key length".to_string())?;
-    let signing_key = ed25519_dalek::SigningKey::from_bytes(&sk_arr);
-
-    let access_level = match level.as_str() {
-        "Read" => PermissionLevel::Read,
-        "Write" => PermissionLevel::Write,
-        "Admin" => PermissionLevel::Admin,
-        _ => return Err("Invalid permission level".to_string()),
-    };
-
-    let namespace = exotalk_core::protocol_internal::derive_namespace(&namespace_id);
-
-    let mut cap = Capability {
-        delegator: vault.did.clone(),
-        delegatee: target_did,
-        namespace,
-        access_level: access_level.clone(),
-        signature: vec![],
-    };
-
-    // Serialize payload for signature (exclude empty signature field)
-    let ns_b58 = bs58::encode(&cap.namespace).into_string();
-    let payload = format!("{}:{}:{}:{:?}", cap.delegator, cap.delegatee, ns_b58, cap.access_level);
-    let signature = signing_key.sign(payload.as_bytes());
-    cap.signature = signature.to_bytes().to_vec();
-
-    serde_json::to_string(&cap).map_err(|e| e.to_string())
-}
-
-/// Verifies a Meadowcap Capability token mathematically against the delegator's active DID
-pub async fn verify_capability(cap_json: String) -> Result<bool, String> {
-    let cap: Capability = serde_json::from_str(&cap_json).map_err(|e| e.to_string())?;
-    
-    let pk_b58 = match cap.delegator.strip_prefix("did:peer:2.Vz") {
-        Some(s) => s,
-        None => return Err("Invalid delegator DID format".to_string()),
-    };
-    
-    let pk_bytes = bs58::decode(pk_b58).into_vec().map_err(|e| e.to_string())?;
-    let pk_arr: [u8; 32] = pk_bytes.try_into().map_err(|_| "Invalid public key length".to_string())?;
-    let verifying_key = ed25519_dalek::VerifyingKey::from_bytes(&pk_arr).map_err(|e| e.to_string())?;
-
-    // 💡 MENTOR TIP: We use the exact same format for the payload as we did
-    // when signing. If even ONE character is different, the signature will fail!
-    let ns_b58 = bs58::encode(&cap.namespace).into_string();
-    let payload = format!("{}:{}:{}:{:?}", cap.delegator, cap.delegatee, ns_b58, cap.access_level);
-    
-    let sig_arr: [u8; 64] = cap.signature.clone().try_into().map_err(|_| "Invalid signature length".to_string())?;
-    let signature = ed25519_dalek::Signature::from_bytes(&sig_arr);
-
-    match verifying_key.verify(payload.as_bytes(), &signature) {
-        Ok(_) => Ok(true),
-        Err(_) => Ok(false),
-    }
-}
-
-/// Fetches the current roster of verified peers for a specific conversation.
-pub async fn get_capabilities_for_namespace(namespace_id: String) -> std::collections::HashMap<String, String> {
-    // 💡 MENTOR TIP: We derive the 32-byte namespace hash because that's how
-    // the CapabilityStore keys its in-memory map.
-    let namespace = exotalk_core::protocol_internal::derive_namespace(&namespace_id);
-    let store = exotalk_core::network_internal::CAPABILITY_STORE.read().await;
-    let mut res = std::collections::HashMap::new();
-    if let Some(map) = store.get(&namespace) {
-        for (did, level) in map.iter() {
-            res.insert(did.clone(), format!("{:?}", level));
-        }
-    }
-    res
 }

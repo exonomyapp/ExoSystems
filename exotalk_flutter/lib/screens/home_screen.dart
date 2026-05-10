@@ -16,7 +16,7 @@ import 'chat_window_screen.dart';
 import '../widgets/theme_selector.dart';
 import '../widgets/pulsing_icon.dart';
 import '../providers/conscia_provider.dart';
-import '../src/rust/api/willow.dart';
+import '../src/rust/api/messaging.dart';
 import '../widgets/modals/peer_list_modal.dart';
 import '../widgets/modals/governance_mission_control.dart';
 import 'node_management_view.dart';

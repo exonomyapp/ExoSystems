@@ -25,7 +25,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../src/rust/api/willow.dart';
+import '../src/rust/api/messaging.dart';
+import 'package:exoauth/exoauth.dart';
 
 // --- MODELS ---
 

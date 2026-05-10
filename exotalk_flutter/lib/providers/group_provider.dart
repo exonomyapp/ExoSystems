@@ -13,7 +13,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../src/rust/api/willow.dart';
+import '../src/rust/api/messaging.dart';
 
 class CapabilityRoster {
   final Map<String, String> allowedPeers; // DID -> PermissionLevel ("Read", "Write", "Admin")
@@ -43,6 +43,8 @@ class GroupStateNotifier extends StateNotifier<CapabilityRoster> {
       // 💡 MENTOR TIP: This call goes through the "Bridge" into Rust.
       // Rust then signs the token and broadcasts it over the Iroh mesh.
       await delegateCapability(
+        delegatorDid: '', // TODO: Pass from identity provider via caller
+        delegatorSecret: '', // TODO: Pass from identity provider via caller
         targetDid: did,
         namespaceId: conversationId,
         level: level,
