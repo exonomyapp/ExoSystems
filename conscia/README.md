@@ -1,5 +1,7 @@
 # Conscia Node — The Sovereign Lifeline
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 Conscia is the always-on, standalone beacon and relay daemon for the ExoTalk network. It provides archival storage, high-availability peer routing, and "Lifeline" identity recovery for users like **Charlie**, ensuring messages are delivered even when devices are offline.
 
 ## 🛡️ The Sovereign Lifeline

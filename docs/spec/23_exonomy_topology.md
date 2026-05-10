@@ -16,6 +16,12 @@ To handle the complexity of voucher content management without sacrificing sover
 | **Mobile (`_lite`)** | `exonomy_lite` | Mobile-first Flutter app for rapid voucher claiming, peer-to-peer value exchange, and on-the-go milestone approvals. |
 | **Desktop (`_flutter`)** | `exonomy_flutter` | Heavy UI Flutter client for Exonomists managing complex voucher ledgers, tracking value exchange histories, and performing extensive cryptographic auditing. |
 | **Indexing Node (`_web`)** | `exonomy_web` | High-throughput Rust indexing service providing a public/private search fabric for available vouchers and bounties, managed via a Flutter Web dashboard. |
++
++## 2.1 Deployment Levels
++Exonomy is deployed across tiered operational levels:
++- **Consumer**: Standard app-store installation for rapid voucher claiming and social interaction.
++- **Merchant**: Headless, Docker-based wallet for automated voucher processing and bulk exchange.
++- **Enterprise**: Sideloaded, centrally-managed APKs for controlled organizational voucher systems.
 
 ## 3. The Indexing Relay
 The `exonomy_web` node acts as a "Consciosophical" facilitator. It hosts encrypted voucher payloads blindly, only indexing the explicitly decorated metadata (e.g., bounty amount, skill requirements, geographic tags) published by the Exonomist. This allows global crowdsourcing of tasks without exposing the underlying cryptographically sealed proof-of-work.

@@ -51,7 +51,16 @@ To ensure maximum accessibility, we provide curated acquisition paths for all us
 
 ## 4. The ExoTalk CLI (Headless Automation)
 
-The **ExoTalk CLI** is a first-class headless client designed for the terminal. It is built directly from the `exotalk_core` engine to provide a powerful interface for automation and mesh management.
+The **ExoTalk CLI** is a first-class headless client designed for the terminal. It is built directly from the underlying Rust engine to provide a powerful interface for automation and mesh management.
+
+### 4.1 Developer Ecosystem (NPM / Cargo)
+We provide automated binary delivery for developer toolchains:
+- **NPM (`@exotalk/conscia`)**:
+    - Wrapper package with a `postinstall` script.
+    - Script detects OS/Arch and fetches the matching binary from GitHub Releases.
+    - Ensures `conscia` is globally available without manual PATH configuration.
+- **Cargo**:
+    - Source-based installation via `cargo install conscia`.
 
 ### Primary Use Cases:
 1.  **"Conscierge" Bots**: Organizations can deploy headless chat clients to provide automated support, notifications, or "Concierge" services to members.

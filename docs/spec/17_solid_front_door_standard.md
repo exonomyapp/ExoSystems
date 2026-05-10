@@ -39,3 +39,19 @@ The Front Door is implemented as a shared Flutter package (`exoauth`).
 
 ## 5. Typography and Aesthetics
 - **Brightness Tuning**: To reduce eye strain and provide a more balanced "Dark Mode" aesthetic, the primary white text elements (headers, body text, primary button text) are toned down to an 80% intensity (e.g., using an `0xCC` alpha channel or equivalent toned-down hex) rather than pure white. This prevents the text from being overwhelmingly bright against the deep dark surfaces.
+
+## 6. The First-Run Lifecycle (Onboarding)
+
+The transition from binary acquisition to **Identity Synthesis** must be frictionless and narrative-driven.
+
+### 6.1 The Welcome Pulse
+The very first screen utilizes a high-fidelity animated splash screen reflecting the node's heartbeat. If no identity is detected, the app initiates the "Universal Passport" sequence.
+
+### 6.2 Identity Synthesis (The "Familiar Front Door")
+- **OAuth Bridge**: To bridge the gap for users familiar with Google/Apple sign-in, the system facilitates identity creation *through* these providers.
+- **Synthesis Logic**: During the familiar OAuth flow, a `did:peer` is generated locally and cryptographically associated with the provider's token. The user feels the comfort of a standard login, while the mesh receives a sovereign P2P identifier.
+- **Sovereign Path**: A "Raw P2P" path remains available for power users to generate an unanchored `did:peer` in two taps.
+
+### 6.3 Conscia Pairing & Mesh Discovery
+- **Pairing**: New installs are encouraged to link a **Conscia Lifeline** node for persistent data storage.
+- **Discovery**: An automatic local network scan (mDNS/Bluetooth) immediately shows P2P connectivity potential to "WOW" the user with the scale of the mesh.

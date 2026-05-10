@@ -1,5 +1,7 @@
 # ExoAuth — The Universal Passport
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 The `exoauth` package provides the unified **"Universal Passport"** for the entire Sovereign Exosystem. It is the "Solid Front Door" that bridges familiar user experiences with decentralized cryptographic sovereignty.
 
 ## 🛂 The Universal Passport

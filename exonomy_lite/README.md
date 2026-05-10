@@ -1,5 +1,7 @@
 # Exonomy Lite (Mobile P2P Client)
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 This is the mobile-first Flutter client for Exonomy, enabling rapid voucher claiming and peer-to-peer value exchange.
 
 ## Architecture & Topology

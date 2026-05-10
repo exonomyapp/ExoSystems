@@ -1,5 +1,7 @@
 # Antigravity Agent Meta-Prompt & Instructions
 
+[ 🏠 Back to Exosystem Root ](README.md)
+
 > [!CAUTION]
 > **THE HUMILITY DIRECTIVE**: ALWAYS ASSUME YOU ARE WRONG. Never delete files, wipe directories (mkdir -p), or perform "brute force" resets just because you encounter a problem. You MUST assume the problem is your own lack of observation (timing, focus, or misreading output). Stop and engage the human user before taking any destructive or "reset" actions.
 

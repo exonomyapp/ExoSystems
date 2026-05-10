@@ -1,5 +1,7 @@
 # 🏗️ Sovereign Infrastructure (Infra)
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 This directory contains the supporting infrastructure required to maintain, monitor, and relay the Sovereign Exosystem mesh. It bridges the gap between the headless Rust engine and the public internet.
 
 ## Components

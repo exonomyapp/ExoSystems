@@ -1,5 +1,7 @@
 # ⚙️ ExoTalk Engine Workspace
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 This is the pure beating heart of the Sovereign application Exosystem. It contains no UI logic, operating entirely on fundamental cryptography, peer-to-peer networking (via Iroh), and offline-first database syncing (via Willow).
 
 ## Workspace Domains

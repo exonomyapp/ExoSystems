@@ -1,5 +1,7 @@
 # ExoTalk (Multi-Platform)
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 This is the decentralized chat application of the Sovereign Exosystem. 
 
 ExoTalk compiles natively for iOS, Android, macOS, Linux, and Windows using Flutter. It does **not** rely on a centralized backend cloud.

@@ -1,113 +1,76 @@
-# zrok - Secure internet sharing made simple
+# The Sovereign Exosystem
 
-![zrok logo](docs/images/zrok_cover.png)
+<p align="center">
+  <img src="assets/branding/exotalk_pappus_desktop.png" alt="Pappus Logo" width="300">
+</p>
 
-**Share anything, anywhere, instantly. Enterprise reliability. No firewall changes. No port forwarding. No hassle.**
+> **"A digital node should be as free as the person who owns it and as connectable as the physics of the internet allows."** — *[The Vision](docs/vision.md)*
 
-zrok lets you securely share web services, files, and network resources with anyone—whether they're across the internet or your private network. Built on zero-trust networking, it works through firewalls and NAT without requiring any network configuration changes.
-
-## Quick start
-
-Get sharing in under 2 minutes:
-
-1. **[Install zrok](https://docs.zrok.io/docs/guides/install/)** for your platform
-2. **Get an account**: `zrok invite` (use the free [zrok.io service](https://docs.zrok.io/docs/getting-started/))
-3. **Enable sharing**: `zrok enable`
-
-That's it! Now you can share anything:
-
-```bash
-# Share a web service publicly
-$ zrok share public localhost:8080
-
-# Share files as a network drive  
-$ zrok share public --backend-mode drive ~/Documents
-
-# Share privately with other zrok users
-$ zrok share private localhost:3000
-```
-
-![zrok Web Console](docs/images/zrok_web_console.png)
-
-## What you can share
-
-### Web services
-
-Instantly make local web apps accessible over the internet:
-
-```bash
-zrok share public localhost:8080
-```
-
-![zrok share public](docs/images/zrok_share_public.png)
-
-### Files & directories
-
-Turn any folder into a shareable network drive:
-
-```bash
-zrok share public --backend-mode drive ~/Repos/zrok
-```
-
-![zrok share public -b drive](docs/images/zrok_share_public_drive.png)
-![mounted zrok drive](docs/images/zrok_share_public_drive_explorer.png)
-
-### Private resources
-
-Share TCP/UDP services securely with other zrok users—no public internet exposure.
-
-## Key features
-
-- **Zero Configuration**: Works through firewalls, NAT, and corporate networks
-- **Secure by Default**: End-to-end encryption with zero-trust architecture  
-- **Public & Private Sharing**: Share with anyone or just specific users
-- **Multiple Protocols**: HTTP/HTTPS, TCP, UDP, and file sharing
-- **Cross-Platform**: Windows, macOS, Linux, and Raspberry Pi
-- **Self-Hostable**: Run your own zrok service instance
-
-## How it works
-
-zrok is built on [OpenZiti](https://docs.openziti.io/docs/learn/introduction/), a programmable zero-trust network overlay. This means:
-
-- **No inbound connectivity required**: Works from behind firewalls and NAT
-- **End-to-end encryption**: All traffic is encrypted, even from zrok servers
-- **Peer-to-peer connections**: Direct connections between users when possible
-- **Identity-based access**: Share with specific users, not IP addresses
-
-## Developer SDK
-
-Embed zrok sharing into your applications with our Go SDK:
-
-```go
-// Create a share
-shr, err := sdk.CreateShare(root, &sdk.ShareRequest{
-    BackendMode: sdk.TcpTunnelBackendMode,
-    ShareMode:   sdk.PrivateShareMode,
-})
-
-// Accept connections
-listener, err := sdk.NewListener(shr.Token, root)
-```
-
-[Read the SDK guide](https://blog.openziti.io/the-zrok-sdk) for complete examples.
-
-## Self-hosting
-
-Run your own zrok service—from Raspberry Pi to enterprise scale:
-
-- Single binary contains everything you need
-- Scales from small personal instances to large public services
-- Built on the same codebase as the public zrok.io service
-
-[Self-Hosting Guide](https://docs.zrok.io/docs/guides/self-hosting/self_hosting_guide/)
-
-## Resources
-
-- **[Documentation](https://docs.zrok.io/)**
-- **[Office Hours Videos](https://www.youtube.com/watch?v=Edqv7yRmXb0&list=PLMUj_5fklasLuM6XiCNqwAFBuZD1t2lO2)**
-- **[Building from source](./BUILD.md)**
-- **[Contributing](./CONTRIBUTING.md)**
+Welcome to the root of the **Sovereign Exosystem**. This monorepo is the forge for a decentralized, zero-harvesting communications stack designed to defend digital sovereignty in an era of centralized hegemony and algorithmic "kill chains."
 
 ---
 
-*Ready to start sharing? [Get started with zrok →](https://docs.zrok.io/docs/getting-started)*
+## 📖 The Manifest
+Before contributing or deploying, align your frequency with the core philosophy:
+*   **[The Vision](docs/vision.md)**: Identity sovereignty, data locality, and publisher-led aggregation.
+*   **[The Sovereign Saga](docs/scenarios/sovereign_saga.md)**: Our narrative framework for digital resistance.
+*   **[Agent Protocol](agent.md)**: The "Bible" for AI and human agents operating in this SDLC.
+
+---
+
+## 🚀 The Application Triad
+We build in threes. Each application is designed for multi-dimensional resilience across mobile, desktop, and web.
+
+### 💬 ExoTalk — *Sovereign Messaging*
+The flagship. Encrypted, offline-first gossip via Willow and Iroh.
+- **[exotalk_flutter/](exotalk_flutter/README.md)**: High-density desktop client.
+- **[exotalk_web/](exotalk_web/README.md)**: Wasm-based entry point.
+- **[exotalk_engine/](exotalk_engine/README.md)**: The Rust-powered P2P heart.
+
+### 💳 Exonomy — *Social Voucher Exchange*
+Decentralized social credit and exchange without intermediate brokers.
+- **[exonomy_lite/](exonomy_lite/README.md)**: Mobile P2P client.
+- **[exonomy_flutter/](exonomy_flutter/README.md)**: Desktop management.
+- **[exonomy_web/](exonomy_web/README.md)**: Indexing node.
+
+### 🗳️ Exocracy — *Project Governance*
+Fluid, cryptographically-verified decision making for the autonomous age.
+- **[exocracy_lite/](exocracy_lite/README.md)** | **[exocracy_flutter/](exocracy_flutter/README.md)** | **[exocracy_web/](exocracy_web/README.md)**
+
+### 📚 RepubLet — *Scientific Publishing*
+Verifiable, immutable archival of human knowledge.
+- **[republet_lite/](republet_lite/README.md)** | **[republet_flutter/](republet_flutter/README.md)** | **[republet_web/](republet_web/README.md)**
+
+---
+
+## 🏗️ Core Infrastructure
+The shared backbone that powers the Exosystem.
+
+*   **[conscia/](conscia/README.md)**: **The Sovereign Lifeline.** A first-class, headless beacon and HA relay daemon.
+*   **[exoauth/](exoauth/README.md)**: **The Universal Passport.** Portable Ed25519 identity synthesis and FFI plugin.
+*   **[infra/](infra/README.md)**: Signaling relays, diagnostic bridges, and monitoring tools.
+
+---
+
+## 📚 Documentation Vault
+The Exosystem is documented as a living history.
+
+*   **[Knowledge Hub (docs/)](docs/README.md)**: Centralized specs and scenarios.
+*   **[Functional Specs](docs/spec/README.md)**: The "Ground Truth" for architectural standards.
+*   **[Walkthroughs](docs/walkthroughs/README.md)**: Sequential records of every development session.
+*   **[License](docs/license.md)**: Proudly published under **AGPL-3.0**.
+
+---
+
+## 🤖 Agentic SDLC (BMAD)
+This repository is managed via an **Event-Driven Multi-Agent SDLC**.
+- **[Spec 31](docs/spec/31_bmad_agile_methodology.md)**: Meet the AI Workforce (The Sovereign PM, Iroh Expert, etc.).
+- **[Spec 32](docs/spec/32_archon_workflow_standard.md)**: High-fidelity automation standards.
+
+---
+
+### 🧠 Brain Context: The Pappus Root
+The root README is the **Pappus**—the seed that carries the entire genetic code of the project. It serves as the primary "Solid Front Door" for both humans and AI agents entering the swarm.
+
+---
+*Created with intent on Exocracy.local. Verified via KDVV.*

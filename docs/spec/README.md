@@ -1,5 +1,7 @@
 # Exosystem Functional Specifications
 
+[ 🏠 Back to Exosystem Root ](../../README.md)
+
 This directory contains the formal specifications for the Sovereign Exosystem. These documents define the architectural, operational, and visual standards for all applications in the suite.
 
 ## 🧭 Navigation Map
@@ -26,7 +28,7 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 
 ### 📦 Distribution & Acquisition (Production Suite)
 - **[20. Distribution Control Panel](20_distribution_control_panel.md)**: **Master Hub** for App IDs, Docker naming, and acquisition syntax.
-- **[21. Distribution Strategy](21_distribution_and_acquisition_strategy.md)**: (Coming Soon) Unified strategy for Flatpak, Docker, and App Stores.
+- **[21. Distribution Strategy](21_distribution_and_acquisition_strategy.md)**: Unified strategy for Flatpak, Docker, and App Stores.
 - **[19. Verification Telemetry API](19_verification_telemetry_api.md)**: Port 11434 sidecar for automated health auditing.
 - **[Telemetry Verification (Live)](telemetry_verification.md)**: Real-time results of the programmatic infrastructure stress test.
 
@@ -39,8 +41,7 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 
 ---
 
-### 🗄️ Specialized & Legacy
-- **[Legacy Archive](legacy/)**: Preserved individual app distribution specs.
+### 🗄️ Specialized & Operational
 - **[Conscia Management](conscia_manage.md)**: Specific operations for the Conscia node.
 - **[Mesh Delivery Decisions](mesh_delivery_decisions.md)**: Rationale behind low-level networking choices.
 

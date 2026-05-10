@@ -16,5 +16,5 @@ Exocracy is the "Governance Layer" of the mesh. It is a completely independent a
 | **Indexing Node (`_web`)** | `exocracy_web` | High-throughput Rust indexing service providing public/private search indexing for open tasks and bounties, managed via a Flutter Web dashboard. |
 
 ## 3. Related Documents
-- [ExoTalk Distribution](exotalk_distribution.md)
-- [Conscia Distribution](conscia_distribution.md)
+- [Distribution & Acquisition Strategy](21_distribution_and_acquisition_strategy.md)
+- [Conscia Management](conscia_manage.md)

@@ -1,5 +1,7 @@
 # ExoTalk: The Vision
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 The digital landscape of the early 2020s was defined by a Faustian bargain: in exchange for "exposure" and "connectivity," users surrendered their data, their identities, and their digital sovereignty to monolithic brokers. These brokers became the gatekeepers of truth, the arbiters of visibility, and the single points of failure for the global conversation. 
 
 The Exotalk architecture is a rejection of this bargain. It is built on the premise that a digital node should be as free as the person who owns it and as connectable as the physics of the internet allows.

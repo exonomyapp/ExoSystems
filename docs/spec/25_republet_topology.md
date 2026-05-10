@@ -18,5 +18,5 @@ Furthermore, if a RepubLet scientist chooses to initiate an Exocracy project to 
 | **Indexing Node (`_web`)** | `republet_web` | High-throughput Rust indexing service serving as an academic citation relay and public search gateway for open-science metadata, managed via a Flutter Web dashboard. |
 
 ## 3. Related Documents
-- [ExoTalk Distribution](exotalk_distribution.md)
-- [Conscia Distribution](conscia_distribution.md)
+- [Distribution & Acquisition Strategy](21_distribution_and_acquisition_strategy.md)
+- [Conscia Management](conscia_manage.md)

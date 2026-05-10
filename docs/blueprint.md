@@ -1,5 +1,7 @@
 # ExoTalk: The Architecture of Autonomy
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 This document serves as the high-level formal architectural blueprint and vision for ExoTalk, a local-first, P2P social publishing and messaging platform. It synthesizes our technical decisions into a cohesive strategy for a digital node that is "free" (autonomous) and "connectable" (resilient).
 
 *For the philosophical underpinnings of this architecture, please see [The Vision](vision.md).*

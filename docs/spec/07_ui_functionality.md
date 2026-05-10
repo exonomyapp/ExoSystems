@@ -53,3 +53,9 @@ The sidebar includes a high-density environment dashboard below the Account Sett
     - **Layer 2 (ID)**: Node ID (truncated), Uptime, Clock Drift.
     - **Layer 3 (Mesh)**: Blob Store Size, Traffic Pulse (Ingress/Egress).
     - **Layer 4 (Env)**: OS/Architecture, Process ID (PID).
++
++### 7.7 Terminal Interaction Protocol (CLI/TUI)
++For headless nodes and power users, the system employs a tiered terminal strategy:
++- **Tier 1: CLI (`clap`)**: Non-interactive automation, piping, and quick commands (e.g., `conscia status`).
++- **Tier 2: Interactive (`inquire`)**: Guided onboarding, configuration wizards, and confirmation prompts.
++- **Tier 3: TUI (`ratatui`)**: Immersive, full-screen dashboard for real-time monitoring of mesh health and logs in a terminal environment.

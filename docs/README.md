@@ -1,5 +1,7 @@
 # Sovereign Documentation & Specifications
 
+[ 🏠 Back to Exosystem Root ](../README.md)
+
 Welcome to the central knowledge hub of the Sovereign Exosystem. This directory contains the philosophical, architectural, and operational blueprints for a decentralized mesh network designed to bypass the Panopticon of centralized technocracy.
 
 ## 📖 Philosophical Foundation
@@ -17,12 +19,11 @@ Located in `docs/scenarios/`:
 
 ## 🛠 Individual Specifications
 Located in `docs/spec/`:
-*   **[Conscia Distribution](spec/conscia_distribution.md)**: Packaging strategy for global South resilience.
-*   **[ExoTalk Distribution](spec/exotalk_distribution.md)**: Roadmap for multi-platform delivery.
+*   **[Distribution & Acquisition Strategy](spec/21_distribution_and_acquisition_strategy.md)**: Unified roadmap for multi-platform delivery and global South resilience.
 *   **[Node Management](spec/conscia_manage.md)**: Design principles for top-down administration.
 
 ## 🚀 Operational Guides
 *   **[Conscia Ops Guide](conscia_ops_guide.md)**: Running and federating your sovereign backbones.
 
 ## 📜 History
-*   **[Walkthroughs](walkthroughs/)**: Sequential records of development sessions and verification audits.
+*   **[Walkthroughs](walkthroughs/README.md)**: Sequential records of development sessions and verification audits.

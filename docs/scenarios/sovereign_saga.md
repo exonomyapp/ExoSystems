@@ -1,5 +1,7 @@
 # The Sovereign Saga: Resonance in the Mesh (ExoTalk Focus)
 
+[ 🏠 Back to Exosystem Root ](../../README.md)
+
 This document establishes the narrative framework for all ExoTalk/Conscia scenarios and screenplays. It grounds our technical architecture in the lived reality of those for whom "private communication" is not a luxury, but a requirement for survival.
 
 ## The Context: The Resistance against Digital Hegemony
