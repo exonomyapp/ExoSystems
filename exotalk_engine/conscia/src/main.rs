@@ -297,6 +297,12 @@ async fn start_daemon(config: Config) -> anyhow::Result<()> {
         .route("/api/governance/authorize", post(authorize_peer))
         .route("/api/federation/toggle", post(toggle_federation))
         .route("/api/logs/stream", get(stream_logs))
+        .route("/api/discovery", get(get_discovery))
+        .route("/api/capabilities", get(get_capabilities))
+        .route("/api/capabilities/petition", post(submit_petition))
+        .route("/api/capabilities/verify", post(verify_capability))
+        .route("/api/index/metadata", post(inject_metadata))
+        .route("/api/index/search", get(search_metadata))
         .route("/metrics", get(move || async move { metrics_handle.render() }))
         .layer(
             CorsLayer::new()
@@ -388,3 +394,134 @@ async fn stream_logs(Query(params): Query<LogParams>) -> Sse<impl Stream<Item = 
 struct LogParams {
     level: Option<String>,
 }
+
+// =============================================================================
+// PHASE 4: DISCOVERY, SDUI & BLIND INDEXING ENDPOINTS
+// =============================================================================
+// 🧠 EDUCATIONAL CONTEXT: The Triad Architecture mandates that host apps 
+// (like ThreeSteps or RepubLet) are independent of the network stack. 
+// These endpoints allow them to securely "Discover" the Conscia node, query
+// its capabilities, and fetch the exact UI components they are allowed to paint.
+
+#[derive(Serialize)]
+struct DiscoveryResponse {
+    did: String,
+    node_id: String,
+    version: String,
+}
+
+async fn get_discovery() -> Json<DiscoveryResponse> {
+    let stats = network_internal::get_stats().await;
+    Json(DiscoveryResponse {
+        did: "did:peer:conscia_beacon".to_string(), // Placeholder for actual DID configuration
+        node_id: stats.get("node_id").cloned().unwrap_or_else(|| "Offline".to_string()),
+        version: env!("CARGO_PKG_VERSION").to_string(),
+    })
+}
+
+#[derive(Serialize)]
+struct CapabilitiesResponse {
+    node_role: String,
+    performance_target: serde_json::Value,
+    sdui_widgets: Vec<String>,
+}
+
+/// 💡 MENTOR TIP: Server-Driven UI (SDUI)
+/// Instead of hardcoding widgets in the client app, we tell the client exactly
+/// what to render based on the node's performance profile and federation status.
+/// This prevents a mobile app from crashing a lightweight node with heavy queries!
+async fn get_capabilities() -> Json<CapabilitiesResponse> {
+    Json(CapabilitiesResponse {
+        node_role: "High-Availability Mesh".to_string(), // Contextually derived in production
+        performance_target: serde_json::json!({
+            "cpu_idle_target": 1.3,
+            "render_mode": "moses_pulse"
+        }),
+        sdui_widgets: vec![
+            "FederationToggle".to_string(),
+            "RoleDropdown".to_string(),
+            "MetadataSearch".to_string(),
+        ],
+    })
+}
+
+#[derive(Deserialize)]
+struct PetitionPayload {
+    did: String,
+    role_requested: String,
+}
+
+async fn submit_petition(Json(payload): Json<PetitionPayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let mut pending = network_internal::PENDING_REQUESTS.write().await;
+    if !pending.contains(&payload.did) {
+        pending.push(payload.did.clone());
+        tracing::info!("External petition queued for DID: {} (Requested: {})", payload.did, payload.role_requested);
+    }
+    Ok(StatusCode::OK)
+}
+
+#[derive(Deserialize)]
+struct VerifyPayload {
+    did: String,
+}
+
+#[derive(Serialize)]
+struct VerifyResponse {
+    permission_level: String,
+}
+
+async fn verify_capability(Json(payload): Json<VerifyPayload>) -> Json<VerifyResponse> {
+    let store = network_internal::CAPABILITY_STORE.read().await;
+    // We use the mesh governance namespace for base access level checks
+    let namespace = exotalk_core::protocol_internal::derive_namespace("conscia_mesh_governance");
+    
+    let permission_level = if let Some(ns_map) = store.get(&namespace) {
+        if let Some(level) = ns_map.get(&payload.did) {
+            format!("{:?}", level)
+        } else {
+            "None".to_string()
+        }
+    } else {
+        "None".to_string()
+    };
+    
+    Json(VerifyResponse { permission_level })
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+struct MetadataPayload {
+    author_did: String,
+    content_hash: String,
+    metadata_tags: Vec<String>,
+    signature: String,
+}
+
+// 🧠 EDUCATIONAL CONTEXT: Blind Indexing
+// As a "Sovereign Beacon", this node indexes metadata tags for global search 
+// (like RepubLet articles) without ever needing the keys to decrypt the 
+// underlying content payloads.
+// In-memory store for blind indexing (ephemeral for this version)
+static METADATA_INDEX: Lazy<tokio::sync::RwLock<Vec<MetadataPayload>>> = Lazy::new(|| tokio::sync::RwLock::new(Vec::new()));
+
+async fn inject_metadata(Json(payload): Json<MetadataPayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let mut index = METADATA_INDEX.write().await;
+    index.push(payload.clone());
+    tracing::info!("Indexed new public metadata for encrypted content hash: {}", payload.content_hash);
+    Ok(StatusCode::OK)
+}
+
+#[derive(Deserialize)]
+struct SearchQuery {
+    query: String,
+}
+
+async fn search_metadata(Query(params): Query<SearchQuery>) -> Json<Vec<MetadataPayload>> {
+    let index = METADATA_INDEX.read().await;
+    let query_lower = params.query.to_lowercase();
+    let results: Vec<MetadataPayload> = index.iter()
+        .filter(|m| m.metadata_tags.iter().any(|t| t.to_lowercase().contains(&query_lower)))
+        .cloned()
+        .collect();
+    Json(results)
+}
+
