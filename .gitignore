@@ -58,3 +58,4 @@ docs/archive/
 
 # --- LOCAL SECRETS ---
 **/secrets_config.dart
+agent.md
