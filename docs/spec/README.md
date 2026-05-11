@@ -50,7 +50,12 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 ### 🚀 Strategy & Evolution
 - **[27. Storage Infrastructure Matrix](27_storage_infrastructure_matrix.md)**: Comparative analysis of S3 and P2P storage solutions.
 - **[28. Sovereign Management Evolution](28_sovereign_management_evolution.md)**: Roadmap from **BridgeNode** to the **ExoMC**.
-- **[29. KDVV Remote Control Protocol](29_kdvv_remote_control_protocol.md)**: Standards for **Programmatic Humanity** and remote orchestration.
+
+---
+
+### 🏗️ Deployment & Infrastructure (The Enterprise FHS Standard)
+- **[36. Exonomy Deployment Standard](36_exonomy_deployment_standard.md)**: FHS-compliant deployment architecture for the Exonomy suite.
+- **[FHS Installer Specification](../releases/fhs_installer_specification.md)**: Complete specification for the modular TUI installer, directory mapping, and systemd orchestration.
 
 ---
 
@@ -61,7 +66,6 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 - **[33. BAML Type Safety Protocol](33_baml_type_safety_protocol.md)**: Schema enforcement and prompt reliability layer.
 - **[34. GitHub Projects Governance](34_github_projects_governance.md)**: Issue lifecycles, webhooks, and the Flutter Web Cockpit.
 - **[35. Observability & Memory Vault](35_observability_and_memory_vault.md)**: Minikube hardware split for Arize Phoenix, Qdrant, and Promptfoo.
-- **[36. Exonomy Deployment Standard](36_exonomy_deployment_standard.md)**: Standardized deployment patterns for the Exonomy suite.
 
 ---
 

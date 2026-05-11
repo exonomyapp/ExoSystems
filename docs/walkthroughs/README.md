@@ -5,9 +5,10 @@
 This directory contains the sequential record of the Sovereign Exosystem's development. Each file represents a session or a major architectural transition.
 
 ## 🏁 Most Recent
+- **[74. ConSoul Foundation](74_consoul_foundation.md)**: Establishing the ConSoul administrative interface.
+- **[73. Enterprise FHS Installer Planning](73_enterprise_fhs_installer_planning.md)**: Finalizing the TUI installer specification.
+- **[72. Enterprise FHS Migration Pivot](72_enterprise_fhs_migration_pivot.md)**: Shifting deployment architecture to Linux FHS standards.
 - **[71. Prepping for Root Identity Restoration](71_prepping_for_root_identity_restoration.md)**: Preparation for reclaiming the monorepo root.
-- **[70. Conscia Citizenship Extraction](70_conscia_citizenship_extraction.md)**: Promoting Conscia to a first-class top-level component.
-- **[69. Conscia SDUI and Blind Indexing API](69_conscia_sdui_and_blind_indexing_api.md)**: Capabilities and discovery integration.
 
 ## 🏗️ Major Campaigns
 

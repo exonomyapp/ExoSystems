@@ -1,26 +1,32 @@
-# Walkthrough 71: Prepping for Root Identity Restoration
+# Walkthrough 71: Root Identity Restoration
 
-## Overview
-As we conclude the **Conscia Citizenship Extraction** campaign, we have identified a significant architectural debt: the root of the monorepo is currently polluted with `zrok` documentation (README, CHANGELOG, LICENSE), obscuring the **Exosystems** identity. This walkthrough prepares the terrain for a dedicated restoration session.
+We have successfully reclaimed the monorepo root and consolidated the documentation base to reflect the **Sovereign Exosystem** identity.
 
-## State of the Union
-- **Conscia Promotion**: Complete. Conscia is now a first-class citizen at `/conscia` with its own Triad scaffolds.
-- **CMC Purge**: Complete. Legacy placeholders removed; documentation scrubbed.
-- **Documentation Audit**:
-  - `conscia/README.md`: Updated and aligned with the Triad.
-  - `docs/spec/22_application_triad_architecture.md`: Updated.
-  - `root/README.md`: **NEEDS RESTORATION.** Currently occupied by zrok v2 documentation.
+## 🏁 Milestones
 
-## Next Session: The "Pappus" Restoration
-The objective for the next session is to reclaim the root of the monorepo and establish a high-fidelity "Solid Identity" for the Exosystems project.
+### 1. Root Identity Restoration (The Pappus)
+- **Archival**: Moved legacy `zrok` files (`README.md`, `CHANGELOG.md`, `LICENSE`, `zrok.tar.gz`) to [docs/archive/zrok/](file:///home/exocrat/code/exotalk/docs/archive/zrok/).
+- **Pappus Root**: Established the new [README.md](file:///home/exocrat/code/exotalk/README.md) as the high-fidelity entry point for the Application Triad.
+- **Legislative Update**: Updated root [LICENSE](file:///home/exocrat/code/exotalk/LICENSE) to **AGPL-3.0**.
+- **Historical Record**: Redefined [CHANGELOG.md](file:///home/exocrat/code/exotalk/CHANGELOG.md) as a pointer to the walkthrough system.
 
-### Preparatory Research (Session Start Tasks)
-1.  **Audit `agent.md`**: Extract the "Sovereign Operating Protocol" and "Brain" emoji context for root-level educational blocks.
-2.  **Audit `docs/spec/22` & `docs/spec/36`**: Distill the Application Triad philosophy and deployment standards into a concise "Exosystems at a Glance" guide.
-3.  **Audit `docs/ai_landscape_strategy.md`**: Extract the core vision of "Digital Resistance" and "Zero-Harvesting" to anchor the project's "Why."
-4.  **Legacy Preservation**: Plan to move the current `zrok` root files to `docs/archive/zrok/` to maintain technical reference without sacrificing root identity.
+### 2. Symmetrical Navigation Breadcrumbs
+- Implemented `[ 🏠 Back to Exosystem Root ]` links across all major READMEs and specifications to ensure a circular, frictionless navigation loop.
+- Updated all directory links in the root README to point directly to `README.md` files for deterministic IDE focus.
 
-## 🧠 Brain Context: The Pappus Root
-In the sovereign monorepo, the root README is the **Pappus**—the seed that carries the entire genetic code of the project. It must WOW the visitor with the scale of the Triad architecture and the clarity of the sovereign vision. The current "zrok pollution" is a barrier to this high-fidelity entry point.
+### 3. Specification Consolidation
+- **Salvaged Knowledge**: Extracted "Solid Identity Onboarding," "Terminal UI Protocol," and "Developer Distribution" details from legacy files.
+- **Modern Integration**: Re-homed salvaged knowledge into:
+    - [Spec 07: UI Functionality](file:///home/exocrat/code/exotalk/docs/spec/07_ui_functionality.md) (TUI Tiered Strategy).
+    - [Spec 17: Solid Front Door Standard](file:///home/exocrat/code/exotalk/docs/spec/17_solid_front_door_standard.md) (Onboarding Narrative).
+    - [Spec 20: Distribution Control Panel](file:///home/exocrat/code/exotalk/docs/spec/20_distribution_control_panel.md) (NPM Lifecycle).
+    - [Spec 23: Exonomy Topology](file:///home/exocrat/code/exotalk/docs/spec/23_exonomy_topology.md) (Deployment Levels).
+- **Purge**: Successfully removed the `docs/spec/legacy/` directory and updated the [Specifications Index](file:///home/exocrat/code/exotalk/docs/spec/README.md).
 
-**Status**: Ready for Session Transition.
+## 🧪 Verification Results
+- **Link Audit**: All breadcrumbs and sub-project links verified for relative path accuracy.
+- **Visual Audit**: Pappus logo centered and resized to `300px` for optimal vertical density.
+- **Git State**: Clean master branch; all changes pushed to `origin/master`.
+
+---
+**Status**: Root Identity Restored. Monorepo Clean. Standing by for Phase 4.
