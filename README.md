@@ -11,6 +11,10 @@ Welcome to the root of the **Sovereign Exosystem**. This monorepo is the forge f
 ---
 
 ## 📖 The Manifest
+<p align="center">
+  <img src="assets/branding/exosystem_banner.png" alt="Sovereign Exosystem Banner" width="100%">
+</p>
+
 Before contributing or deploying, align your frequency with the core philosophy:
 *   **[The Vision](docs/vision.md)**: Identity sovereignty, data locality, and publisher-led aggregation.
 *   **[The Sovereign Saga](docs/scenarios/sovereign_saga.md)**: Our narrative framework for digital resistance.
