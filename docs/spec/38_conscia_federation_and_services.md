@@ -26,7 +26,7 @@ Federation is a mutual, Human-in-the-Loop relationship between two Conscia nodes
 **Step-by-step:**
 
 1. **Propose**: Node A sends a federation proposal to Node B, including its DID, advertised services, geographic metadata, and connectivity profile.
-2. **HITL Review**: Node B's operator reviews the proposal in the Conscia UI. They can inspect Node A's identity, service offerings, and geographic context before deciding.
+2. **HITL Review**: Node B's operator reviews the proposal in the ConSoul interface. They can inspect Node A's identity, service offerings, and geographic context before deciding.
 3. **Accept**: Node B's operator approves. Node B sends an acceptance response including its own DID and service declarations.
 4. **Capability Exchange**: Both nodes exchange Meadowcap capability tokens granting each other appropriate federation-level access.
 5. **Gossip Channel Active**: Both nodes join shared federation gossip topics (see §2.3) and begin exchanging heartbeats, catalog updates, and index synchronization data.
@@ -88,7 +88,7 @@ Nodes that do not declare geographic metadata are treated as "region-agnostic" a
 
 ### 4.2 Content Locality Rules
 
-Node operators configure content locality policies via the Conscia UI. These rules govern how metadata and relay traffic are distributed across the federation network.
+Node operators configure content locality policies via the ConSoul interface. These rules govern how metadata and relay traffic are distributed across the federation network.
 
 | Rule Type | Description | Use Case |
 |---|---|---|
@@ -116,11 +116,11 @@ Conscia distinguishes between two API surfaces:
 | Surface | Endpoint | Purpose | Primary Consumer |
 |---|---|---|---|
 | **Capabilities** | `GET /api/capabilities` | Client-facing: "What can I see? What SDUI widgets should I render?" | Synesys, ExoTalk, and all consumer apps |
-| **Services** | `GET /api/services` | Operator-facing: "What is this node running? What can I configure?" | Conscia UI (admin) |
+| **Services** | `GET /api/services` | Operator-facing: "What is this node running? What can I configure?" | ConSoul interface (admin) |
 
 This separation enforces the admin-vs-consumer boundary:
 - A Synesys browser calls `/api/capabilities` to learn which widgets to paint
-- A Conscia UI operator calls `/api/services` to manage what is enabled, configured, and monitored
+- A ConSoul operator calls `/api/services` to manage what is enabled, configured, and monitored
 
 ### 5.2 Service Catalog
 
@@ -181,7 +181,7 @@ Conscia nodes are designed to integrate with Grafana for visual observability da
 - Service utilization trends over time
 - Alert thresholds for storage, latency, and availability
 
-The Conscia UI surfaces key Prometheus metrics directly, but Grafana provides the deep, time-series analysis layer for enterprise operators managing multiple clusters.
+The ConSoul interface surfaces key Prometheus metrics directly, but Grafana provides the deep, time-series analysis layer for enterprise operators managing multiple clusters.
 
 ---
 
@@ -255,7 +255,7 @@ Conscia's understanding of application needs is modular. Each application regist
 
 1. **Register**: Application declares the service type, resource requirements, and API endpoints it needs via `POST /api/services/register`.
 2. **Queue for review**: Conscia node queues the registration for operator review (or auto-approves if the operator has pre-configured automation policies).
-3. **Approve / Deny (HITL or automated)**: Operator reviews and approves in the Conscia UI, or the automation policy approves based on predefined rules.
+3. **Approve / Deny (HITL or automated)**: Operator reviews and approves in the ConSoul interface, or the automation policy approves based on predefined rules.
 4. **Service Active**: Conscia confirms the service is active; the application begins consuming it.
 
 ---
@@ -304,16 +304,16 @@ Conscia nodes present QR codes encoding structured payloads that any Exosystem a
 
 ### 11.2 Presentation
 
-The Conscia UI (Campaign 1) generates and displays QR codes in relevant screens:
-- **Identity/Federation screen**: Node Discovery QR and Federation Proposal QR
-- **Petition review screen**: Petition Invite QR for sharing with prospective followers
+The ConSoul interface (Campaign 1) generates and displays QR codes in relevant screens:
+- **Proximity Discovery tab**: Node Discovery QR via `pretty_qr_code` for high-speed Layer A bridging
+- **Proposal Inbox tab**: Petition Invite QR for sharing with prospective followers
 - **Forum management screen**: Circle Join QR for onboarding followers into specific circles
 
 ### 11.3 Consumption
 
 Any Exosystem application can scan any Conscia QR code. The `type` field in the payload tells the scanning app which flow to initiate:
 - An app that receives a `discovery` QR adds the Conscia node to its known nodes list
-- An app that receives a `federation` QR forwards it to its own Conscia UI operator for review
+- An app that receives a `federation` QR forwards it to its own ConSoul operator for review
 - An app that receives a `petition` QR opens a pre-filled petition submission form
 - An app that receives a `circle_join` QR navigates to the circle join flow with the relevant Conscia node and circle pre-selected
 

@@ -8,7 +8,7 @@ This session focused entirely on the architectural planning and specification fo
 ## 2. Key Architectural Decisions
 
 ### 2.1 The Modular TUI Installer
-We rejected both monolithic `.deb` packages and domain-separated `.deb` packages. Instead, the deployment will be orchestrated by a **Sophisticated Terminal User Interface (TUI)** mechanism.
+We are embracing an **"All Of The Above" (AOTA)** philosophy, providing native `.deb` packages alongside other options. Specifically, the deployment can also be orchestrated by a **Sophisticated Terminal User Interface (TUI)** mechanism.
 - The TUI acts as an interactive configuration dashboard.
 - It allows the operator to selectively deploy any combination of the four core components: **Conscia** (daemon), **Conscia UI** (desktop app), **Zrok**, and **Signaling**.
 - The TUI handles complex configurations, including securely capturing credentials and selecting OpenTofu cluster deployment scripts.

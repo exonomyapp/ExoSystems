@@ -254,7 +254,13 @@ package: build-conscia build-signaling build-ui
 	cp infra/signaling/signaling_server.py dist/opt/exo/signaling/
 ```
 
-### 7.2 Debian Package (`.deb`) — Future Phase
-A `.deb` package wrapper may be introduced in a subsequent phase. The `DEBIAN/postinst` script would replicate the installer's action sequence (§6.3) for hands-free deployment via `apt`. This phase depends on establishing a stable release cadence.
+### 7.2 Debian Package (`.deb`) & AOTA Strategy
+In adherence to the **"All Of The Above" (AOTA)** philosophy, the codebase outputs multiple standardized payload types. Native Debian (`.deb`) packages are provided as a fully supported installation option alongside the TUI. 
+
+**Native Configuration via `debconf`**:
+To achieve the exact same interactive configuration experience as the Rust TUI, the Debian package leverages `debconf`.
+- **Interactive**: During `apt install`, the `DEBIAN/config` script triggers `debconf` to present native terminal prompts (using `dialog` or `readline`) to capture required parameters (e.g., mesh namespace, DID seed, Zrok token).
+- **Headless**: For automated deployments (Ansible, Terraform, OpenTofu), administrators can pre-seed these answers using `debconf-set-selections` prior to installation.
+- **Execution**: The `DEBIAN/postinst` script consumes these securely captured parameters and replicates the core installer's action sequence (§6.3) for a fully configured deployment without the TUI.
 
 

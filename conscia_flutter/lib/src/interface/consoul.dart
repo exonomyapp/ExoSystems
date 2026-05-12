@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:exoauth/exoauth.dart';
-
+import 'providers/blueprint_provider.dart';
+import 'federation/federation_view.dart';
 class ConSoul extends ConsumerStatefulWidget {
   const ConSoul({super.key});
 
@@ -15,39 +16,62 @@ class _ConSoulState extends ConsumerState<ConSoul> {
   @override
   Widget build(BuildContext context) {
     final identityState = ref.watch(identityProvider);
-    final isAuthenticated = identityState.activeDid != null;
 
-    // The interface dynamically adapts based on established Meadowcap authority.
-    final List<NavigationRailDestination> destinations = [
-      const NavigationRailDestination(
-        icon: Icon(Icons.monitor_heart_outlined),
-        selectedIcon: Icon(Icons.monitor_heart),
-        label: Text('Operational Pulse'),
-      ),
-      if (isAuthenticated)
-        const NavigationRailDestination(
-          icon: Icon(Icons.manage_accounts_outlined),
-          selectedIcon: Icon(Icons.manage_accounts),
-          label: Text('Authority Matrix'),
-        ),
-      if (isAuthenticated)
-        const NavigationRailDestination(
-          icon: Icon(Icons.admin_panel_settings_outlined),
-          selectedIcon: Icon(Icons.admin_panel_settings),
-          label: Text('Sovereign Governance'),
-        ),
-    ];
+    // 🧠 EDUCATIONAL CONTEXT: Progressive Disclosure Architecture
+    // The NavigationRail dynamically rebuilds based on the capabilitiesProvider.
+    // Rather than rigid "admin levels", the interface seamlessly reveals authorized
+    // controls in real time as the user's Meadowcap capability profile evolves.
+    // This allows for dynamic SDUI adaptation without requiring an application restart.
+    final capabilities = ref.watch(capabilitiesProvider);
 
-    // Build the body based on the selected index.
+    final List<NavigationRailDestination> destinations = capabilities.map((cap) {
+      switch (cap) {
+        case ConsoulCapability.operationalPulse:
+          return const NavigationRailDestination(
+            icon: Icon(Icons.monitor_heart_outlined),
+            selectedIcon: Icon(Icons.monitor_heart),
+            label: Text('Operational Pulse'),
+          );
+        case ConsoulCapability.authorityMatrix:
+          return const NavigationRailDestination(
+            icon: Icon(Icons.manage_accounts_outlined),
+            selectedIcon: Icon(Icons.manage_accounts),
+            label: Text('Authority Matrix'),
+          );
+        case ConsoulCapability.sovereignGovernance:
+          return const NavigationRailDestination(
+            icon: Icon(Icons.admin_panel_settings_outlined),
+            selectedIcon: Icon(Icons.admin_panel_settings),
+            label: Text('Sovereign Governance'),
+          );
+        case ConsoulCapability.federationAdministration:
+          return const NavigationRailDestination(
+            icon: Icon(Icons.hub_outlined),
+            selectedIcon: Icon(Icons.hub),
+            label: Text('Federation'),
+          );
+      }
+    }).toList();
+
+    // Build the body based on the dynamically authorized capability at the selected index.
     Widget body;
-    if (_selectedIndex == 0) {
+    if (_selectedIndex >= capabilities.length) {
       body = _buildPulseView();
-    } else if (_selectedIndex == 1 && isAuthenticated) {
-      body = _buildAuthorityView();
-    } else if (_selectedIndex == 2 && isAuthenticated) {
-      body = _buildGovernanceView();
     } else {
-      body = _buildPulseView();
+      switch (capabilities[_selectedIndex]) {
+        case ConsoulCapability.operationalPulse:
+          body = _buildPulseView();
+          break;
+        case ConsoulCapability.authorityMatrix:
+          body = _buildAuthorityView();
+          break;
+        case ConsoulCapability.sovereignGovernance:
+          body = _buildGovernanceView();
+          break;
+        case ConsoulCapability.federationAdministration:
+          body = const FederationView();
+          break;
+      }
     }
 
     return Scaffold(

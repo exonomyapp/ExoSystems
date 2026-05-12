@@ -39,6 +39,8 @@ dependencies:
   google_fonts: ^8.0.2
   exoauth:
     path: ../exoauth
+  flutter_graph_view: ^2.1.0
+  pretty_qr_code: ^3.6.0
 
 dev_dependencies:
   flutter_test:

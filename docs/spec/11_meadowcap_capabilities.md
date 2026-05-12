@@ -31,3 +31,8 @@ Revocation in a chain creates a cascading effect: if Malik's capability is revok
     2. The Conscia daemon injects this into the same `PENDING_REQUESTS` queue, unifying governance regardless of transport.
     3. The app polls `POST /api/capabilities/verify` to discover when its petition has been approved.
 - **Trust Model**: Both paths converge on the same human-in-the-loop gate, ensuring decentralized enforcement regardless of whether the petitioner arrives over gossip or HTTP.
+
+## 11.5 UI Representation (ConsoulCapability)
+While Meadowcap handles strict cryptographic access control on the backend (enforcing rules mathematically), client interfaces like ConSoul must translate these rules into a user-friendly frontend. This translation relies on the `ConsoulCapability` enum, documented fully in [Spec 40: P2P SDUI & Meta-Management](./40_p2p_sdui_and_metamanagement.md).
+
+By decoupling the rigid network-level permissions (`Read`, `Write`, `Admin`) from the UI-level capabilities (`operationalPulse`, `authorityMatrix`, `federationAdministration`), the Exosystem allows for a **Progressive Disclosure Architecture**. As a node operator's identity accumulates the requisite underlying Meadowcap delegations, their ConSoul interface dynamically injects new administration tabs and tools—resolving the SDUI Catch-22 and presenting complex operations safely.
