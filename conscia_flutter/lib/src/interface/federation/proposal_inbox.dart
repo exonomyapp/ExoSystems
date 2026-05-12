@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/conscia_provider.dart';
 
-class ProposalInbox extends StatelessWidget {
+class ProposalInbox extends ConsumerWidget {
   const ProposalInbox({super.key});
 
   // 🧠 EDUCATIONAL CONTEXT: Human-in-the-Loop (HITL) Adjudication
@@ -8,31 +10,38 @@ class ProposalInbox extends StatelessWidget {
   // review capability petitions from client applications (like Synesys) to prevent
   // autonomous network infiltration and ensure cryptographic authority remains intentional.
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncPetitions = ref.watch(petitionsProvider);
+
     return Container(
       padding: const EdgeInsets.all(24.0),
-      child: ListView(
-        children: [
-          _buildProposalCard(
-            context,
-            did: 'did:peer:1zQmTest...',
-            client: 'Synesys iOS',
-            roleRequested: 'Reader',
-            timestamp: '2 mins ago',
-          ),
-          _buildProposalCard(
-            context,
-            did: 'did:peer:1zQmXYZ...',
-            client: 'ExoTalk Desktop',
-            roleRequested: 'Contributor',
-            timestamp: '1 hour ago',
-          ),
-        ],
+      child: asyncPetitions.when(
+        data: (petitions) {
+          if (petitions.isEmpty) {
+            return const Center(child: Text('No pending petitions.'));
+          }
+          return ListView.builder(
+            itemCount: petitions.length,
+            itemBuilder: (context, index) {
+              final did = petitions[index];
+              return _buildProposalCard(
+                context,
+                ref,
+                did: did,
+                client: 'Unknown Client', // In production, this metadata is gossiped
+                roleRequested: 'Reader',     // In production, this metadata is gossiped
+                timestamp: 'Recently',
+              );
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(child: Text('Error loading petitions: $error')),
       ),
     );
   }
 
-  Widget _buildProposalCard(BuildContext context, {
+  Widget _buildProposalCard(BuildContext context, WidgetRef ref, {
     required String did,
     required String client,
     required String roleRequested,
@@ -60,13 +69,18 @@ class ProposalInbox extends StatelessWidget {
             ElevatedButton.icon(
               icon: const Icon(Icons.check, color: Colors.green),
               label: const Text('Approve'),
-              onPressed: () {},
+              onPressed: () async {
+                await ref.read(consciaActionProvider).authorizePeer(did, roleRequested);
+                ref.invalidate(petitionsProvider);
+              },
             ),
             const SizedBox(width: 8),
             OutlinedButton.icon(
               icon: const Icon(Icons.close, color: Colors.red),
               label: const Text('Deny'),
-              onPressed: () {},
+              onPressed: () {
+                // Deny logic would involve removing the request
+              },
             ),
           ],
         ),

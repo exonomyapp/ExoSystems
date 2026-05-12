@@ -1,0 +1,18 @@
+Source: conscia-node
+Section: utils
+Priority: optional
+Maintainer: ExoSystems Governance <federation@exonomy.local>
+Build-Depends: debhelper-compat (= 13), cargo
+Standards-Version: 4.5.0
+Homepage: https://exotalk.tech
+
+Package: conscia-node
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, systemd, logrotate
+Description: Conscia Sovereign Node — Daemon & ConSoul Desktop
+ This package provisions a sovereign Exosystem node into the Linux Filesystem
+ Hierarchy Standard (FHS). It includes the Conscia P2P daemon (with native
+ signaling relay) and the ConSoul desktop administration console.
+ .
+ The installation is managed via debconf to ensure a standardized,
+ interactive configuration experience across all distribution targets.

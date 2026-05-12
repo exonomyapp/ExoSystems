@@ -9,7 +9,7 @@ This allows the operator to instantly update the UX of the entire user populatio
 
 ## 2. The Meta-Management Dashboard
 
-The **ConSoul** interface (Campaign 1) serves as the "Metamanager Dashboard." From this interface, the operator can author and broadcast UI blueprints that all client applications (Triad Tier 1 & 2) consume.
+The **ConSoul** interface (**[Campaign 1](../plans/upcoming_milestones_and_fhs.md)**) serves as the "Metamanager Dashboard." From this interface, the operator can author and broadcast UI blueprints that all client applications (**[Triad Tier 1 & 2](./22_application_triad_architecture.md)**) consume.
 
 ### 2.1 Managed Domain Logic
 The operator can dynamically inject and update:
@@ -54,7 +54,7 @@ A common challenge in Server-Driven UI is the "Catch-22" of needing an interface
 The Exosystem resolves this through ConSoul's `BlueprintProvider`. The UI is built using a Progressive Disclosure Architecture:
 1. **Initial State**: ConSoul bootstraps with a fallback/root payload showing only basic diagnostic telemetry.
 2. **Local Resolution**: It natively reads the local Willow Data Store for gossiped blueprints rather than hitting an external authentication server.
-3. **Dynamic Reveal**: As Meadowcap grants the `did:peer` more capabilities, the `BlueprintProvider` seamlessly injects new navigation routes (like the Federation Administration tab) into the interface without requiring an application restart.
+3. **Dynamic Reveal**: As Meadowcap grants the `did:peer` more capabilities, the `BlueprintProvider` seamlessly injects new navigation routes (like the Federation Administration tab) into the interface without requiring an application restart (**[Campaign 1](../plans/upcoming_milestones_and_fhs.md)**).
 
 ---
 
@@ -66,6 +66,8 @@ To bridge the cryptographic reality of Meadowcap with the user-facing ConSoul da
 - **`authorityMatrix`**: Grants access to cryptographic node orchestration and service legislation controls.
 - **`sovereignGovernance`**: Grants access to Meadowcap capability management and mesh membership governance.
 - **`federationAdministration`**: Grants access to the Meta-Management dashboard (P2P Mesh Topology, HITL capability proposals, and Proximity Discovery).
+- **`serviceAdministration`**: Grants access to the administration of active Conscia service decorations (Relay, Blind Indexing, Storage).
+- **`geographicContext`**: Grants access to the management of content locality and replication affinity policies.
 
 ---
 

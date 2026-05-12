@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'src/interface/consoul.dart';
 
+// 🧠 EDUCATIONAL CONTEXT: The ConSoul entry point.
+// As a "Sovereign Administrative Console," ConSoul follows the Triad Architecture
+// (Spec 22), operating as a modular GUI layer that connects to the background
+// Conscia daemon via a secure, local API.
 void main() {
   runApp(
     const ProviderScope(

@@ -17,12 +17,12 @@ To ensure the codebase serves as an academic-grade reference architecture, we in
 - **`proposal_inbox.dart`**: Clarified the *Human-in-the-Loop (HITL)* philosophy requiring sovereign adjudication for client capability petitions.
 
 ### 2.2 Specification Evolution
-- **[Spec 40: P2P SDUI & Meta-Management](file:///home/exocrat/code/exotalk/docs/spec/40_p2p_sdui_and_metamanagement.md)**: Purged legacy "Conscia UI" naming in favor of the newly adopted **ConSoul** branding. Added a dedicated section defining the **SDUI Catch-22 Resolution** and the mechanics of local Willow payload resolution.
-- **[Spec 38: Conscia Federation & Service Architecture](file:///home/exocrat/code/exotalk/docs/spec/38_conscia_federation_and_services.md)**: Modernized naming conventions, specifically noting the `pretty_qr_code` implementation and referencing the Proximity Discovery tab and Proposal Inbox tab.
-- **[Spec 11: Meadowcap Capabilities](file:///home/exocrat/code/exotalk/docs/spec/11_meadowcap_capabilities.md)**: Appended Section 11.5 linking the backend cryptographic reality (Meadowcap) to the frontend UI Representation (`ConsoulCapability`).
+- **[Spec 40: P2P SDUI & Meta-Management](../spec/40_p2p_sdui_and_metamanagement.md)**: Purged legacy "Conscia UI" naming in favor of the newly adopted **ConSoul** branding. Added a dedicated section defining the **SDUI Catch-22 Resolution** and the mechanics of local Willow payload resolution.
+- **[Spec 38: Conscia Federation & Service Architecture](../spec/38_conscia_federation_and_services.md)**: Modernized naming conventions, specifically noting the `pretty_qr_code` implementation and referencing the Proximity Discovery tab and Proposal Inbox tab.
+- **[Spec 11: Meadowcap Capabilities](../spec/11_meadowcap_capabilities.md)**: Appended Section 11.5 linking the backend cryptographic reality (Meadowcap) to the frontend UI Representation (`ConsoulCapability`).
 
 ### 2.3 Future Roadmap Assembly
-- Established the **Campaign 1: ConSoul & Enterprise FHS Installer Roadmap** ([`upcoming_milestones_and_fhs.md`](file:///home/exocrat/code/exotalk/docs/plans/upcoming_milestones_and_fhs.md)). This document structurally catalogs the remaining tasks for Phases 2, 3, and 4, ensuring our "Cross-Exosystem Service Surface" and Enterprise `.deb` packaging efforts are cleanly mapped out for future sessions.
+- Established the **Campaign 1: ConSoul & Enterprise FHS Installer Roadmap** ([`upcoming_milestones_and_fhs.md`](../plans/upcoming_milestones_and_fhs.md)). This document structurally catalogs the remaining tasks for Phases 2, 3, and 4, ensuring our "Cross-Exosystem Service Surface" and Enterprise `.deb` packaging efforts are cleanly mapped out for future sessions.
 
 ## 3. Verification
 - `flutter analyze` runs completely clean with 0 warnings (after pruning an unused `isAuthenticated` variable in `consoul.dart`).

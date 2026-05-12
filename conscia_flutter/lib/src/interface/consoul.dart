@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:exoauth/exoauth.dart';
 import 'providers/blueprint_provider.dart';
 import 'federation/federation_view.dart';
+import 'services/services_screen.dart';
+import 'services/geographic_context_screen.dart';
 class ConSoul extends ConsumerStatefulWidget {
   const ConSoul({super.key});
 
@@ -50,6 +52,18 @@ class _ConSoulState extends ConsumerState<ConSoul> {
             selectedIcon: Icon(Icons.hub),
             label: Text('Federation'),
           );
+        case ConsoulCapability.serviceAdministration:
+          return const NavigationRailDestination(
+            icon: Icon(Icons.settings_suggest_outlined),
+            selectedIcon: Icon(Icons.settings_suggest),
+            label: Text('Services'),
+          );
+        case ConsoulCapability.geographicContext:
+          return const NavigationRailDestination(
+            icon: Icon(Icons.public_outlined),
+            selectedIcon: Icon(Icons.public),
+            label: Text('Geographic'),
+          );
       }
     }).toList();
 
@@ -70,6 +84,12 @@ class _ConSoulState extends ConsumerState<ConSoul> {
           break;
         case ConsoulCapability.federationAdministration:
           body = const FederationView();
+          break;
+        case ConsoulCapability.serviceAdministration:
+          body = const ServicesScreen();
+          break;
+        case ConsoulCapability.geographicContext:
+          body = const GeographicContextScreen();
           break;
       }
     }

@@ -15,7 +15,7 @@ The Exonomy node deployment architecture follows the **Enterprise FHS Installer 
 - **Logs**: `/var/log/exo/` — centralized, logrotated diagnostics.
 - **Service User**: `exo-sys` — headless, non-login system user for backend service isolation.
 - **Systemd Units**: `/etc/systemd/system/exo-*.service` — system-level orchestration.
-- **Installer**: A modular Ratatui-based TUI for interactive, idempotent provisioning.
+- **Installer**: A modular inquire-based interactive installer (Tier 2 per Spec 07) for guided, idempotent provisioning.
 
 For the complete directory mapping, systemd unit templates, security model, and installer flow, refer to the **[FHS Installer Specification](../releases/fhs_installer_specification.md)**.
 

@@ -1,0 +1,37 @@
+#!/bin/sh
+set -e
+. /usr/share/debconf/confmodule
+
+# 🧠 EDUCATIONAL CONTEXT: Debconf Configuration Script
+# This script is the Debian-native equivalent of our Rust TUI wizard.
+# It presents interactive prompts to the operator during `apt install`
+# or `dpkg -i`, ensuring the AOTA (All Of The Above) dogma of parity
+# between installation vectors.
+
+db_capb backup
+
+STATE=1
+while [ "$STATE" -ge 1 ] && [ "$STATE" -le 3 ]; do
+    case "$STATE" in
+    1)
+        # Component Selection
+        db_input high conscia-node/components || true
+        ;;
+    2)
+        # Conscia Config (Namespace)
+        db_input medium conscia-node/mesh_namespace || true
+        ;;
+    3)
+        # Conscia Config (API Port)
+        db_input medium conscia-node/api_port || true
+        ;;
+    esac
+
+    if db_go; then
+        STATE=$((STATE + 1))
+    else
+        STATE=$((STATE - 1))
+    fi
+done
+
+db_stop

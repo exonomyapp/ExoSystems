@@ -1,0 +1,28 @@
+# 🧠 EDUCATIONAL CONTEXT: Zrok is an OPTIONAL overlay tunnel.
+# The P2P mesh (Iroh/Willow) works without it — Zrok only provides
+# public HTTPS URLs for remote browser access to the Conscia dashboard.
+# The "watering hole" lifeline scenario does NOT require Zrok.
+[Unit]
+Description=Zrok Overlay Tunnel (Optional)
+After=exo-conscia.service
+Wants=exo-conscia.service
+
+[Service]
+Type=simple
+User=exo-sys
+Group=exo-sys
+EnvironmentFile=/etc/exo/zrok.env
+ExecStart=/opt/exo/zrok/zrok share reserved ${ZROK_SHARE_TOKEN} --headless
+WorkingDirectory=/var/lib/exo/zrok
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/var/log/exo/zrok.log
+StandardError=append:/var/log/exo/zrok.log
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/exo/zrok /var/log/exo
+
+[Install]
+WantedBy=multi-user.target

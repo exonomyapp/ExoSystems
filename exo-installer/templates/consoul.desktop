@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=ConSoul
+Comment=Sovereign Administrative Console for the Conscia Node
+Exec=/opt/exo/ui/consoul
+Icon=/opt/exo/ui/data/flutter_assets/assets/pappus.png
+Terminal=false
+Type=Application
+Categories=System;Network;Monitor;
+Keywords=conscia;exosystem;sovereign;mesh;

@@ -1,0 +1,20 @@
+Template: conscia-node/components
+Type: multiselect
+Choices: ConSoul (Desktop Admin Console), Zrok (Public HTTPS Tunnel)
+Default: ConSoul (Desktop Admin Console)
+_Description: Select optional components to install:
+ The Conscia daemon is the core lifeline and is always installed.
+ ConSoul is the desktop management interface.
+ Zrok provides public HTTPS URLs (optional, not required for P2P mesh).
+
+Template: conscia-node/mesh_namespace
+Type: string
+Default: sovereign_mesh
+_Description: Mesh network namespace:
+ Enter a human-readable identifier for your mesh network.
+
+Template: conscia-node/api_port
+Type: string
+Default: 3000
+_Description: Conscia API port:
+ The port for the HTTP/WebSocket interface (includes signaling relay).

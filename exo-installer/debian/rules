@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+
+# 🧠 EDUCATIONAL CONTEXT: The Debian Rules File
+# This is the "Makefile" for the Debian package. It uses `dh` (debhelper)
+# to automate the build lifecycle. We override `dh_auto_build` to use
+# `cargo build` and `dh_auto_install` to place files into the staging area.
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	cd .. && cargo build --release -p conscia
+	cd .. && cargo build --release -p exo-installer
+
+override_dh_auto_install:
+	# Create directory structure in debian/conscia-node/
+	mkdir -p debian/conscia-node/usr/bin
+	mkdir -p debian/conscia-node/opt/exo/conscia
+	
+	# Install binaries
+	cp ../target/release/conscia debian/conscia-node/opt/exo/conscia/
+	cp ../target/release/exo-installer debian/conscia-node/usr/bin/
+	
+	# Install systemd units
+	mkdir -p debian/conscia-node/lib/systemd/system
+	cp templates/exo-conscia.service debian/conscia-node/lib/systemd/system/
+	
+	# Install logrotate
+	mkdir -p debian/conscia-node/etc/logrotate.d
+	cp templates/exo-logrotate.conf debian/conscia-node/etc/logrotate.d/exo

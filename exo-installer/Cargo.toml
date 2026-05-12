@@ -1,0 +1,24 @@
+[package]
+name = "exo-installer"
+version = "0.1.0"
+edition = "2021"
+license = "AGPL-3.0"
+authors = ["ExoSystems Governance <federation@exonomy.local>"]
+description = "Interactive FHS-compliant installer for the Conscia Sovereign Node"
+
+# 🧠 EDUCATIONAL CONTEXT: Dependency Philosophy
+# We use `inquire` (Tier 2: Interactive) per Spec 07 §7.7 for the wizard flow,
+# NOT `ratatui` (Tier 3: TUI) which is reserved for immersive monitoring dashboards.
+# `indicatif` provides progress bars during the installation phase.
+# `nix` gives us safe Unix syscalls for user creation and permission management.
+
+[dependencies]
+inquire = "0.7"
+indicatif = "0.17"
+console = "0.15"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+clap = { version = "4", features = ["derive"] }
+nix = { version = "0.29", features = ["user", "fs"] }
+which = "7"
+anyhow = "1"

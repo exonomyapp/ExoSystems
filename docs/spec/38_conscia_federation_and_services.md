@@ -189,7 +189,7 @@ The ConSoul interface surfaces key Prometheus metrics directly, but Grafana prov
 
 ### 7.1 Clustering Model
 
-As defined in Spec 06, Conscia nodes support a 3-node clustering model for enterprise deployments. Federation extends this to cross-geography redundancy.
+As defined in **[Spec 06](./06_high_availability.md)**, Conscia nodes support a 3-node clustering model for enterprise deployments. Federation extends this to cross-geography redundancy.
 
 ### 7.2 Failover Semantics
 
@@ -304,7 +304,7 @@ Conscia nodes present QR codes encoding structured payloads that any Exosystem a
 
 ### 11.2 Presentation
 
-The ConSoul interface (Campaign 1) generates and displays QR codes in relevant screens:
+The ConSoul interface (**[Campaign 1](../plans/upcoming_milestones_and_fhs.md)**) generates and displays QR codes in relevant screens:
 - **Proximity Discovery tab**: Node Discovery QR via `pretty_qr_code` for high-speed Layer A bridging
 - **Proposal Inbox tab**: Petition Invite QR for sharing with prospective followers
 - **Forum management screen**: Circle Join QR for onboarding followers into specific circles
@@ -329,5 +329,5 @@ The QR system is extensible — new `type` values can be added as the Exosystem 
 - [Spec 22: Application Triad Architecture](./22_application_triad_architecture.md)
 - [Conscia Node Management UI](./conscia_manage.md)
 - [Conscia SDUI Widget Catalog](./conscia_sdui_widget_catalog.md)
-- [Campaign 1: Conscia UI](../plans/conscia_ui_campaign.md)
+- [Campaign 1: Conscia UI](../plans/upcoming_milestones_and_fhs.md)
 - [Campaign 2: Synesys](../external/campaign_2_synesys_conscia_browser.md)

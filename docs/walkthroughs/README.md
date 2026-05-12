@@ -5,10 +5,11 @@
 This directory contains the sequential record of the Sovereign Exosystem's development. Each file represents a session or a major architectural transition.
 
 ## 🏁 Most Recent
+- **[78. ConSoul Functional Implementation](78_consoul_functional_integration.md)**: Transitioning ConSoul to a functional, data-bound administrative interface.
+- **[77. Enterprise FHS Modular Installer](77_fhs_installer_finalization.md)**: Finalizing the professional FHS deployment infrastructure.
+- **[76. Educational Commenting and SDUI Specs](76_educational_commenting_and_sdui_specs.md)**: Standardizing documentation and SDUI capability specifications.
+- **[75. Federation Administration](75_federation_administration.md)**: Implementing Phase 2 Federation UI and capability-driven navigation.
 - **[74. ConSoul Foundation](74_consoul_foundation.md)**: Establishing the ConSoul administrative interface.
-- **[73. Enterprise FHS Installer Planning](73_enterprise_fhs_installer_planning.md)**: Finalizing the TUI installer specification.
-- **[72. Enterprise FHS Migration Pivot](72_enterprise_fhs_migration_pivot.md)**: Shifting deployment architecture to Linux FHS standards.
-- **[71. Prepping for Root Identity Restoration](71_prepping_for_root_identity_restoration.md)**: Preparation for reclaiming the monorepo root.
 
 ## 🏗️ Major Campaigns
 

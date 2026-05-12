@@ -1,0 +1,32 @@
+# 🧠 EDUCATIONAL CONTEXT: Production FHS-Compliant Systemd Unit
+# This is the enterprise-grade replacement for the legacy user-space unit
+# that ran under ~/deployments/. Key differences:
+# - Runs as exo-sys (non-login system user) instead of the human operator
+# - Uses EnvironmentFile for clean config injection
+# - Includes systemd hardening directives (NoNewPrivileges, ProtectSystem)
+# - Signaling relay is now built into the Conscia daemon — no separate service
+[Unit]
+Description=Conscia - Sovereign Lifeline Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=exo-sys
+Group=exo-sys
+EnvironmentFile=/etc/exo/conscia.env
+ExecStart=/opt/exo/conscia/conscia daemon
+WorkingDirectory=/var/lib/exo
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/exo/conscia.log
+StandardError=append:/var/log/exo/conscia.log
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/exo /var/log/exo
+
+[Install]
+WantedBy=multi-user.target

@@ -42,15 +42,15 @@ This document outlines the remaining multi-phase implementation roadmap for fina
 
 ## 4. Enterprise FHS Modular Installer
 
-**Goal**: Transition from user-space manual deployments to a highly robust, FHS-compliant `.deb` and TUI installation architecture.
+**Goal**: Transition from user-space manual deployments to a highly robust, FHS-compliant `.deb` and interactive TUI installation architecture.
 
 ### Proposed Changes
-#### `exotalk-sys/installer/`
-- **[NEW] `tui_installer.rs`**: A `ratatui`-based interactive terminal wizard. This will replace CLI flags, allowing the operator to visually select components (Conscia, Signaling, Zrok, ConSoul) and review the configuration.
-- **[NEW] `debian_packaging/`**: Makefiles and `DEBIAN/postinst` scripts that orchestrate building `.deb` packages. The `postinst` script will:
-  - Create the non-login `exo-sys` system user.
-  - Set permissions (`chown`/`chmod`) on `/opt/exo/`, `/var/lib/exo/`, and `/var/log/exo/`.
-  - Execute `systemctl daemon-reload` to register the new systemd orchestrator files.
+#### `exo-installer/`
+- **[NEW] `main.rs`**: An `inquire`-based interactive terminal wizard (Tier 2 per Spec 07). This replaces manual config, allowing the operator to select components (Conscia, Zrok, ConSoul), configure mesh identity, and review the FHS topology.
+- **[NEW] `debian/`**: Infrastructure for building native `.deb` packages with `debconf` integration. This achieves AOTA (All Of The Above) parity, ensuring the interactive installation experience is identical across TUI and package managers.
+  - Creates the non-login `exo-sys` system user.
+  - Provisions `/opt/exo/`, `/etc/exo/`, `/var/lib/exo/`, and `/var/log/exo/`.
+  - Registers security-hardened systemd units.
 
 ---
 

@@ -6,6 +6,8 @@ enum ConsoulCapability {
   authorityMatrix,
   sovereignGovernance,
   federationAdministration,
+  serviceAdministration,
+  geographicContext,
 }
 
 // 🧠 EDUCATIONAL CONTEXT: SDUI Catch-22 Resolution
@@ -22,6 +24,8 @@ final capabilitiesProvider = Provider<List<ConsoulCapability>>((ref) {
       ConsoulCapability.authorityMatrix,
       ConsoulCapability.sovereignGovernance,
       ConsoulCapability.federationAdministration,
+      ConsoulCapability.serviceAdministration,
+      ConsoulCapability.geographicContext,
     ];
   } else {
     return [
