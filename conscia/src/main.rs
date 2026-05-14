@@ -67,6 +67,18 @@ enum Commands {
     },
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct DatabaseConfig {
+    pub connection_string: String,
+    pub health_check_interval_secs: u64,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct EmailConfig {
+    pub sendgrid_api_key: String,
+    pub operator_email: String,
+}
+
 /// The Node Configuration Model
 /// This is the "brain" of the node's local state. We use Serde to 
 /// serialize this to TOML on disk.
@@ -77,6 +89,8 @@ struct Config {
     pub secret: String,
     pub http_port: u16,
     pub federation_active: bool,
+    pub db_config: Option<DatabaseConfig>,
+    pub email_config: Option<EmailConfig>,
 }
 
 impl Default for Config {
@@ -87,6 +101,8 @@ impl Default for Config {
             secret: "CVh7w1QW9GdThiRskD5SYtCyzGLteP4BC6CXR94CFABC".to_string(),
             http_port: 3000,
             federation_active: false,
+            db_config: None,
+            email_config: None,
         }
     }
 }
@@ -253,6 +269,8 @@ fn run_onboarding(path: &std::path::Path) -> anyhow::Result<Config> {
         secret: secret_b58,
         http_port: port,
         federation_active: role == "High-Availability Mesh",
+        db_config: None,
+        email_config: None,
     };
 
     // PERSISTENCE: 
@@ -290,6 +308,15 @@ async fn start_daemon(config: Config) -> anyhow::Result<()> {
     let stats = network_internal::get_stats().await;
     println!("Node initialized: {}", stats.get("node_id").unwrap_or(&"Unknown".to_string()));
 
+    // 1.5. START CORE SERVICE WORKERS
+    // 🧠 EDUCATIONAL CONTEXT: Core Service Management
+    // Conscia manages long-lived service workers for background tasks like 
+    // email notifications and database maintenance.
+    let worker_config = config.clone();
+    tokio::spawn(async move {
+        run_service_worker(worker_config).await;
+    });
+
     // 2. THE DASHBOARD API
     // We use Axum for a fast, type-safe HTTP interface.
     let app = Router::new()
@@ -315,6 +342,8 @@ async fn start_daemon(config: Config) -> anyhow::Result<()> {
         .route("/api/services/storage/unpin", delete(unpin_storage))
         .route("/api/services/storage/inventory", get(get_storage_inventory))
         .route("/api/services/auth/policy", post(update_auth_policy))
+        .route("/api/services/database/configure", post(configure_database))
+        .route("/api/services/email/configure", post(configure_email))
         // 🧠 Signaling Relay: Absorbed from the standalone Python signaling_server.py.
         // These two routes replicate the entire SDP exchange protocol natively.
         .route("/api/signaling", post(post_signaling))
@@ -692,6 +721,41 @@ async fn update_auth_policy(Json(payload): Json<AuthPolicyPayload>) -> Result<im
     tracing::info!("Auth policy updated: {} - {:?}", payload.policy_name, payload.allowed_roles);
     Ok(StatusCode::OK)
 }
+
+async fn configure_database(Json(payload): Json<DatabaseConfig>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Database service configured: {}", payload.connection_string);
+    // In a real implementation, we would update the Config and save to disk
+    Ok(StatusCode::OK)
+}
+
+async fn configure_email(Json(payload): Json<EmailConfig>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Email service configured for: {}", payload.operator_email);
+    Ok(StatusCode::OK)
+}
+
+// 🧠 EDUCATIONAL CONTEXT: The Service Worker
+// This background task manages periodic service health checks and 
+// scheduled tasks (like digest reports or status notifications).
+async fn run_service_worker(config: Config) {
+    let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(3600)); // Hourly
+    loop {
+        interval.tick().await;
+        
+        // Example: Send a periodic status report if email is configured
+        if let Some(email_cfg) = &config.email_config {
+            tracing::info!("Sending periodic status report to {} via Sendgrid...", email_cfg.operator_email);
+            let _ = send_status_email(&email_cfg.sendgrid_api_key, &email_cfg.operator_email).await;
+        }
+    }
+}
+
+async fn send_status_email(api_key: &str, target: &str) -> anyhow::Result<()> {
+    // 💡 MENTOR TIP: In this phase, we mock the actual Sendgrid API call.
+    tracing::info!("MOCK SENDGRID: Sending status email to {} using key {}...", target, api_key);
+    Ok(())
+}
+
+
 
 // =============================================================================
 // SIGNALING RELAY HANDLERS

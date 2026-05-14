@@ -161,7 +161,23 @@ The node operator decides which services to enable. Applications discover which 
 
 ---
 
-## 6. Observability
+## 6. ConsciaLet: The Federation Interface
+
+### 6.1 Concept: The Government Lobby
+**ConsciaLet** is a high-fidelity federation module exposed as a server-driven UI (SDUI) component within the **ConSoul** administrative interface. It functions as a "Government's Lobby"—a secure, localized space where the node operator manages the node's external relationships.
+
+### 6.2 Peer Registration & Management
+Through ConsciaLet, operators can:
+- **Register Peers**: Manually add or scan `did:peer` IDs of other Conscia nodes to initiate the federation handshake (§2.1).
+- **Remote Relationship Management**: Define and adjust Meadowcap capability delegations for federated peers without leaving the local environment.
+- **Topology Oversight**: Visualize the local mesh neighborhood and monitor the health of active federation channels.
+
+### 6.3 SDUI Integration
+ConsciaLet is injected into the ConSoul navigation rail via the `federationAdministration` capability. It leverages the **Application Triad** architecture to ensure that the management of these sovereign relationships remains strictly local and private to the node operator.
+
+---
+
+## 7. Observability
 
 ### 6.1 Prometheus
 
@@ -306,7 +322,7 @@ Conscia nodes present QR codes encoding structured payloads that any Exosystem a
 
 The ConSoul interface (**[Campaign 1](../plans/upcoming_milestones_and_fhs.md)**) generates and displays QR codes in relevant screens:
 - **Proximity Discovery tab**: Node Discovery QR via `pretty_qr_code` for high-speed Layer A bridging
-- **Proposal Inbox tab**: Petition Invite QR for sharing with prospective followers
+- **ConsciaLet (Federation tab)**: Petition Invite and Federation Proposal QRs for inter-node handshaking
 - **Forum management screen**: Circle Join QR for onboarding followers into specific circles
 
 ### 11.3 Consumption

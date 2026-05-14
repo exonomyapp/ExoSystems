@@ -1,0 +1,107 @@
+REPORT: TECHNICAL ARCHITECTURE AND PRODUCT RECOMMENDATIONS FOR DECENTRALIZED SOCIAL MEDIA STACK
+
+This report exhaustively documents all product recommendations and their associated configurations, solutions, and implementation details discussed from the point where the distinction between "private" and "personal" content was introduced through the evolution into the full technical stack discussion. The scope is strictly limited to recommended products and their related solutions. No philosophical commentary, alternative approaches, or non-recommended options are included unless directly tied to a recommended product's configuration or deployment.
+
+SECTION 1: CORE P2P SYNC AND IDENTITY LAYER PRODUCTS
+
+Willow (willow-rs)
+Willow is the foundational data synchronization protocol recommended for the P2P layer. It provides synchronizable, eventually-consistent data spaces where entries are addressed by the tuple (namespace_id, subspace_id, path, timestamp). Two namespace modes are relevant: owned namespaces, where one NamespacePublicKey controls all data and capabilities must be delegated from that key; and communal namespaces, where each SubspaceId (a user's public key) owns its slice and moderation is bottom-up. Willow supports destructive editing for content removal and is designed for offline-first, deterministic sync. Critical implementation guidance: sync workers must verify cryptographic provenance via did:peer signatures before materializing entries; ingestion must be idempotent using composite natural keys; and the protocol layer must remain stateless with respect to social logic or external state.
+
+Meadowcap
+Meadowcap is the capability-based access control system recommended for enforcing privacy and delegation within Willow namespaces. Capabilities are delegatable, restrictable, cryptographically-signed assertions about relationships, structured with fields including access_mode (Read or Write), namespace_key (NamespacePublicKey), user_key (UserPublicKey), and a chain of delegations with Area restrictions. Areas define scope via path prefixes, time ranges, and namespace/subspace bounds. For "personal-but-public" content, capabilities are issued with Area::full() for public readability while retaining authorship proof via did:peer signatures. For private content, capabilities are restricted to specific Areas and delegated only to authorized peers. Implementation guidance: capabilities must be verified locally without external state to preserve offline guarantees; delegation chains must be cryptographically validated at each hop; and capability verification must occur before any content is exposed to application logic.
+
+iroh
+iroh is the recommended P2P networking and transport layer that binds Willow and Meadowcap into a functional sync mesh. It handles peer discovery, connection management, and efficient data transfer over QUIC. Implementation guidance: iroh should be configured to subscribe to Willow namespace updates and stream entries to ingestion workers; peer discovery should integrate with did:peer resolution where possible; and connection timeouts must be tuned to accommodate bursty sync patterns without blocking the sync loop.
+
+did:peer
+did:peer is the recommended decentralized identity method for establishing authorship and ownership without external registries. It generates identifiers locally, binds content to authorial identity via cryptographic signatures, and supports key rotation and revocation through DID document updates. Implementation guidance: all content entries must be signed with the author's did:peer key at creation; signature verification must be the first step in any ingestion or rendering pipeline; and DID document updates (for key rotation) must be propagated through the sync layer to maintain provenance continuity. The supernode must never hold or use author signing keys.
+
+SECTION 2: SOCIAL CONTEXT AND INDEXING LAYER PRODUCTS
+
+PostgreSQL
+PostgreSQL is recommended as the social context layer running on the "dumb supernode" to handle search, discovery, credential caching, relationship graphs, moderation signals, and feed materialization. It derives its state from the Willow sync layer and never creates truth—only interprets it for UX purposes. Three critical design choices govern its integration:
+
+First, idempotent upserts: use a composite natural key of (author_did, namespace_id, path) with PostgreSQL's ON CONFLICT DO UPDATE syntax, gated by timestamp comparison to ensure newer entries overwrite older ones. Add a version or sync_epoch column to handle clock skew. For content-addressable indexing, alternatively use sha256(namespace + subspace + path + timestamp + content) as the primary key. For strict causal ordering, implement version vectors or Lamport clocks tracked in a dedicated column. For high-latency environments, implement a pre-ingest deduplication queue using a bounded async channel before database writes.
+
+Second, soft deletion: never use hard DELETE. Add deleted_at TIMESTAMPTZ and deletion_reason VARCHAR columns to content tables. Add an is_tombstone BOOLEAN flag to distinguish author removal from moderation takedown. Maintain a separate tombstones table that logs protocol-level deletions with cryptographic signatures for auditability. Create materialized views like active_posts that auto-filter soft-deleted rows for common queries. Implement periodic archival jobs to move old deleted rows to archive tables to keep the main table lean.
+
+Third, backpressure management: implement an async bounded channel (e.g., tokio::sync::mpsc::channel with capacity 10,000) between the sync worker and the database writer to prevent memory exhaustion. Batch inserts using PostgreSQL's multi-row VALUES syntax or the COPY protocol to reduce round trips by 10–50x. Use connection pooling via PgBouncer or the bb8 Rust pool with max_size set to CPU cores × 2 to prevent connection exhaustion. Implement adaptive throttling that monitors pg_stat_activity or write latency percentiles and dynamically reduces batch size or pauses ingestion under strain. As a circuit breaker, implement a local fallback queue (see SQLite/RocksDB section) that persists entries to disk if the database is unreachable, with replay logic for when connectivity resumes.
+
+Additional PostgreSQL implementation guidance: only materialize entries that are publicly readable per Meadowcap capabilities; never index encrypted or private payloads; use BRIN indexes for timestamp ranges, GIN indexes for tag arrays, and pg_trgm or tsvector for full-text search; and ensure all writes are idempotent to tolerate sync duplicates.
+
+pgEdge
+pgEdge is recommended for managing the PostgreSQL cluster in distributed deployments. It enables multi-master replication, horizontal read scaling, and resilient failover for the social context layer. Implementation guidance: use pgEdge to distribute the social-index layer across multiple supernodes for resilience while keeping each node's Willow store independent; configure conflict resolution policies to prefer latest-writer or application-defined merge logic for social metadata; and ensure that cryptographic truth (signatures, capabilities) remains anchored in the sync layer, not the distributed database. pgEdge clustering should be transparent to the application layer, which queries via a logical endpoint.
+
+SECTION 3: LOCAL FALLBACK AND BACKPRESSURE QUEUE PRODUCTS
+
+SQLite
+SQLite is recommended as a local fallback queue when structured replay, selective filtering, or debugging capabilities are needed. Configure SQLite in WAL mode (journal_mode=WAL) to improve write concurrency. Use batch inserts to reduce I/O overhead. Implement a BackpressureQueue trait abstraction to allow swapping implementations. For replay, support filtering by namespace, timestamp range, or author_did. Use rusqlite for Rust integration. Mitigate the single-writer bottleneck by batching sync entries before write and by keeping the queue's purpose limited to backpressure absorption, not primary storage.
+
+RocksDB
+RocksDB is recommended when maximum write throughput and append-only replay are the priority, such as when syncing thousands of peers simultaneously. Tune compaction using Options::optimize_for_point_lookup() to reduce write amplification. Use WriteBatch for atomic flushes of multiple entries. Configure background thread pools to handle compaction without blocking ingestion. Use the rocksdb Rust crate with careful attention to native build dependencies. RocksDB is ideal when the fallback queue needs only key-range access and minimal querying.
+
+Redb
+Redb is recommended as a pure-Rust alternative offering MVCC concurrency, ACID guarantees, and zero-FFI deployment. It is suitable for medium-volume backpressure queues where Rust-native tooling and future-proofing are priorities. Use redb's transactional API to ensure atomic writes. Be aware that the ecosystem is younger and less battle-tested under extreme sync loads compared to SQLite or RocksDB.
+
+SECTION 4: NOSQL VELOCITY LAYER PRODUCT FOR LARGE-SCALE SOCIAL FOOTPRINT
+
+ScyllaDB
+ScyllaDB is the recommended NoSQL database to pair with pgEdge when expecting a large social media footprint requiring high write/read throughput, linear horizontal scaling, and low-latency feed generation. Its shared-nothing architecture matches pgEdge's distributed philosophy without competing for ACID workloads. The wide-column data model is ideal for materialized feed timelines, interaction streams, and denormalized social state. It handles over 1M operations per second per node with sub-10ms p99 latency and is optimized for NVMe and modern CPUs.
+
+Implementation guidance for ScyllaDB: use the official scylla-rust-driver, which is async and tokio-native, supporting prepared statements, paging, and speculative execution. Partition data using (user_did, bucket) or (namespace_id, time_bucket) as partition keys to avoid hotspotting; Scylla's partitioner will distribute evenly. Set explicit TTL on ephemeral data like presence or session rows to prevent tombstone accumulation. Ensure all social interaction writes (likes, shares) are idempotent by upserting on (post_id, user_did) to survive network retries. Never store cryptographic truth—did:peer signatures, capability grants, or VC issuers—in ScyllaDB; treat it strictly as a cache or accelerator for derived state that can be rebuilt from the sync stream.
+
+Data routing strategy: route author signatures, capability grants, VC caches, relationship graphs, moderation logs, and structured metadata to pgEdge. Route feed timelines, interaction streams, presence/sessions, draft states, and rich media metadata to ScyllaDB. Use an event bus (see below) to fan-out from the sync layer to both stores, avoiding dual-write logic in application code.
+
+Query routing in the application: fetch materialized timelines from ScyllaDB for speed, then enrich or filter using credential and relationship checks from pgEdge. If ScyllaDB degrades, fall back to pgEdge materialized views or raw Willow sync; social features should degrade gracefully while cryptographic sync never blocks.
+
+Adoption threshold: introduce ScyllaDB when feed generation p95 latency exceeds 150ms on pgEdge alone, when interaction writes exceed 5,000 per second sustained, when pgEdge connection pools exhaust during peak sync bursts, or when schema evolution requires zero-downtime flexibility for social features.
+
+SECTION 5: EVENT BUS AND INFRASTRUCTURE PRODUCTS
+
+Event Bus Options
+NATS, Kafka, Redis Streams, or Redpanda are recommended as the event bus to fan-out from the Willow sync layer to both pgEdge and ScyllaDB ingestion workers. The bus ensures exactly-once ingestion semantics, decouples sync performance from database write latency, and enables independent scaling of truth-index and velocity-layer consumers. Implementation guidance: use structured event payloads that include the full Willow entry metadata, the verified did:peer signature, and the evaluated Meadowcap capability; implement consumer groups for pgEdge and ScyllaDB writers to allow independent replay and backpressure handling; and monitor consumer lag to detect ingestion bottlenecks.
+
+Connection Pooling for PostgreSQL
+PgBouncer or the bb8 Rust connection pool is recommended to manage PostgreSQL connections under load. Configure max_size to CPU cores × 2, enable prepared statement caching, and set appropriate idle and lifetime timeouts. Monitor pool utilization and adjust dynamically based on query latency percentiles.
+
+SECTION 6: INTEGRATION PATTERNS AND DATA FLOW
+
+End-to-end ingestion flow: the Willow sync layer, via iroh, subscribes to namespace updates and verifies did:peer signatures and Meadowcap capabilities. Verified entries are published to the event bus. Two consumer groups subscribe: one writes to pgEdge using idempotent upserts, soft deletion markers, and batched inserts with backpressure management; the other writes to ScyllaDB using partitioned keys, TTL for ephemeral data, and idempotent interaction upserts. The application layer queries ScyllaDB for real-time social features and pgEdge for verification and relational context, with fallback logic to raw Willow sync if either store is unavailable.
+
+Credential-gated search pattern: authors publish content with public Meadowcap read capabilities so it syncs widely. The pgEdge worker materializes the post and tags it with a requires_credential field. The application queries pgEdge with the user's Verifiable Credential; the API verifies the VC signature against a cached issuer key before returning results. If the API is unreachable, the app can still sync the raw post via Willow but will not render it without the credential check, enforcing policy at the application layer.
+
+Fallback queue integration: if pgEdge or ScyllaDB ingestion lags or fails, entries are persisted to a local SQLite, RocksDB, or Redb queue. A replay worker periodically attempts to flush the queue to the primary stores. The queue uses the same idempotent upsert and soft deletion logic as the primary stores to ensure consistency upon replay.
+
+SECTION 7: OPERATIONAL AND SECURITY GUARDRAILS
+
+Cryptographic truth invariant: pgEdge and ScyllaDB must never store or generate authorship keys, capability grants, or cryptographic proofs. These remain exclusively in the Willow/Meadowcap/did:peer layer. The databases only cache or index derived, verifiable state.
+
+Privacy preservation: only materialize entries that are publicly readable per Meadowcap capabilities. Never index encrypted payloads or private content. Use path-based or capability-based filtering at the sync layer to prevent unauthorized data from reaching the social context layer.
+
+Degradation strategy: design the application to gracefully degrade social features if pgEdge or ScyllaDB is unavailable, while preserving core sync and authorship verification. Raw Willow sync must always function independently of the social index.
+
+Auditability: maintain tombstone tables in pgEdge for all protocol-level deletions, with cryptographic signatures. Log all capability delegations and VC verifications for compliance and forensic analysis.
+
+Monitoring: instrument sync latency, database write queue depth, feed generation time, interaction write rate, and consumer lag. Use these metrics to trigger adaptive throttling, auto-scaling, or fallback activation.
+
+SECTION 8: PRODUCT-SPECIFIC CONFIGURATION SUMMARY
+
+Willow: use owned namespaces for user-controlled content, communal namespaces for shared spaces; configure sync to verify signatures before ingestion; implement idempotent upserts using composite keys.
+
+Meadowcap: issue public capabilities with Area::full() for personal-but-public content; restrict private content to specific Areas; verify capability chains locally without external state.
+
+iroh: tune connection timeouts for bursty sync; integrate peer discovery with did:peer where possible; stream entries to ingestion workers without blocking.
+
+did:peer: sign all content at creation; verify signatures as the first ingestion step; propagate DID document updates through sync for key rotation.
+
+PostgreSQL: enable WAL mode; use composite natural keys with ON CONFLICT DO UPDATE gated by timestamp; add deleted_at, deletion_reason, and is_tombstone columns; implement batched inserts with async bounded channels; use BRIN, GIN, and tsvector indexes; pool connections with PgBouncer or bb8.
+
+pgEdge: deploy multi-master replication for social-index resilience; configure conflict resolution for social metadata; keep cryptographic truth anchored in sync layer.
+
+SQLite/RocksDB/Redb: implement as BackpressureQueue trait; use WAL mode for SQLite; tune compaction for RocksDB; leverage MVCC for Redb; persist entries with idempotent logic for replay.
+
+ScyllaDB: use scylla-rust-driver with async tokio; partition by (user_did, bucket) or (namespace_id, time_bucket); set TTL for ephemeral data; upsert interactions on (post_id, user_did); never store cryptographic truth.
+
+Event Bus (NATS/Kafka/Redis Streams/Redpanda): fan-out verified sync events to pgEdge and ScyllaDB consumers; implement consumer groups for independent scaling; monitor lag for backpressure detection.
+
+This report contains all product recommendations and their associated solutions, configurations, and implementation details discussed from the introduction of the private/personal distinction through the full technical stack evolution. No philosophical commentary, alternative products, or non-recommended approaches are included. The content is structured for ingestion by another AI agent, with exhaustive detail and no tables, as requested.
