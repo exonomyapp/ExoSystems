@@ -2,11 +2,10 @@ import 'package:exoauth/exoauth.dart';
 import 'package:exoauth/exoauth.dart' as rust;
 import '../src/rust/api/network.dart' as net;
 
-// 🧠 Educational Context: The Identity FFI Bridge
 /// Implementation of [IdentityService] that delegates to the Rust backend.
-/// This service acts as the legislative intermediary, translating sovereign 
-/// identity requests from the Flutter UI into deterministic Rust FFI calls 
-/// that operate directly on the local JSON identity vault.
+/// This service acts as the intermediary, translating identity 
+/// requests from the Flutter UI into deterministic Rust FFI calls 
+/// that operate directly on the local JSON identity storage.
 class RustIdentityService implements IdentityService {
   @override
   Future<DeviceManifest> getDeviceManifest() async {
@@ -19,7 +18,7 @@ class RustIdentityService implements IdentityService {
         avatarUrl: p.avatarUrl,
         oauthSubs: p.oauthSubs,
       )).toList(),
-      associatedConsciaId: manifest.associatedConsciaId,
+      associatedRelayId: manifest.associatedRelayId,
     );
   }
 
@@ -34,13 +33,13 @@ class RustIdentityService implements IdentityService {
           avatarUrl: p.avatarUrl,
           oauthSubs: p.oauthSubs,
         )).toList(),
-        associatedConsciaId: manifest.associatedConsciaId,
+        associatedRelayId: manifest.associatedRelayId,
       ),
     );
   }
 
   @override
-  Future<IdentityVault> generateNewIdentity() async {
+  Future<IdentityRecord> generateNewIdentity() async {
     final vault = await rust.generateNewIdentity();
     return _mapVault(vault);
   }
@@ -51,15 +50,15 @@ class RustIdentityService implements IdentityService {
   }
 
   @override
-  Future<IdentityVault> getActiveProfileVault() async {
+  Future<IdentityRecord> getActiveProfileVault() async {
     final vault = await rust.getActiveIdentity();
     return _mapVault(vault);
   }
 
   @override
-  Future<void> pingConscia() async {
+  Future<void> pingRelay() async {
     try {
-      await net.forceHandshake();
+      await net.initiateConnection();
     } catch (e) {
       // If no node is associated, we just fail silently as per the UI contract
     }
@@ -77,7 +76,7 @@ class RustIdentityService implements IdentityService {
   }
 
   @override
-  Future<IdentityVault> updateActiveProfile({
+  Future<IdentityRecord> updateActiveProfile({
     required String name,
     required String avatar,
   }) async {
@@ -183,7 +182,7 @@ class RustIdentityService implements IdentityService {
       manifest: rust.DeviceManifest(
         tenancyMode: manifest.tenancyMode,
         profiles: filtered,
-        associatedConsciaId: manifest.associatedConsciaId,
+        associatedRelayId: manifest.associatedRelayId,
       ),
     );
   }
@@ -207,8 +206,8 @@ class RustIdentityService implements IdentityService {
     await rust.confirmVerificationLink(url: url, verified: verified);
   }
 
-  IdentityVault _mapVault(rust.IdentityVault v) {
-    return IdentityVault(
+  IdentityRecord _mapVault(rust.IdentityRecord v) {
+    return IdentityRecord(
       did: v.did,
       secret: v.secret,
       displayName: v.displayName,

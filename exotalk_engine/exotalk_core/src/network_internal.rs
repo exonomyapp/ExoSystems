@@ -1,27 +1,19 @@
 // =============================================================================
-// network_internal.rs — Iroh Node Lifecycle & P2P Mesh Engine
+// network_internal.rs — Iroh Node Lifecycle & P2P Engine
 // =============================================================================
 //
-// Hey! This is where the magic (networking) happens. This module manages the
-// Iroh stack, which handles our global connectivity. 
-//
-// 💡 MENTOR TIP: We don't expose this directly to Flutter because Flutter's
-// FFI (Foreign Function Interface) prefers simple types. `api/network.rs` 
-// acts as the "receptionist" that translates Flutter's needs into these 
-// low-level Rust calls.
+// This module manages the Iroh stack for network connectivity.
 //
 // Architecture:
 //   IrohNode (The persistent engine)
-//     ├── endpoint  — The "Physical" connection (NAT traversal / QUIC)
-//     ├── blobs     — The "Hard Drive" (Stores message payloads)
-//     ├── gossip    — The "Loudspeaker" (Broadcasts short alerts to peers)
-//     └── topics    — A map of everyone we're currently listening to
+//     ├── endpoint  — The connection (NAT traversal / QUIC)
+//     ├── blobs     — Storage (message payloads)
+//     ├── gossip    — Gossip (broadcasts alerts to peers)
+//     └── topics    — A map of active subscriptions
 //
-// Capability Governance (Meadowcap):
-//   In this version, we've moved away from a hardcoded "Role" system.
-//   Instead, we use CAPABILITY_STORE. When a peer joins, they "show" us 
-//   a signed token. If the math checks out, we remember their permission
-//   level (Read/Write/Admin) in memory for as long as we're online.
+// Capability management (Meadowcap):
+//   Peers provide signed tokens to verify permission levels
+//   (Read/Write/Admin) in memory.
 //
 // See also: docs/spec/11_meadowcap_capabilities.md
 // =============================================================================
@@ -38,25 +30,20 @@ use iroh_blobs::store::Store;
 
 // (Removed unused crate::runtime import)
 /// Static in-memory storage of verified access capabilities.
-/// 💡 MENTOR TIP: We use a `Lazy<RwLock<...>>` here because this store needs
-/// to be accessible from many different background tasks (threads) at once.
-/// The `RwLock` ensures that many people can read permissions, but only one
-/// can update them at a time, preventing "Race Conditions".
-///
 /// Maps [Namespace Hash] -> { [Delegatee DID] -> PermissionLevel }
 pub static CAPABILITY_STORE: Lazy<RwLock<HashMap<[u8; 32], HashMap<String, crate::protocol_internal::PermissionLevel>>>> =
     Lazy::new(|| RwLock::new(HashMap::new()));
 
 async fn save_capabilities() {
     let store = CAPABILITY_STORE.read().await;
-    let path = std::path::Path::new("conscia_storage").join("capabilities.json");
+    let path = std::path::Path::new("exotalk_storage").join("capabilities.json");
     if let Ok(json) = serde_json::to_string(&*store) {
         let _ = std::fs::write(path, json);
     }
 }
 
 async fn load_capabilities() {
-    let path = std::path::Path::new("conscia_storage").join("capabilities.json");
+    let path = std::path::Path::new("exotalk_storage").join("capabilities.json");
     if let Ok(json) = std::fs::read_to_string(path) {
         if let Ok(data) = serde_json::from_str::<HashMap<[u8; 32], HashMap<String, crate::protocol_internal::PermissionLevel>>>(&json) {
             let mut store = CAPABILITY_STORE.write().await;
@@ -66,27 +53,25 @@ async fn load_capabilities() {
     }
 }
 
-/// Tracker for the associated Conscia
-static ASSOCIATED_CONSCIA: Lazy<RwLock<Option<PublicKey>>> = Lazy::new(|| RwLock::new(None));
+/// Tracker for the associated relay
+static ASSOCIATED_RELAY: Lazy<RwLock<Option<PublicKey>>> = Lazy::new(|| RwLock::new(None));
 
 /// Global store of pending join requests (node IDs).
 pub static PENDING_REQUESTS: Lazy<RwLock<Vec<String>>> = Lazy::new(|| RwLock::new(Vec::new()));
 
-/// Cached secret key for the beacon (used for signing delegations)
-static BEACON_SECRET: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
+/// Cached secret key for the node (used for signing delegations)
+static NODE_SECRET: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
 
-/// Cached DID for the beacon (used for discovering and signing)
-/// 🧠 EDUCATIONAL CONTEXT: Identity Propagation
-/// When the Conscia daemon boots, it reads its DID from config.toml and
+/// Cached DID for the node (used for discovering and signing)
+// EDUCATIONAL CONTEXT: Identity Propagation
+/// When the daemon boots, it reads its DID from config.toml and
 /// stores it here. Every subsystem that needs to sign, delegate, or identify
-/// itself (authorize_node, revoke_node, /api/discovery) reads from this
-/// single source of truth instead of constructing ad-hoc identity strings.
-/// This eliminates the risk of identity divergence across the codebase.
-static BEACON_DID: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
+/// itself reads from this source of truth instead of constructing ad-hoc identity strings.
+static NODE_DID: Lazy<RwLock<Option<String>>> = Lazy::new(|| RwLock::new(None));
 
 /// Returns the node's actual DID for external consumption (e.g., HTTP API).
-pub async fn get_beacon_did() -> Option<String> {
-    BEACON_DID.read().await.clone()
+pub async fn get_node_did() -> Option<String> {
+    NODE_DID.read().await.clone()
 }
 
 pub struct IrohNode {
@@ -120,20 +105,15 @@ pub async fn is_egress_paused() -> bool {
     *mode
 }
 
-pub async fn set_associated_conscia(node_id: String) -> Result<(), String> {
+pub async fn set_associated_relay(node_id: String) -> Result<(), String> {
     let key = PublicKey::from_str(&node_id).map_err(|e| e.to_string())?;
     {
-        let mut p = ASSOCIATED_CONSCIA.write().await;
+        let mut p = ASSOCIATED_RELAY.write().await;
         *p = Some(key);
     }
     
-    // 💡 MENTOR TIP: In real-world networks (like mobile hotspots), discovery can be slow.
-    // By explicitly calling `remote_info` or `connect`, we force Iroh to start
-    // the dialer and handshake process immediately.
     let node_opt = NODE.read().await;
     if let Some(node) = node_opt.as_ref() {
-        // 💡 MENTOR TIP: By adding the NodeAddr to the endpoint, we tell Iroh
-        // that this peer is "interesting" and should be discovered via relays.
         let mut addr = iroh::NodeAddr::new(key);
         if let Ok(relay) = "https://euw1-1.relay.iroh.network./".parse() {
             addr = addr.with_relay_url(relay);
@@ -142,8 +122,7 @@ pub async fn set_associated_conscia(node_id: String) -> Result<(), String> {
 
         let ep = node.endpoint.clone();
         tokio::spawn(async move {
-            tracing::info!("Explicitly dialing associated Conscia node: {}", key);
-            // Use the standard Iroh Gossip ALPN to ensure compatibility
+            tracing::info!("Dialing associated relay node: {}", key);
             let _ = ep.connect(key, iroh_gossip::ALPN).await;
         });
     }
@@ -151,13 +130,10 @@ pub async fn set_associated_conscia(node_id: String) -> Result<(), String> {
     Ok(())
 }
 
-/// Forces an immediate cryptographic handshake with the associated Conscia node.
-/// 💡 MENTOR TIP: By default, Iroh handles re-dialing automatically, but 
-/// for real-time UI responsiveness (<500ms), we manually trigger an 
-/// endpoint connection to bypass the standard gossip/discovery delays.
-pub async fn force_handshake() -> Result<(), String> {
+/// Forces an immediate cryptographic connection with the associated relay node.
+pub async fn initiate_connection() -> Result<(), String> {
     let target = {
-        let p = ASSOCIATED_CONSCIA.read().await;
+        let p = ASSOCIATED_RELAY.read().await;
         *p
     };
     
@@ -172,7 +148,7 @@ pub async fn force_handshake() -> Result<(), String> {
 
             let ep = node.endpoint.clone();
             tokio::spawn(async move {
-                tracing::info!("Manually triggered dial to associated Conscia node: {}", key);
+                tracing::info!("Manually triggered dial to associated relay node: {}", key);
                 let _ = ep.connect(key, iroh_gossip::ALPN).await;
             });
             Ok(())
@@ -180,13 +156,13 @@ pub async fn force_handshake() -> Result<(), String> {
             Err("Network not initialized".to_string())
         }
     } else {
-        Err("No associated Conscia node set".to_string())
+        Err("No associated relay node set".to_string())
     }
 }
 
-pub async fn get_conscia_status() -> (Option<String>, bool, u32) {
+pub async fn get_relay_status() -> (Option<String>, bool, u32) {
     let target = {
-        let p = ASSOCIATED_CONSCIA.read().await;
+        let p = ASSOCIATED_RELAY.read().await;
         *p
     };
     let node_opt = NODE.read().await;
@@ -236,10 +212,6 @@ pub async fn join_conversation_topic(namespace: [u8; 32]) -> Result<(), String> 
         }
     }
     
-    // 💡 MENTOR TIP: Iroh 0.31 changed how subscriptions work. 
-    // We "split" the topic into a Sender and a Receiver. 
-    // We move the Receiver into a background task to listen for messages,
-    // and keep the Sender in our `topics` map so we can broadcast later.
     let topic = n.gossip.subscribe(topic_id, vec![]).map_err(|e: anyhow::Error| e.to_string())?;
     let (sender, mut receiver) = topic.split();
 
@@ -248,8 +220,6 @@ pub async fn join_conversation_topic(namespace: [u8; 32]) -> Result<(), String> 
         topics.insert(namespace, sender);
     }
 
-    // 💡 MENTOR TIP: We use `tokio::spawn` here so this function can finish
-    // immediately while a background worker keeps listening for new messages.
     tokio::spawn(async move {
         while let Some(Ok(event)) = receiver.next().await {
             if is_ingress_paused().await {
@@ -271,10 +241,8 @@ pub async fn join_conversation_topic(namespace: [u8; 32]) -> Result<(), String> 
                         }
                     }
 
-                    // 2. Handle Capability Tokens
                     if json_str.contains("delegator") && json_str.contains("delegatee") && json_str.contains("access_level") {
                         if let Ok(cap) = serde_json::from_str::<crate::protocol_internal::Capability>(&json_str) {
-                            // 💡 MENTOR TIP: Always verify signatures *before* trusting the data!
                             if cap.verify() {
                                 let mut store = CAPABILITY_STORE.write().await;
                                 let ns_map = store.entry(cap.namespace).or_insert_with(HashMap::new);
@@ -283,17 +251,14 @@ pub async fn join_conversation_topic(namespace: [u8; 32]) -> Result<(), String> 
                                 drop(store);
                                 save_capabilities().await;
                             } else {
-                                tracing::warn!("Invalid capability token dropped — math doesn't work!");
+                                tracing::warn!("Invalid capability token dropped");
                             }
                             continue;
                         }
                     }
 
-                    // 3. Handle Revocation Tombstones
                     if json_str.contains("delegator") && json_str.contains("namespace") && !json_str.contains("access_level") {
                         if let Ok(tombstone) = serde_json::from_str::<crate::protocol_internal::RevocationTombstone>(&json_str) {
-                             // 💡 MENTOR TIP: In this simple version, we trust the delegator for revocation.
-                             // A real production system would verify the signature of the tombstone.
                              let mut store = CAPABILITY_STORE.write().await;
                              if let Some(ns_map) = store.get_mut(&tombstone.namespace) {
                                  if ns_map.remove(&tombstone.delegatee).is_some() {
@@ -330,20 +295,20 @@ pub async fn get_all_capabilities() -> HashMap<String, String> {
 
 pub async fn authorize_node(node_id: String, role: String) -> Result<(), String> {
     let secret = {
-        let s = BEACON_SECRET.read().await;
-        s.clone().ok_or("Beacon secret not set")?
+        let s = NODE_SECRET.read().await;
+        s.clone().ok_or("Node secret not set")?
     };
 
     let level = match role.to_lowercase().as_str() {
-        "admin" | "conscierge" | "owner" => crate::protocol_internal::PermissionLevel::Admin,
+        "admin" | "owner" => crate::protocol_internal::PermissionLevel::Admin,
         "write" | "writer" | "delegate" => crate::protocol_internal::PermissionLevel::Write,
         _ => crate::protocol_internal::PermissionLevel::Read,
     };
 
     // Use a default global namespace for mesh-level governance
-    let namespace = crate::protocol_internal::derive_namespace("conscia_mesh_governance");
+    let namespace = crate::protocol_internal::derive_namespace("mesh_governance");
     
-    let delegator_did = get_beacon_did().await.ok_or("Beacon DID not set")?;
+    let delegator_did = get_node_did().await.ok_or("Node DID not set")?;
     
     let cap = crate::protocol_internal::delegate_capability(
         &delegator_did,
@@ -375,7 +340,7 @@ pub async fn authorize_node(node_id: String, role: String) -> Result<(), String>
 }
 
 pub async fn revoke_node(node_id: String) -> Result<(), String> {
-    let namespace = crate::protocol_internal::derive_namespace("conscia_mesh_governance");
+    let namespace = crate::protocol_internal::derive_namespace("mesh_governance");
     
     // 1. Remove locally
     {
@@ -387,7 +352,7 @@ pub async fn revoke_node(node_id: String) -> Result<(), String> {
     save_capabilities().await;
 
     // 2. Broadcast Tombstone
-    let delegator_did = get_beacon_did().await.ok_or("Beacon DID not set")?;
+    let delegator_did = get_node_did().await.ok_or("Node DID not set")?;
 
     let tombstone = crate::protocol_internal::RevocationTombstone {
         delegator: delegator_did,
@@ -408,11 +373,8 @@ pub async fn request_access() -> Result<(), String> {
     let n = node_lock.as_ref().ok_or("Network not initialized")?;
     let node_id = n.endpoint.node_id().to_string();
 
-    let namespace = crate::protocol_internal::derive_namespace("conscia_mesh_governance");
+    let namespace = crate::protocol_internal::derive_namespace("mesh_governance");
 
-    // 💡 MENTOR TIP: A JoinRequest is a simple broadcast that tells the mesh
-    // "I am here and I want to be part of the collective." 
-    // The Conscia node listens for these and queues them for the operator.
     let req = crate::protocol_internal::JoinRequest {
         node_id: node_id.clone(),
         timestamp_ms: chrono::Utc::now().timestamp_millis(),
@@ -424,7 +386,7 @@ pub async fn request_access() -> Result<(), String> {
     join_conversation_topic(namespace).await?;
     
     broadcast_raw_gossip(namespace, json).await?;
-    tracing::info!("Access request (petition) broadcasted for node: {}", node_id);
+    tracing::info!("Access request broadcasted for node: {}", node_id);
     
     Ok(())
 }
@@ -457,12 +419,12 @@ pub async fn start_iroh_node(did: String, secret_key_b58: String) -> Result<(), 
     }
     
     {
-        let mut s = BEACON_SECRET.write().await;
+        let mut s = NODE_SECRET.write().await;
         *s = Some(secret_key_b58.clone());
     }
 
     {
-        let mut d = BEACON_DID.write().await;
+        let mut d = NODE_DID.write().await;
         *d = Some(did.clone());
     }
 
@@ -470,7 +432,7 @@ pub async fn start_iroh_node(did: String, secret_key_b58: String) -> Result<(), 
 
     // Profile-specific storage path
     let safe_did = did.replace(":", "_");
-    let mut storage_path = std::path::PathBuf::from("conscia_storage");
+    let mut storage_path = std::path::PathBuf::from("exotalk_storage");
     storage_path.push("profiles");
     storage_path.push(&safe_did);
     storage_path.push("blobs");
@@ -581,10 +543,8 @@ pub async fn start_iroh_node(did: String, secret_key_b58: String) -> Result<(), 
     let mut node_lock = NODE.write().await;
     *node_lock = Some(node.clone());
     
-    // 💡 MENTOR TIP: The manifest is loaded BEFORE the node starts, which sets
-    // ASSOCIATED_CONSCIA. Now that the node is actually up, we must explicitly
-    // trigger the handshake dial if an ID was pre-loaded.
-    let p = ASSOCIATED_CONSCIA.read().await;
+    // Handshake initialization
+    let p = ASSOCIATED_RELAY.read().await;
     if let Some(key) = *p {
         let mut addr = iroh::NodeAddr::new(key);
         if let Ok(relay) = "https://euw1-1.relay.iroh.network./".parse() {
@@ -593,7 +553,7 @@ pub async fn start_iroh_node(did: String, secret_key_b58: String) -> Result<(), 
         let _ = node.endpoint.add_node_addr(addr);
         let ep = node.endpoint.clone();
         tokio::spawn(async move {
-            tracing::info!("Boot dial to associated Conscia node: {}", key);
+            tracing::info!("Boot dial to associated relay node: {}", key);
             let _ = ep.connect(key, iroh_gossip::ALPN).await;
         });
     }
@@ -621,9 +581,6 @@ pub async fn save_blob(bytes: Vec<u8>) -> Result<String, String> {
 }
 
 /// Broadcasts a message hash across the gossip mesh.
-/// 💡 MENTOR TIP: We only broadcast the HASH of the message, not the message itself.
-/// Peers who see the hash can then decide to download the full blob from us
-/// using Iroh's blob sync protocol. This keeps the gossip channel very fast!
 pub async fn broadcast_message_hash(namespace: [u8; 32], hash_str: String) -> Result<(), String> {
     if is_egress_paused().await {
         tracing::warn!("Egress paused, skipping gossip broadcast");
@@ -667,10 +624,8 @@ pub async fn get_stats() -> HashMap<String, String> {
         let topics = n.topics.read().await;
         stats.insert("topics_count".to_string(), topics.len().to_string());
 
-        // 🧠 EDUCATIONAL CONTEXT: We renamed 'blob_count' to 'storage_status' to elevate 
+        // EDUCATIONAL CONTEXT: We renamed 'blob_count' to 'storage_status' to elevate 
         // the API from an implementation-detail (blobs) to a functional concept (storage).
-        // This aligns with the "Process IS The Product" vision by making the telemetry
-        // human-readable for the Sovereign Dashboard.
         stats.insert("storage_status".to_string(), "Active".to_string());
     } else {
         stats.insert("status".to_string(), "Offline".to_string());
@@ -692,8 +647,8 @@ mod diagnostics {
     async fn check_status() {
         let stats = get_stats().await;
         println!("NETWORK_STATS: {:?}", stats);
-        let (id, online, peers) = get_conscia_status().await;
-        println!("CONSCIA_STATUS: id={:?} online={} peers={}", id, online, peers);
+        let (id, online, peers) = get_relay_status().await;
+        println!("RELAY_STATUS: id={:?} online={} peers={}", id, online, peers);
     }
 
     #[tokio::test]
@@ -706,9 +661,9 @@ mod diagnostics {
         let local_id = stats.get("node_id").unwrap();
         println!("LOCAL_NODE_ID_FOR_VERIFY: {}", local_id);
         
-        // Connect to LOCAL conscia
+        // Connect to LOCAL relay
         let remote_id = "2f4300ae2c116d3c0f87cea35cc0254900a217558878d55010e435e30b0cc9b4";
-        set_associated_conscia(remote_id.to_string()).await?;
+        set_associated_relay(remote_id.to_string()).await?;
         
         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
         

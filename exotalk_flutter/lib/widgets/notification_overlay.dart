@@ -80,7 +80,7 @@ class _NotificationTileState extends ConsumerState<_NotificationTile> with Singl
             decoration: BoxDecoration(
               color: Color(0xFF1E293B),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: ConsciaTheme.border(context)),
+              border: Border.all(color: AppTheme.border(context)),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
@@ -137,7 +137,7 @@ class _NotificationTileState extends ConsumerState<_NotificationTile> with Singl
                       child: Container(
                         color: Colors.black,
                         child: Center(
-                          child: CircularProgressIndicator(color: ConsciaTheme.accent(context)),
+                          child: CircularProgressIndicator(color: AppTheme.accent(context)),
                         ),
                       ),
                     ),
@@ -183,14 +183,14 @@ class _NotificationTileState extends ConsumerState<_NotificationTile> with Singl
         break;
       case NotificationType.info:
         iconData = LucideIcons.info;
-        color = ConsciaTheme.accent(context);
+        color = AppTheme.accent(context);
         break;
     }
 
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: ConsciaTheme.accentDark(context),
+        color: AppTheme.accentDark(context),
         shape: BoxShape.circle,
       ),
       child: Icon(iconData, color: color, size: 24),
@@ -215,7 +215,7 @@ class _NotificationTileState extends ConsumerState<_NotificationTile> with Singl
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: ConsciaTheme.accent(context),
+              backgroundColor: AppTheme.accent(context),
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -243,7 +243,7 @@ class _NotificationTileState extends ConsumerState<_NotificationTile> with Singl
       });
       
       if (sync) {
-        ref.read(toastProvider.notifier).show("Sovereign Metadata Synchronized", type: ToastType.success);
+        ref.read(toastProvider.notifier).show("Metadata Synchronized", type: ToastType.success);
       } else {
         ref.read(toastProvider.notifier).show("Local Identity Preserved", type: ToastType.info);
       }
@@ -252,7 +252,7 @@ class _NotificationTileState extends ConsumerState<_NotificationTile> with Singl
 }
 
 // =============================================================================
-// ANIMATION WRAPPERS & SCREEN CANDY
+// ANIMATION WRAPPERS & UI COMPONENTS
 // =============================================================================
 
 class ConflictResolutionCandy extends StatefulWidget {
@@ -302,7 +302,7 @@ class _ConflictResolutionCandyState extends State<ConflictResolutionCandy> with 
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: widget.sync ? ConsciaTheme.accent(context) : ConsciaTheme.surface(context),
+                  color: widget.sync ? AppTheme.accent(context) : AppTheme.surface(context),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(

@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 /// Which components the operator selected for installation.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct ComponentSelection {
-    /// Conscia daemon — always required (the sovereign lifeline)
+    /// Conscia daemon — always required
     pub conscia: bool,
     /// ConSoul desktop admin console
     pub consoul: bool,
@@ -27,7 +27,7 @@ pub struct ComponentSelection {
 impl Default for ComponentSelection {
     fn default() -> Self {
         Self {
-            conscia: true,  // Always on — the core lifeline
+            conscia: true,  // Always on — core service
             consoul: true,
             zrok: false,    // Optional — not required for P2P mesh
         }
@@ -48,7 +48,7 @@ pub struct ConsciaConfig {
 impl Default for ConsciaConfig {
     fn default() -> Self {
         Self {
-            mesh_namespace: "sovereign_mesh".to_string(),
+            mesh_namespace: "exo_mesh".to_string(),
             api_port: 3000,
             generate_new_identity: true,
         }
@@ -82,8 +82,8 @@ impl Default for InstallerConfig {
     }
 }
 
-// 🧠 EDUCATIONAL CONTEXT: FHS Path Constants
-// These are the enterprise-standard directories defined in the
+// EDUCATIONAL CONTEXT: FHS Path Constants
+// These are the standard directories defined in the
 // FHS Installer Specification (docs/releases/fhs_installer_specification.md).
 // They are NOT configurable — the entire point of FHS compliance is
 // deterministic, predictable paths across all deployment targets.

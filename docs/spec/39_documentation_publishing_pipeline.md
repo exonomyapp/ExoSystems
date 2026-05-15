@@ -1,7 +1,7 @@
 # Specification 39: Documentation Publishing Pipeline
 
 ## 1. Overview
-The Sovereign Exosystem utilizes a CLI-driven publishing pipeline to convert raw Markdown from the monorepo into high-fidelity web surfaces and portable documents. This ensures that the knowledge base remains both sovereign and accessible across different environments.
+The Exosystem utilizes a CLI-driven publishing pipeline to convert raw Markdown from the monorepo into high-fidelity web surfaces and portable documents. This ensures that the knowledge base remains both independent and accessible across different environments.
 
 This specification defines the use of **MkDocs Material** for site generation and **Pandoc** for multi-format document export.
 
@@ -30,7 +30,7 @@ To facilitate portability and offline access, the document viewer UI includes a 
 ### 3.1 Supported Export Formats
 The UI provides a selection of professional formats:
 - **Plain Text (`.txt`)**: For maximum compatibility and low-overhead reading.
-- **Markdown (`.md`)**: To preserve the raw sovereign source format.
+- **Markdown (`.md`)**: To preserve the raw source format.
 - **PDF (`.pdf`)**: For high-fidelity, printable deliverables (rendered via `weasyprint`).
 - **DOCX (`.docx`)**: For integration with legacy word processing environments.
 - **ePub (`.epub`)**: For optimized reading on mobile devices and e-readers.

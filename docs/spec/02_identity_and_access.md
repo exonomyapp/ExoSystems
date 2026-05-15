@@ -1,11 +1,11 @@
 # Identity and Access Management
 
-## 2.1 Self-Sovereign Identity (SSI)
+## 2.1 Self-Authorial Identity (SSI)
 - **Local Keypairs:** Users generate Ed25519 keypairs locally. The resulting `did:peer` (specifically `did:peer:2.Vz...`) serves as the immutable digital anchor.
 - **Independence:** No central registry is required. Identity is claimed, not granted.
 
 ## 2.2 Proof-of-Visibility (Social Proofs)
-To bridge self-sovereign DIDs with existing social platforms (X, GitHub, Mastodon), ExoTalk utilizes a three-generation proof system.
+To bridge independent DIDs with existing social platforms (X, GitHub, Mastodon), ExoTalk utilizes a three-generation proof system.
 
 ### 2.2.1 Proof Formats
 1. **Legacy (`v1`)**:
@@ -29,7 +29,7 @@ The application implements a "Best-Fit" selection algorithm:
 - **Validation:** Peers validate these tokens locally against the publisher's public key. No central authority is consulted for access control.
 
 ## 2.4 The Duality of Trust: Proofs vs. Auth
-To maintain resilience without sacrificing sovereignty, ExoTalk bifurcates the concept of "Linked Accounts":
+To maintain resilience without sacrificing autonomy, ExoTalk bifurcates the concept of "Linked Accounts":
 
 ### 2.4.1 Outward Verification (ExoTalk → World) 
 - **Role:** Reputation and Trust.
@@ -42,7 +42,7 @@ To maintain resilience without sacrificing sovereignty, ExoTalk bifurcates the c
 - **Mechanism:** OAuth-linked accounts (Google, Microsoft, GitHub, etc.). Credentials for these providers are securely provisioned via environment variables (e.g., `EXOTALK_GITHUB_CLIENT_ID`) in the client configuration, completely isolating secrets from the source code.
 - **Implementation Guard:** The client UI enforces an `isConfigured` guard pattern. Social login buttons and account linking tiles remain gracefully disabled (displaying a "Not configured" state) until real OAuth credentials are detected, preventing broken flows involving development-time "mock" IDs.
 - **Target:** The user's own recovery nodes (Conscia) and paired devices.
-- **Goal:** PROVING to yourself (and your nodes) who you are in order to regain access to your sovereign identity after losing a device.
+- **Goal:** PROVING to yourself (and your nodes) who you are in order to regain access to your independent identity after losing a device.
 ## 2.5 The Role of Conscia in Identity Recovery
 While the `did:peer` is local-first, it can be optionally bound to centralized authenticators via Conscia:
 1. **Binding:** A user performs an OAuth flow; ExoTalk generates a "Binding Proof" (a signature linking the DID to the OAuth `sub` ID).
@@ -57,4 +57,4 @@ To participate as a first-class citizen in the Meadowcap capability system, ever
 - **Key Resolution Tiers:** To solve the "Key Management Overhead" of isolated server nodes, Conscia implements two distinct levels of cryptographic support:
   1. **Peer Key Resolution (Non-Federated):** Two independent Conscia nodes can act as "mere peers," agreeing to securely hold each other's encrypted recovery keys. This lightweight agreement carries no obligation for data replication or cluster federation, but ensures that if one node suffers hardware failure, it can recover its identity from its peer.
   2. **Federated Key Resolution:** Engaged as part of a formal Node Federation (e.g., an HA Cluster). Nodes in a federation not only back up each other's keys but actively share state, telemetry, and capabilities.
-- **UI Support:** The ExoTalk and Conscia UIs provide distinct workflows for engaging in lightweight Peer Key Resolution versus establishing a full Node Federation.
+- **UI Support:** The ExoTalk and ConSoul interfaces provide distinct workflows for engaging in lightweight Peer Key Resolution versus establishing a full Node Federation.

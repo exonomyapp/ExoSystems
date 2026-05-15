@@ -1,6 +1,6 @@
 # Spec 30: Emergency Manual Operation
 
-This specification document serves as the "Sovereign Ground Truth" for the ExoTech Bridge Monitor infrastructure. In the event of a UI failure or the absence of the AI Agent, use these hard-coded commands to manually manage the mesh daemons on the Exonomy node.
+This specification document serves as the "Technical Ground Truth" for the ExoTech Bridge Monitor infrastructure. In the event of a UI failure or the absence of the AI Agent, use these hard-coded commands to manually manage the mesh daemons on the Exonomy node.
 
 ## Core Mesh Daemons
 
@@ -14,7 +14,7 @@ The WebRTC handshake bridge.
 - **Verification**: `pgrep -fl signaling-relay`
 
 ### 2. Conscia Beacon
-The P2P Mesh engine (Sovereign).
+The P2P Mesh engine.
 - **Binary Path**: `/home/exocrat/code/exotalk/exotalk_engine/target/release/conscia`
 - **Manual Start Command (Active)**:
   ```bash

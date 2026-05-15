@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>conscia Dashboard</title>
+    <title>Dashboard</title>
     <style>
         :root {
             --bg: #0d1117;
@@ -317,7 +317,7 @@
 </head>
 <body>
     <header>
-        <div class="logo">Conscia Node</div>
+        <div class="logo">Node Dashboard</div>
         <div class="node-id-container">
             <div class="node-id" id="node-id">Initializing...</div>
             <button onclick="copyToClipboard('node-id', this)" title="Copy Node ID" style="flex-shrink: 0; background: rgba(48, 54, 61, 0.5); border: 1px solid #30363d; color: var(--muted); border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 0.7rem; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
@@ -327,7 +327,7 @@
     </header>
 
     <main>
-        <div class="log-header" style="margin-bottom: 1rem; padding: 0; border: none;">NETWORK HEALTH TELEMETRY</div>
+        <div class="log-header" style="margin-bottom: 1rem; padding: 0; border: none;">NETWORK HEALTH</div>
         <div class="health-telemetry" id="health-container">
             <div class="health-stage" id="stage-engine">
                 <div class="health-icon">⚙️</div>
@@ -358,27 +358,25 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <!-- 🧠 EDUCATIONAL CONTEXT: The label "Storage Status" is a functional abstraction.
-                     While the underlying Iroh engine thinks in terms of "Blobs," the human dashboard
-                     presents this as "Storage" to emphasize the utility of the archived data. -->
+                <!-- EDUCATIONAL CONTEXT: Storage Status -->
                 <h3>Storage Status</h3>
                 <div class="value" id="count-blobs">0</div>
             </div>
             <div class="stat-card">
-                <h3>Commercial Status</h3>
+                <h3>Node Status</h3>
                 <div class="value" style="color: var(--accent);">Ready</div>
-                <button class="conscire-btn" style="margin-top: 10px; width: 100%; padding: 10px; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Conscire</button>
+                <button class="conscire-btn" style="margin-top: 10px; width: 100%; padding: 10px; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Confirm</button>
             </div>
         </div>
 
         <div class="peering-manager" style="margin-top: 2rem;">
-            <div class="log-header">PEERING MANAGER (CONSCIERGE)</div>
+            <div class="log-header">PEER MANAGEMENT</div>
             <div style="padding: 1.5rem; background: var(--surface); border-radius: 0 0 12px 12px; border: 1px solid #30363d; border-top: none;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
                     <div>
                         <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">PEER NODE WHITELIST</h4>
                         <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-                            <input type="text" id="node-invite-input" placeholder="Paste Conscia Node ID..." style="flex: 1; min-width: 200px; padding: 0.6rem; background: #000; border: 1px solid #30363d; border-radius: 6px; color: white;">
+                            <input type="text" id="node-invite-input" placeholder="Paste Node ID..." style="flex: 1; min-width: 200px; padding: 0.6rem; background: #000; border: 1px solid #30363d; border-radius: 6px; color: white;">
                             <button onclick="addPeer('node')" style="padding: 0.6rem 1rem; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Invite</button>
                         </div>
                         
@@ -392,17 +390,17 @@
                     <div>
                         <h4 style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--muted);">FEDERATION STATUS</h4>
                         <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem; background: #000; border-radius: 6px; border: 1px solid #30363d;">
-                            <span id="fed-status-label" style="font-weight: 600; color: var(--muted); font-size: 0.9rem;">Autonomous (Lifeline)</span>
+                            <span id="fed-status-label" style="font-weight: 600; color: var(--muted); font-size: 0.9rem;">Standby</span>
                             <button onclick="toggleFederation()" id="fed-toggle-btn" style="white-space: nowrap; padding: 0.5rem 1rem; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; cursor: pointer;">Enable Federation</button>
                         </div>
-                        <p style="margin-top: 1rem; font-size: 0.75rem; color: var(--muted);">Your Conscia Node ID is required to initiate a bilateral 1-to-1 sync. Share it only with trusted Conscierges.</p>
+                        <p style="margin-top: 1rem; font-size: 0.75rem; color: var(--muted);">Your Node ID is required to initiate a bilateral 1-to-1 sync.</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="governance-control" style="margin-top: 2rem;">
-            <div class="log-header">GOVERNANCE MISSION CONTROL</div>
+            <div class="log-header">ACCESS CONTROL</div>
             <div style="padding: 1.5rem; background: var(--surface); border-radius: 0 0 12px 12px; border: 1px solid #30363d; border-top: none;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2rem;">
                     <div>
@@ -422,10 +420,10 @@
                 
                 <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <h4 style="font-size: 0.85rem; color: var(--muted);">SOVEREIGN TOOLS</h4>
+                        <h4 style="font-size: 0.85rem; color: var(--muted);">MANAGEMENT TOOLS</h4>
                         <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                            <button onclick="generateInvite('Conscierge')" style="padding: 0.6rem 1rem; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Generate Master Link (T1)</button>
-                            <button onclick="generateInvite('User')" style="padding: 0.6rem 1rem; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; cursor: pointer;">Generate Referral (T2)</button>
+                            <button onclick="generateInvite('Node')" style="padding: 0.6rem 1rem; background: var(--accent); border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: 600;">Generate Master Link</button>
+                            <button onclick="generateInvite('User')" style="padding: 0.6rem 1rem; border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; cursor: pointer;">Generate Referral</button>
                         </div>
                     </div>
                 </div>
@@ -460,7 +458,7 @@
                         <span>📋</span> <span class="btn-text">Copy Logs</span>
                     </button>
                     <button onclick="openExportModal()" style="padding: 0.5rem 1rem; background: transparent; border: 1px solid var(--muted); border-radius: 6px; color: var(--text); cursor: pointer; font-size: 0.8rem; display: flex; gap: 0.5rem; align-items: center;">
-                        <span>📥</span> Export Vault
+                        <span>📥</span> Export Logs
                     </button>
                 </div>
             </div>
@@ -515,8 +513,8 @@
             <div class="export-option" onclick="downloadLogs('exolog')">
                 <div class="export-icon">🔐</div>
                 <div class="export-info">
-                    <h4>Encrypted Vault (.exolog)</h4>
-                    <p>Cryptographically signed and encrypted bundle of the mesh activity.</p>
+                    <h4>Archive (.exolog)</h4>
+                    <p>Cryptographically signed bundle of mesh activity.</p>
                 </div>
             </div>
         </div>
@@ -544,7 +542,7 @@
 
     <footer>
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>&copy; 2026 Conscia P2P Networking | Commercial Reporting & Archival Lifeline</div>
+            <div>&copy; 2026 ExoTalk P2P Networking</div>
             <div id="version-label" style="font-family: monospace; font-size: 0.7rem;">v0.7.7</div>
         </div>
     </footer>
@@ -841,7 +839,7 @@
                 const knownNodes = {
                     "2f4300ae2c116d3c0f87cea35cc0254900a217558878d55010e435e30b0cc9b4": { name: "Exocracy (Host)", role: "Nexus Beacon", icon: "🏰" },
                     "83fa401028e4f8b8cf9ad85801fb27b8905faffec13ee22caa2a1a9b09c052e1": { name: "Exonomy (Node)", role: "Federated Node", icon: "🛰️" },
-                    "613e962785bff825e9bb522428a78f457195b3fc7d327f694c662bbcb541eb87": { name: "ExoTalk (Flutter)", role: "Sovereign App", icon: "📱" },
+                    "613e962785bff825e9bb522428a78f457195b3fc7d327f694c662bbcb541eb87": { name: "ExoTalk (Flutter)", role: "autonomous App", icon: "📱" },
                 };
 
                 // Clear if length changed or first run

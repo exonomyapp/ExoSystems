@@ -1,10 +1,10 @@
-# Sovereign Exosystem Specification: Overview
+# Exosystem Specification: Overview
 
-This document provides a high-level overview of the Sovereign Exosystem functional specification. It serves as the entry point for understanding the architectural, philosophical, and operational principles that govern the suite.
+This document provides a high-level overview of the Exosystem functional specification. It serves as the entry point for understanding the architectural, philosophical, and operational principles that govern the suite.
 
 ## 1. The Core Philosophy
 
-The Exosystem is built on the principle of **Sovereign Persistence**. We believe that a user's digital identity, social graph, and content should exist independently of any centralized service provider. 
+The Exosystem is built on the principle of **Independent Persistence**. We believe that a user's digital identity, social graph, and content should exist independently of any centralized service provider. 
 
 - **Local-First**: All data is stored and managed locally by default.
 - **P2P Mesh**: Synchronization occurs over a peer-to-peer mesh using the Iroh and Willow protocols.

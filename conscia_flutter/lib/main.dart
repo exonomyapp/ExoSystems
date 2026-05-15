@@ -3,9 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'src/interface/consoul.dart';
 
 // 🧠 EDUCATIONAL CONTEXT: The ConSoul entry point.
-// As a "Sovereign Administrative Console," ConSoul follows the Triad Architecture
+// As an "Administrative Console," ConSoul follows the Triad Architecture
 // (Spec 22), operating as a modular GUI layer that connects to the background
 // Conscia daemon via a secure, local API.
+//
+// 💡 MENTOR TIP: Riverpod Integration
+// We use 'ProviderScope' at the root of the app to enable Riverpod's 
+// reactive state management. This allows any widget in the tree to 
+// efficiently listen to background data (like P2P stats or mesh logs) 
+// without complex prop-drilling.
 void main() {
   runApp(
     const ProviderScope(

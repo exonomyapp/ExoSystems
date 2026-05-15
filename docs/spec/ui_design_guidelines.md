@@ -1,13 +1,13 @@
 # ExoTalk UI/UX Design Guidelines
 
-To ensure ExoTalk feels like a premium, state-of-the-art sovereign application, all interface components must adhere to these strict rules.
+To ensure ExoTalk feels like a premium, state-of-the-art independent application, all interface components must adhere to these strict rules.
 
 ## 1. Horizontal-First Density
 *   **No Redundant Stacking**: If two elements can fit side-by-side on a standard 1000px width, they **must** be in a Row, not a Column.
 *   **Labels-to-the-Left**: Section titles (e.g., "Danger Zone", "Network Control") should ideally sit to the left of their content/controls, not on top.
 *   **Compact Footprint**: Minimize vertical margins. Use `SizedBox(height: 8)` as the default gap, never 24 or 32 unless it's a major page-level break.
 *   **Asymmetric Grids**: Use `flex` tracks (e.g., 5-4-2) for heterogeneous dashboard cards to maximize horizontal width utility.
-*   **Intrinsic Anchoring**: Wrap top-level dashboard rows in `IntrinsicHeight` (and use `CrossAxisAlignment.stretch` internally) to ensure all sibling cards share a unified vertical height, preventing "floating" elements.
+*   **Intrinsic Anchoring**: Wrap top-level dashboard rows in `IntrinsicHeight` (and use `CrossAxisAlignment.stretch` internally) to ensure all sibling cards share a consistent vertical height, preventing "floating" elements.
 
 ## 2. Typographic Integrity
 *   **Font Ratios**: Heading and Caption sizes must be brought closer together.
@@ -19,7 +19,7 @@ To ensure ExoTalk feels like a premium, state-of-the-art sovereign application, 
 ## 3. Geometric Matrix & Spacing
 *   **Symmetry**: Buttons and interactive elements must have symmetrical padding. `padding: EdgeInsets.symmetric(horizontal: X, vertical: Y)` is the rule.
 *   **Alignment**: Component edges (left and right) must align to a strict vertical grid. No "floating" or "indented" boxes unless functionally required.
-*   **Surface Consistency**: Use a single, unified border and background logic. No "stacked" shadows or doubled-up borders.
+*   **Surface Consistency**: Use a single, standardized border and background logic. No "stacked" shadows or doubled-up borders.
 
 ## 4. Visual Language
 *   **Accent Color**: Use `ExoTheme.accent` (green) for active/functional states.

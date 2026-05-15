@@ -1,15 +1,14 @@
 // =============================================================================
-// EXO-INSTALLER: Conscia Sovereign Node — FHS Installer
+// EXO-INSTALLER: Conscia node — FHS Installer
 // =============================================================================
-// 🧠 EDUCATIONAL CONTEXT: The "Process IS The Product" Mandate
-// We do not manually SSH into servers and hack directories into compliance.
+// EDUCATIONAL CONTEXT: The "Process IS The Product" Mandate
 // The SOFTWARE ITSELF is the installer. This binary automates every step of
-// the Enterprise FHS deployment: user creation, directory provisioning,
+// the FHS deployment: user creation, directory provisioning,
 // binary placement, systemd registration, and health verification.
 //
 // This is a Tier 2 Interactive tool (per Spec 07 §7.7) using `inquire`
 // for guided configuration wizards. The Tier 3 TUI (`ratatui`) is reserved
-// for the future immersive Conscia monitoring dashboard — a separate project.
+// for the Conscia monitoring dashboard — a separate project.
 //
 // Usage:
 //   sudo exo-installer              # Interactive wizard
@@ -24,10 +23,10 @@ use clap::Parser;
 use console::style;
 use std::path::PathBuf;
 
-/// Conscia Sovereign Node — FHS-Compliant Installer
+/// Conscia node — FHS-Compliant Installer
 #[derive(Parser)]
 #[command(name = "exo-installer")]
-#[command(about = "Interactive FHS-compliant installer for the Conscia Sovereign Node")]
+#[command(about = "Interactive FHS-compliant installer for the Conscia node")]
 #[command(version)]
 struct Args {
     /// Path to a saved TOML configuration file for headless re-installation.
@@ -45,10 +44,10 @@ fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
     // ── Root Privilege Check ─────────────────────────────────────────────
-    // 🧠 EDUCATIONAL CONTEXT: The installer writes to /opt, /etc, /var,
+    // EDUCATIONAL CONTEXT: The installer writes to /opt, /etc, /var,
     // creates system users, and manages systemd units. All of these require
-    // root privileges. We check early and fail gracefully rather than
-    // crashing halfway through with a cryptic "Permission denied" error.
+    // root privileges. We check early and exit rather than
+    // halting during execution.
     if !nix::unistd::getuid().is_root() {
         eprintln!("{}", style("Error: This installer must be run as root (sudo).").red().bold());
         eprintln!("{}", style("  Usage: sudo exo-installer").dim());
@@ -80,7 +79,7 @@ fn main() -> anyhow::Result<()> {
     // ── Health Check ─────────────────────────────────────────────────────
     health::run_health_check(&installer_config);
 
-    println!("{}", style("🛰️  Conscia Sovereign Node — Installation Complete!").green().bold());
+    println!("{}", style("Conscia node — Installation Complete!").green().bold());
     println!();
 
     Ok(())

@@ -1,4 +1,4 @@
-# 🧠 EDUCATIONAL CONTEXT: Sovereignty requires stable endpoints. 
+# 🧠 EDUCATIONAL CONTEXT: autonomy requires stable endpoints. 
 # Using "zrok share reserved" instead of "share public" ensures that the node 
 # identity remains consistent across reboots, which is critical for P2P peering.
 [Unit]

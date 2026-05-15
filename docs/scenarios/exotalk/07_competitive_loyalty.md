@@ -5,7 +5,7 @@
 
 ## Cognitive Shift
 **Centralized Expectation**: "I’ll use one big cloud provider for simplicity."
-**Sovereign Reality**: "We use the friction between empires to protect our data. Competitive loyalty is our uptime."
+**Decentralized Reality**: "We use the friction between empires to protect our data. Competitive loyalty is our uptime."
 
 ## World Event Reference
 The freezing of foreign assets by the **US Treasury** and the shift of global South nations toward alternative financial and digital infrastructures.

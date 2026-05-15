@@ -1,21 +1,17 @@
 // =============================================================================
-// willow.rs — Sovereign Identity & Data Engine
+// identity.rs — Identity API
 // =============================================================================
 //
-// Hello! This is the "brain" of the ExoTalk backend. It handles everything
-// from generating your private keys to managing your message history.
-//
-// 💡 MENTOR TIP: All functions here are `async`. This is because they often 
-// need to wait for the "Hard Drive" (disk) or "Network" (gossip). If they 
-// weren't async, your phone would freeze every time you sent a message!
+// This module handles identity operations including key generation,
+// history management, and profile metadata.
 //
 // Main Responsibilities:
-//   1. Identity Vault — Your cryptographically unique self (did:peer).
-//   2. Identity Proofs — How you prove to others who you are.
-//   3. OAuth Bindings — Optional "Inward Recovery" anchors.
-//   4. Conversations — Your private or group chat channels.
+//   1. Identity Structure — Node identity representation (did:peer).
+//   2. Identity Proofs — Identity verification mechanisms.
+//   3. OAuth Bindings — Recovery mechanisms.
+//   4. Conversations — Message history and channel management.
 //
-// These functions are called by Flutter using the `flutter_rust_bridge`.
+// These functions are exposed to the frontend via flutter_rust_bridge.
 // =============================================================================
 
 use tokio::sync::RwLock;
@@ -55,13 +51,12 @@ pub struct OAuthLink {
     pub linked_at_ms: i64,
 }
 
-// 🧠 Educational Context: The Identity Vault
 /// Represents a loaded Node Identity (Keypair).
-/// This structure is the "Legislative Seal" of the user's presence in the mesh.
+/// This structure represents the user's presence in the mesh.
 /// It contains the local root secret (ed25519) from which all sub-capabilities 
 /// and message signatures are derived.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct IdentityVault {
+pub struct IdentityRecord {
     pub did: String,
     pub secret: String,          // Base58 encoded local root secret
     pub display_name: String,
@@ -96,7 +91,7 @@ pub struct DeviceManifest {
     pub tenancy_mode: String, // "Isolated" or "Multiplexed"
     pub profiles: Vec<ProfileRecord>,
     #[serde(default)]
-    pub associated_conscia_id: Option<String>,
+    pub associated_relay_id: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -119,7 +114,7 @@ pub struct ProfileMetadata {
 }
 
 // Store the active node identity
-static ACTIVE_IDENTITY: Lazy<RwLock<Option<IdentityVault>>> = Lazy::new(|| RwLock::new(None));
+static ACTIVE_IDENTITY: Lazy<RwLock<Option<IdentityRecord>>> = Lazy::new(|| RwLock::new(None));
 
 pub(crate) async fn get_active_did_internal() -> Option<String> {
     ACTIVE_IDENTITY.read().await.as_ref().map(|v| v.did.clone())
@@ -146,13 +141,13 @@ pub async fn get_device_manifest() -> DeviceManifest {
         serde_json::from_str::<DeviceManifest>(&data).unwrap_or(DeviceManifest {
             tenancy_mode: "Isolated".to_string(),
             profiles: Vec::new(),
-            associated_conscia_id: None,
+            associated_relay_id: None,
         })
     } else {
         DeviceManifest {
             tenancy_mode: "Isolated".to_string(),
             profiles: Vec::new(),
-            associated_conscia_id: None,
+            associated_relay_id: None,
         }
     };
 
@@ -164,7 +159,7 @@ pub async fn get_device_manifest() -> DeviceManifest {
             if entry.path().is_dir() {
                 let id_path = entry.path().join("identity.json");
                 if let Ok(data) = std::fs::read_to_string(id_path) {
-                    if let Ok(vault) = serde_json::from_str::<IdentityVault>(&data) {
+                    if let Ok(vault) = serde_json::from_str::<IdentityRecord>(&data) {
                         // Check if manifest matches this vault
                         if let Some(record) = manifest.profiles.iter_mut().find(|p| p.did == vault.did) {
                             if record.display_name != vault.display_name || record.avatar_url != vault.avatar_url {
@@ -244,7 +239,7 @@ pub async fn switch_active_profile(did: String) -> Result<bool, String> {
     // Temporarily fake ACTIVE_IDENTITY to allow storage_path to resolve to this DID
     {
         let mut active = ACTIVE_IDENTITY.write().await;
-        *active = Some(IdentityVault {
+        *active = Some(IdentityRecord {
             did: did.clone(),
             secret: "".to_string(), display_name: "".to_string(), avatar_url: "".to_string(),
             proof_string: "".to_string(), verified_links: vec![], oauth_links: vec![], name_history: vec![],
@@ -255,7 +250,7 @@ pub async fn switch_active_profile(did: String) -> Result<bool, String> {
     let identity_path = storage_path("identity.json").await;
     match std::fs::read_to_string(&identity_path) {
         Ok(data) => {
-            match serde_json::from_str::<IdentityVault>(&data) {
+            match serde_json::from_str::<IdentityRecord>(&data) {
                 Ok(vault) => {
                     {
                         let mut active = ACTIVE_IDENTITY.write().await;
@@ -281,12 +276,11 @@ pub async fn switch_active_profile(did: String) -> Result<bool, String> {
     Err("Profile not found on disk".to_string())
 }
 
-// 🧠 Educational Context: Cryptographic Self-Generation
 /// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier.
-/// This is the "Big Bang" of a sovereign session. By generating keys 
+/// This is the initialization of a session. By generating keys 
 /// locally on the device's CSPRNG (OsRng), we ensure that no central 
-/// authority ever sees the private secret, fulfilling the "Own Your Data" mandate.
-pub async fn generate_new_identity() -> IdentityVault {
+/// authority ever sees the private secret.
+pub async fn generate_new_identity() -> IdentityRecord {
     // IMPORTANT: Clear any active profile before generating a new one
     sign_out_profile().await;
 
@@ -298,7 +292,7 @@ pub async fn generate_new_identity() -> IdentityVault {
     let sk_b58 = bs58::encode(signing_key.to_bytes()).into_string();
     
     let did = format!("did:peer:2.Vz{}", pk_b58);
-    let vault = IdentityVault { 
+    let vault = IdentityRecord { 
         did: did.clone(), 
         secret: sk_b58.clone(),
         display_name: "".to_string(),
@@ -327,8 +321,8 @@ pub async fn generate_new_identity() -> IdentityVault {
     vault
 }
 
-/// Returns the active node identity. Returns an empty vault if no identity is active.
-pub async fn get_active_identity() -> IdentityVault {
+/// Returns the active node identity. Returns an empty record if no identity is active.
+pub async fn get_active_identity() -> IdentityRecord {
     let active = ACTIVE_IDENTITY.read().await;
     if let Some(vault) = active.as_ref() {
         return vault.clone();
@@ -337,14 +331,14 @@ pub async fn get_active_identity() -> IdentityVault {
     
     // If no in-memory active identity, try to load the last one from the current storage path
     if let Ok(data) = std::fs::read_to_string(storage_path("identity.json").await) {
-        if let Ok(vault) = serde_json::from_str::<IdentityVault>(&data) {
+        if let Ok(vault) = serde_json::from_str::<IdentityRecord>(&data) {
             let mut active = ACTIVE_IDENTITY.write().await;
             *active = Some(vault.clone());
             return vault;
         }
     }
     
-    IdentityVault {
+    IdentityRecord {
         did: "".to_string(),
         display_name: "".to_string(),
         avatar_url: "".to_string(),
@@ -358,7 +352,7 @@ pub async fn get_active_identity() -> IdentityVault {
     }
 }
 
-pub async fn update_active_profile(name: String, avatar: String) -> IdentityVault {
+pub async fn update_active_profile(name: String, avatar: String) -> IdentityRecord {
     let mut vault = get_active_identity().await;
     let now_ms = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
@@ -546,7 +540,7 @@ fn verify_raw_sig(sig_b58: &str, did: &str, name: &str) -> bool {
     verifying_key.verify(claim.as_bytes(), &signature).is_ok()
 }
 
-pub async fn set_ingress_enabled(enabled: bool) -> IdentityVault {
+pub async fn set_ingress_enabled(enabled: bool) -> IdentityRecord {
     let mut vault = get_active_identity().await;
     vault.ingress_enabled = enabled;
     if let Ok(j) = serde_json::to_string(&vault) {
@@ -557,7 +551,7 @@ pub async fn set_ingress_enabled(enabled: bool) -> IdentityVault {
     vault
 }
 
-pub async fn set_egress_enabled(enabled: bool) -> IdentityVault {
+pub async fn set_egress_enabled(enabled: bool) -> IdentityRecord {
     let mut vault = get_active_identity().await;
     vault.egress_enabled = enabled;
     if let Ok(j) = serde_json::to_string(&vault) {
@@ -568,15 +562,15 @@ pub async fn set_egress_enabled(enabled: bool) -> IdentityVault {
     vault
 }
 
-async fn get_active_identity_sync() -> Option<IdentityVault> {
+async fn get_active_identity_sync() -> Option<IdentityRecord> {
     let active = ACTIVE_IDENTITY.read().await;
     active.clone()
 }
 
 // --- MULTI-PLATFORM VERIFIED LINKS ---
 
-/// Adds a pending (unverified) link to the vault.
-pub async fn add_verification_link(label: String, url: String) -> IdentityVault {
+/// Adds a pending (unverified) link to the record.
+pub async fn add_verification_link(label: String, url: String) -> IdentityRecord {
     let mut vault = get_active_identity().await;
     // Don't add duplicates
     if !vault.verified_links.iter().any(|l| l.url == url) {
@@ -589,7 +583,7 @@ pub async fn add_verification_link(label: String, url: String) -> IdentityVault 
 }
 
 /// Marks an existing link by URL as verified or failed after an HTTP check.
-pub async fn confirm_verification_link(url: String, verified: bool) -> IdentityVault {
+pub async fn confirm_verification_link(url: String, verified: bool) -> IdentityRecord {
     let mut vault = get_active_identity().await;
     let now_ms = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
@@ -604,7 +598,7 @@ pub async fn confirm_verification_link(url: String, verified: bool) -> IdentityV
 }
 
 /// Removes a link by URL.
-pub async fn remove_verification_link(url: String) -> IdentityVault {
+pub async fn remove_verification_link(url: String) -> IdentityRecord {
     let mut vault = get_active_identity().await;
     vault.verified_links.retain(|l| l.url != url);
     if let Ok(j) = serde_json::to_string(&vault) { let _ = std::fs::write(storage_path("identity.json").await, j); }
@@ -614,7 +608,7 @@ pub async fn remove_verification_link(url: String) -> IdentityVault {
 }
 
 /// Renames the display label of a link.
-pub async fn update_link_label(url: String, new_label: String) -> IdentityVault {
+pub async fn update_link_label(url: String, new_label: String) -> IdentityRecord {
     let mut vault = get_active_identity().await;
     if let Some(link) = vault.verified_links.iter_mut().find(|l| l.url == url) {
         link.platform_label = new_label;
@@ -765,7 +759,7 @@ pub async fn import_profile_bundle(bundle: String) -> bool {
     let bundle_val: serde_json::Value = match serde_json::from_str(payload_str) {
         Ok(v) => v, Err(_) => return false
     };
-    let vault: IdentityVault = match serde_json::from_value(bundle_val["vault"].clone()) {
+    let vault: IdentityRecord = match serde_json::from_value(bundle_val["vault"].clone()) {
         Ok(v) => v, Err(_) => return false
     };
     // Verify signature using the embedded DID public key

@@ -1,26 +1,25 @@
 # Walkthrough Index
 
-[ 🏠 Back to Exosystem Root ](../../README.md)
+[ Repository Root ](../../README.md)
 
-This directory contains the sequential record of the Sovereign Exosystem's development. Each file represents a session or a major architectural transition.
+This directory contains the sequential record of the ExoTalk development history. Each file represents an implementation session or architectural transition.
 
-## 🏁 Most Recent
+## Recent Entries
+- **[80. Desktop Modality & Workspace Alignment](80_desktop_modality_alignment.md)**: Relocating desktop products to root and promoting the engine to a virtual workspace.
+- **[79. Conscia Core Services and API Integration](79_conscia_core_services_and_api_integration.md)**: Finalizing core service definitions and REST API integration.
 - **[78. ConSoul Functional Implementation](78_consoul_functional_integration.md)**: Transitioning ConSoul to a functional, data-bound administrative interface.
-- **[77. Enterprise FHS Modular Installer](77_fhs_installer_finalization.md)**: Finalizing the professional FHS deployment infrastructure.
-- **[76. Educational Commenting and SDUI Specs](76_educational_commenting_and_sdui_specs.md)**: Standardizing documentation and SDUI capability specifications.
-- **[75. Federation Administration](75_federation_administration.md)**: Implementing Phase 2 Federation UI and capability-driven navigation.
-- **[74. ConSoul Foundation](74_consoul_foundation.md)**: Establishing the ConSoul administrative interface.
+- **[77. FHS Modular Installer](77_fhs_installer_finalization.md)**: Finalizing the FHS deployment infrastructure.
 
-## 🏗️ Major Campaigns
+## Historical Records
 
-### 🛡️ Phase 3: Stabilization & Extraction (Walkthroughs 60-71)
-Focus: Engine modularization, Conscia promotion, and Bridge Monitor performance.
+### Infrastructure Stabilization (Walkthroughs 60-71)
+Focus: Engine modularization, Conscia implementation, and Bridge Monitor performance.
 
-### 🧩 Phase 2: Mesh Dynamics (Walkthroughs 20-59)
-Focus: Federated deployment, telemetry verification (KDVV), and the Moses Protocol.
+### Mesh Networking Development (Walkthroughs 20-59)
+Focus: Federated deployment, telemetry verification, and communication protocols.
 
-### 🧬 Phase 1: Foundations (Walkthroughs 00-19)
-Focus: Rebranding to ExoTalk, Willow/Iroh integration, and initial identity vaulting.
+### Architectural Foundations (Walkthroughs 00-19)
+Focus: Rebranding to ExoTalk, Willow/Iroh integration, and identity management.
 
 ---
-*Refer to individual files for detailed technical diffs and verification logs.*
+*Refer to individual files for technical implementation details and verification records.*

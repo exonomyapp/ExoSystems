@@ -1,4 +1,4 @@
-# The Sovereign Saga: Resonance in the Mesh (ExoTalk Focus)
+# The Saga: Resonance in the Mesh (ExoTalk Focus)
 
 [ 🏠 Back to Exosystem Root ](../../README.md)
 
@@ -7,7 +7,7 @@ This document establishes the narrative framework for all ExoTalk/Conscia scenar
 ## The Context: The Resistance against Digital Hegemony
 In the war-torn regions of the Levant, the dry plateaus of Iran, and the surveillance-heavy corridors of Latin America, the "Cloud" is not a benevolent service. It is a Panopticon controlled by extra-national technocracies and IMF-driven austerity regimes. From the **Palantir** algorithms scanning the streets of East Jerusalem to the **World Bank** data-harvesting requirements for "financial inclusion" in Egypt, the centralized "server" is a single point of failure and a single point of betrayal. 
 
-As **Palantir**'s Gotham and Foundry platforms provide the "kill chain" for modern asymmetrical warfare, the Exosystem provides the "life chain"—a decentralized, unassailable mesh that operates beyond the reach of the technocratic empire. Here, technology is not a convenience; it is the front line of sovereignty in an era of **Western-imposed IMF austerity** and **US-led sanctions warfare**.
+As **Palantir**'s Gotham and Foundry platforms provide the "kill chain" for modern asymmetrical warfare, the Exosystem provides the "life chain"—a decentralized, unassailable mesh that operates beyond the reach of the technocratic empire. Here, technology is not a convenience; it is the front line of autonomy in an era of **Western-imposed IMF austerity** and **US-led sanctions warfare**.
 
 ---
 
@@ -34,7 +34,7 @@ As **Palantir**'s Gotham and Foundry platforms provide the "kill chain" for mode
 ### 2. Malik (The Architect)
 - **Role**: IT Hactivist / Amnesty International Infrastructure Manager.
 - **Discovery**: Recruited by **Zayd** to manage the "Invisible Backbones". Malik originally built localized mesh nets for humanitarian relief, but found they were too easily spotted. Zayd provided the Conscia engine as the "silent engine" he was missing.
-- **Motivation**: To build "The Ghost Mesh"—infrastructure that is difficult to find, impossible to interrupt, and entirely sovereign.
+- **Motivation**: To build "The Ghost Mesh"—infrastructure that is difficult to find, impossible to interrupt, and entirely independent.
 - **The Need**: Conscia nodes that can be deployed across disparate hardware, federated secretly, and run on intermittent power/internet.
 
 ### 3. Zayd (The Orchestrator)
@@ -62,13 +62,13 @@ In the Exosystem, the failure or seizure of a node does not weaken the mesh; it 
 > [!NOTE]
 > The following 10 milestones focus on the **ExoTalk** messaging client and its integrated **Conscia** relay features. Scenarios for Exonomy, Exocracy, and Republet will be established in subsequent production phases.
 
-1.  **Scenario 00: The Solid Front Door** ([_sc](exotalk/00_solid_front_door_sc.md)) — Isabella's first run. The shift from "Login" to "Synthesize." Visualizing the transition from Palantir-watched apps to a sovereign entry amidst the flickering lights of East Jerusalem.
+1.  **Scenario 00: The Solid Front Door** ([_sc](exotalk/00_solid_front_door_sc.md)) — Isabella's first run. The shift from "Login" to "Synthesize." Visualizing the transition from Palantir-watched apps to an independent entry amidst the flickering lights of East Jerusalem.
 2.  **Scenario 01: Identity Synthesis** ([_sc](exotalk/01_identity_synthesis_sc.md)) — The weight of local keys. Isabella realizes no one (not even the IMF or the World Bank) can "de-platform" her or freeze her presence.
 3.  **Scenario 02: Discovery without Directory** ([_sc](exotalk/02_discovery_without_directory_sc.md)) — Isabella finds the Insider via mDNS/Gossip. The shift from "Search" to "Tactile Connection" as **Amnesty International** reports a nationwide internet "throttling" event.
 4.  **Scenario 03: The Local Relay** ([_sc](exotalk/03_local_relay_sc.md)) — Malik setting up a Conscia node in a solar-powered Beirut bunker. Building confidence in local uptime when the national grid is weaponized.
-5.  **Scenario 04: Cross-Machine Federation** ([_sc](exotalk/04_cross_machine_federation_sc.md)) — Zayd links Hangzhou to Beirut. Sovereignty without isolation, bypassing US-led sanctions that restrict Lebanese communication infrastructure.
+5.  **Scenario 04: Cross-Machine Federation** ([_sc](exotalk/04_cross_machine_federation_sc.md)) — Zayd links Hangzhou to Beirut. Autonomy without isolation, bypassing US-led sanctions that restrict Lebanese communication infrastructure.
 6.  **Scenario 05: The "Seizure" Drill** ([_sc](exotalk/05_seizure_drill_sc.md)) — Simulating a node loss in a hostile Western cloud. Demonstrating how automatic cauterization protects the mesh from Palantir's reach.
 7.  **Scenario 06: Offline Propagation** ([_sc](exotalk/06_offline_propagation_sc.md)) — Isabella sends a war crimes report while the fiber optics are cut. Store-and-forward via Malik’s node and a network of traveling **Doctors Without Borders** tablets.
 8.  **Scenario 07: Competitive Loyalty** ([_sc](exotalk/07_competitive_loyalty_sc.md)) — Zayd’s multi-cloud strategy. Orchestrating across adversaries by mirroring data in Hangzhou and Frankfurt, ensuring no single jurisdiction can kill the signal.
-9.  **Scenario 08: The Enterprise Relay** ([_sc](exotalk/08_enterprise_relay_sc.md)) — Deploying ExoTalk for a fleet of **Amnesty International** field workers in the Andes, proving that "Sovereignty" scales to the organizational level.
-10. **Scenario 09: The Sovereign Echo** ([_sc](exotalk/09_sovereign_echo_sc.md)) — Isabella broadcasts her final report through the mesh. The decentralized truth-layer bypasses IMF-censored state media, echoing across the global mesh.
+9.  **Scenario 08: The Enterprise Relay** ([_sc](exotalk/08_enterprise_relay_sc.md)) — Deploying ExoTalk for a fleet of **Amnesty International** field workers in the Andes, proving that "Autonomy" scales to the organizational level.
+10. **Scenario 09: The Independent Echo** ([_sc](exotalk/09_independent_echo_sc.md)) — Isabella broadcasts her final report through the mesh. The decentralized truth-layer bypasses IMF-censored state media, echoing across the global mesh.

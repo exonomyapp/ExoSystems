@@ -5,7 +5,7 @@ The state security forces cut the fiber optics in Isabella’s district. Isabell
 
 ## Cognitive Shift
 **Centralized Expectation**: "I need the internet to send a message."
-**Sovereign Reality**: "The mesh is physical. Store-and-forward via 'sneakernet' and local relays ensures the truth gets out."
+**Decentralized Reality**: "The mesh is physical. Store-and-forward via 'sneakernet' and local relays ensures the truth gets out."
 
 ## World Event Reference
 The repeated total internet blackouts in Gaza and the reliance on physical data transfer for survival.

@@ -1,45 +1,45 @@
 # Walkthrough 13: Real-Time Telemetry & Global UI Scaling
 
-I have successfully transitioned the Conscia dashboard from a static binary status to a multi-stage network health diagnostic system and implemented global accessibility scaling for the ExoTalk Flutter application.
+The Conscia dashboard has been updated with a network health diagnostic system, and global scaling has been implemented in the ExoTalk Flutter application.
 
-## 1. Multi-Stage Network Health Telemetry
+## 1. Network Health Telemetry
 
-The Conscia dashboard now monitors the **"5 Stages of Connectivity Success"** in real-time, allowing operators to diagnose exactly where a P2P failure is occurring.
+The Conscia dashboard monitors connectivity stages in real-time to facilitate diagnostic analysis of P2P connection states.
 
-### Backend Diagnostic Engine
-- Refactored `exotalk_core/src/network_internal.rs` to extract deep telemetry from the `iroh::Endpoint`.
-- Implemented a custom `tracing_subscriber::Layer` to intercept all engine logs and broadcast them via JSON.
-- Added a new Axum SSE endpoint at `/api/logs/stream` for real-time log delivery.
+### Backend Diagnostic Implementation
+- Refactored `exotalk_core/src/network_internal.rs` to retrieve telemetry from `iroh::Endpoint`.
+- Implemented a `tracing_subscriber::Layer` to intercept engine logs and broadcast via JSON.
+- Added an Axum SSE endpoint at `/api/logs/stream` for real-time log delivery.
 
-### Dashboard UI Overhaul
-- **Health Tracker:** A 5-stage horizontal visualizer tracking Engine Initialization, Local UDP Binding, Relay/Internet Reachability, Peer Mesh Count, and Gossip Subscriptions.
-- **Log Stream Vault:** A tabbed log viewer (INFO, DEBUG, TRACE) with:
-  - **Individual Toggles:** Streams are paused by default to save browser resources.
-  - **Auto-Pause:** A safety threshold that pauses the feed after 100 records to prevent DOM overload.
-  - **Export Options:** One-click exports to `.json`, `.csv`, `.log`, and encrypted `.exolog` formats.
-- **Copy Controls:** Added one-click clipboard buttons for the Node ID and live log excerpts.
+### Dashboard UI Updates
+- **Health Tracker**: A visualizer tracking Engine Initialization, Local UDP Binding, Relay Reachability, Peer Mesh Count, and Gossip Subscriptions.
+- **Log Viewer**: A tabbed log viewer (INFO, DEBUG, TRACE) with:
+  - **Level Filtering**: Independent toggles for log levels.
+  - **Safety Threshold**: Automatically pauses the feed after 100 records to manage DOM resource usage.
+  - **Export Capability**: Support for `.json`, `.csv`, `.log`, and `.exolog` formats.
+- **Copy Controls**: Clipboard integration for Node ID and log excerpts.
 
-## 2. Global UI Scaling (Accessibility)
+## 2. Global UI Scaling
 
-To support diverse hardware and vision requirements, I implemented a global scaling listener in the ExoTalk Flutter app.
+Implemented a global scaling listener in the ExoTalk Flutter application to support diverse display requirements.
 
-- **Keyboard Shortcuts:** Global interception of `Ctrl +` (Enlarge), `Ctrl -` (Shrink), and `Ctrl 0` (Reset).
-- **Dynamic Text Scaling:** Adjusts the application's `TextScaler` across a range of 0.5x to 3.0x.
-- **Unified Implementation:** Uses a Riverpod `StateProvider` and a `Focus` listener in `main.dart` to ensure the scaling applies instantly to every screen and widget.
+- **Keyboard Shortcuts**: Integration for `Ctrl +` (Enlarge), `Ctrl -` (Shrink), and `Ctrl 0` (Reset).
+- **Dynamic Text Scaling**: Support for `TextScaler` adjustments from 0.5x to 3.0x.
+- **State Management**: Utilizes a Riverpod `StateProvider` and `Focus` listener in `main.dart` for immediate application across all screens.
 
 ## 3. Operational Documentation
 
-I created the **[Conscia Operations Guide (docs/conscia_ops_guide.md)](../conscia_ops_guide.md)** which serves as the "SOP" for node operators, covering:
-- The difference between `cargo run` (Dev) and standalone binary execution.
-- How to "zap" new builds to remote laptops using `rsync`.
-- Setting up **SSH Port Forwarding** for remote dashboard access.
-- Establishing **Federation Handshakes** between distinct nodes.
+Created the **[Conscia Operations Guide (docs/conscia_ops_guide.md)](../conscia_ops_guide.md)** covering:
+- Differences between development and production execution.
+- Binary deployment to remote nodes via `rsync`.
+- SSH Port Forwarding for remote dashboard access.
+- Establishing federation connections between nodes.
 
 ## Verification
-- [x] SSE streams correctly filter by level (INFO/DEBUG/TRACE).
-- [x] Pause modal appears at 100 records and auto-dismisses after 10s.
-- [x] Node ID copy button correctly captures the full cryptographic string.
-- [x] Flutter UI scaling preserves layout integrity at 0.5x and 3.0x.
-- [x] `conscia` binary build is fully self-contained.
+- Verified SSE stream filtering by log level.
+- Verified pause threshold and auto-dismissal.
+- Verified Node ID clipboard functionality.
+- Verified Flutter UI scaling integrity across the supported range.
+- Verified self-contained `conscia` binary build.
 
 ![Conscia Dashboard with Live Telemetry](../conscia_health_check_1776554576557.webp)

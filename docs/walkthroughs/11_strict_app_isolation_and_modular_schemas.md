@@ -1,27 +1,24 @@
 # Walkthrough 11: Strict App Isolation & Modular Schemas
 
-*This document serves as the historical record of our transition from a "Universal FFI" model to a strictly isolated schema Exosystem, guaranteeing zero app bloat.*
+This document records the transition from a "Universal FFI" model to an isolated schema ecosystem to reduce application overhead.
 
-## ⚖️ The Universal FFI vs. Strict Isolation
+## Universal FFI vs. Strict Isolation
 
-Following the introduction of RepubLet (Walkthrough 10), we initially configured both `exotalk_flutter` and `republet_lite` to share a single Flutter FFI translation crate (`rust_lib_exotalk_flutter`). 
+Following the introduction of RepubLet (Walkthrough 10), `exotalk_flutter` and `republet_lite` initially shared a single Flutter FFI translation crate (`rust_lib_exotalk_flutter`). 
 
-While this "Universal FFI" meant less boilerplate, it introduced a catastrophic conceptual flaw: **App Bloat**.
-Because the schemas were mixed, compiling ExoTalk meant shipping Dart bindings for `ScientificReports` (which a chat app will never use), and compiling RepubLet Lite meant shipping bindings for generic `ChatMessages`. 
+This "Universal FFI" approach introduced an application overhead issue. Because the schemas were mixed, ExoTalk included Dart bindings for `ScientificReports`, and RepubLet Lite included bindings for `ChatMessages`. 
 
-As RepubLet matures into complex scientific calculation paradigms, this shared overhead would become untenable.
+## Schema Crates
 
-## 🧱 The Solution: Schema Crates
+To decouple `exotalk_core` from data definitions and keep applications lean, the data definition layer was moved into **Modular Schemas**.
 
-To keep the `exotalk_core` engine pure (unaware of what data it syncs) and to keep the applications lean (only shipping data models they actively use), we decoupled the data definition layer entirely into **Modular Schemas**.
+Two Rust libraries were added to the Workspace:
+1.  **`exotalk_schema`**: Contains models like `DirectMessage`, `Profile`, and `Receipt`.
+2.  **`republet_schema`**: Contains models like `ScientificReport`, `Dataset`, and `NegativeResult`.
 
-We added two pure Rust libraries to the Workspace:
-1.  **`exotalk_schema`**: Exclusively contains models like `DirectMessage`, `Profile`, and `Receipt`.
-2.  **`republet_schema`**: Exclusively contains models like `ScientificReport`, `Dataset`, and `NegativeResult`.
+## Independent Bridges
 
-## 🌉 Independent Bridges
-
-With the schemas isolated, we then split the monolithic FFI bridge. Instead of one bridge serving all mobile apps, we created bespoke translators:
+The monolithic FFI bridge was split into bespoke translators:
 
 1.  **`exotalk_ffi`**
     *   Imports: `exotalk_core` + `exotalk_schema`.
@@ -30,17 +27,17 @@ With the schemas isolated, we then split the monolithic FFI bridge. Instead of o
     *   Imports: `exotalk_core` + `republet_schema`.
     *   Serves: The `republet_lite` application.
 
-## 🪚 Toolchain Surgical Restructuring
+## Toolchain Restructuring
 
-We performed a deep surgical refactor of the `rust_builder` toolchain for both mobile apps. 
+A refactor of the `rust_builder` toolchain was performed for both mobile applications. 
 
-Inside `exotalk_flutter` and `republet_lite`, we updated their specific:
+`exotalk_flutter` and `republet_lite` configurations were updated:
 *   `flutter_rust_bridge.yaml`
 *   `linux/CMakeLists.txt` & `windows/CMakeLists.txt`
-*   `android/build.gradle` (updating explicitly the `libname` passed to cargokit)
+*   `android/build.gradle` (updated `libname` passed to cargokit)
 *   `ios/*.podspec` & `macos/*.podspec`
 
-Each app now directly and exclusively resolves its own specific FFI crate within the `exotalk_engine` workspace, ensuring a hermetically sealed build pipeline.
+Each application now resolves its own specific FFI crate within the `exotalk_engine` workspace, ensuring an isolated build pipeline.
 
 ### Conclusion 
-The Sovereign Engine is now structurally perfect. ExoTalk and RepubLet compile side-by-side using the same core P2P networking mesh, yet remain strictly ignorant of each other's domain logic.
+The engine architecture is now modular. ExoTalk and RepubLet use the same core P2P networking mesh while maintaining separate domain logic.

@@ -1,12 +1,12 @@
-# 🌍 ExoTalk Web Frontend
+# ExoTalk Web Frontend
 
-The public face of the Sovereign Exosystem. A lightweight, high-performance landing page and web application host designed to provide a friction-less entry point into the sovereign mesh.
+The web entry point for the Exosystem. A lightweight landing page and web application host designed to provide access to the mesh.
 
 ## Features
 
-- **Sovereign Loading Orchestration**: A custom UI that masks the Wasm engine initialization with thematic telemetry feedback.
+- **Loading Orchestration**: A custom UI that displays engine initialization progress.
 - **WebRTC Handshake**: Integrated with the [Signaling Relay](../infra/signaling_server.py) to establish P2P connections.
-- **Zero-Harvest Landing**: Informational content explaining the philosophy of digital sovereignty.
+- **Zero-Harvest Landing**: Informational content explaining the philosophy of digital autonomy.
 
 ## Deployment
 

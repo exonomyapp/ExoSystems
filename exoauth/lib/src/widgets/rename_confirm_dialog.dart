@@ -1,10 +1,10 @@
 // =============================================================================
-// rename_confirm_dialog.dart — Identity Rename Impact Disclosure
+// rename_confirm_dialog.dart — Rename Identity
 // =============================================================================
 //
-// Renaming a self-sovereign identity is NOT a trivial action. Unlike
-// centralized systems where a username change is atomic, a did:peer rename
-// triggers a cascade of cryptographic side-effects:
+// Renaming an identity is not a trivial action. Unlike
+// systems where a username change is atomic, a did:peer rename
+// triggers side-effects:
 //
 //   1. **History Archival** — The previous name becomes a NameRecord with
 //      its own proof string and timestamp, preserved for auditability.

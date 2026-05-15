@@ -1,6 +1,6 @@
 # Distribution & Acquisition Strategy
 
-This document defines the multi-platform distribution and acquisition strategy for the Sovereign Exosystem. It outlines how we deliver binaries to users and organizations while maintaining the "Solid Identity" standard and ensuring architectural sovereignty.
+This document defines the multi-platform distribution and acquisition strategy for the Exosystem. It outlines how we deliver binaries to users and organizations while maintaining the "Solid Identity" standard and ensuring architectural autonomy.
 
 ## 1. Open Source Identity & Trust
 
@@ -53,9 +53,9 @@ We distribute CLI tools (Conscia CLI, ExoTalk CLI) via standard developer regist
 
 ---
 
-## 5. Sovereign Update Infrastructure
+## 5. Independent Update Infrastructure
 
-To maintain sovereignty, the Exosystem does not rely solely on centralized stores:
+To maintain autonomy, the Exosystem does not rely solely on centralized stores:
 - **Manifest Polling**: Non-store installs check a public JSON manifest on **`exotalk.tech`** for updates.
 - **P2P Update Sharing**: (Experimental) Allowing nodes to share update binaries directly over the mesh to bypass censorship or connectivity outages.
 

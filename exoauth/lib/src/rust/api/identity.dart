@@ -25,9 +25,9 @@ Future<bool> switchActiveProfile({required String did}) =>
     RustLib.instance.api.crateApiIdentitySwitchActiveProfile(did: did);
 
 /// Generates a genuine ed25519 keypair and encodes it into a did:peer identifier.
-/// This is the "Big Bang" of a sovereign session. By generating keys
+/// This is the initialization of a session. By generating keys
 /// locally on the device's CSPRNG (OsRng), we ensure that no central
-/// authority ever sees the private secret, fulfilling the "Own Your Data" mandate.
+/// authority ever sees the private secret, fulfilling the data ownership mandate.
 Future<IdentityVault> generateNewIdentity() =>
     RustLib.instance.api.crateApiIdentityGenerateNewIdentity();
 
@@ -205,7 +205,7 @@ class DeviceManifest {
 }
 
 /// Represents a loaded Node Identity (Keypair).
-/// This structure is the "Legislative Seal" of the user's presence in the mesh.
+/// This structure represents the user's presence in the mesh.
 /// It contains the local root secret (ed25519) from which all sub-capabilities
 /// and message signatures are derived.
 class IdentityVault {

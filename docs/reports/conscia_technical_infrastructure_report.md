@@ -35,10 +35,13 @@ To run the entire test including the proposed database, vector, and observabilit
 ### 3.1 Configuration
 - **Isolation**: Separate containers for:
     - `conscia-daemon` (The core sync node)
-    - `pgedge-mesh` (3-node multi-master cluster)
+    - `exonode` (pgEdge: External gateway for federation sync)
+    - `endonode` (pgEdge: Internal community core for indices and reflections)
+    - `nextnode` (pgEdge: High-ready standby for zero-downtime failover)
     - `scylladb-cluster` (Velocity layer)
     - `qdrant-store` (Vector layer)
     - `nats-bus` (Event fan-out)
     - `observability-stack` (Phoenix, Prometheus, Grafana)
 - **Rationale**: This prevents resource contention between the specialized layers (ACID SQL, high-velocity NoSQL, and similarity search) while mirroring a production-grade distributed environment.
+- **pgEdge Deployment Model**: The three pgEdge nodes are deployed as independent Kubernetes Deployments rather than a single StatefulSet. A StatefulSet treats all replicas as identical clones and cannot assign distinct operational roles or per-node configurations. Since each pgEdge node serves a different purpose (`exonode` as gateway, `endonode` as community core, `nextnode` as failover standby), separate Deployments are required.
 - **Orchestration**: Managed via KIND (Kubernetes in Docker) to provide a consistent, failure-isolated testing ground for the entire infrastructure stack.

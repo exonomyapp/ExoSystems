@@ -1,6 +1,6 @@
 # 33. BAML Type Safety Protocol
 
-This specification outlines the integration of **BoundaryML (BAML)** as the foundational reliability layer for all LLM interactions within the Sovereign Exosystem SDLC.
+This specification outlines the integration of **BoundaryML (BAML)** as the foundational reliability layer for all LLM interactions within the Exosystem SDLC.
 
 ## 1. The Reliability Mandate
 

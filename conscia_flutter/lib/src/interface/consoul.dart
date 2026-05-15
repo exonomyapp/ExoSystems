@@ -5,6 +5,19 @@ import 'providers/blueprint_provider.dart';
 import 'federation/federation_view.dart';
 import 'services/services_screen.dart';
 import 'services/geographic_context_screen.dart';
+
+// 🧠 EDUCATIONAL CONTEXT: The ConSoul Interface
+// ConSoul is the primary administrative dashboard for the Conscia node. 
+// It utilizes a "Progressive Disclosure" pattern where UI components are 
+// conditionally rendered based on the user's verified cryptographic 
+// capabilities (Meadowcap tokens).
+//
+// 💡 MENTOR TIP: Triad Architecture
+// This file acts as the 'Client' in the Triad Architecture. It does not 
+// manage the P2P networking directly; instead, it consumes stubs and 
+// providers from 'providers/blueprint_provider.dart' which in turn 
+// communicate with the background Conscia daemon (Rust).
+
 class ConSoul extends ConsumerStatefulWidget {
   const ConSoul({super.key});
 
@@ -40,11 +53,11 @@ class _ConSoulState extends ConsumerState<ConSoul> {
             selectedIcon: Icon(Icons.manage_accounts),
             label: Text('Authority Matrix'),
           );
-        case ConsoulCapability.sovereignGovernance:
+        case ConsoulCapability.governance:
           return const NavigationRailDestination(
             icon: Icon(Icons.admin_panel_settings_outlined),
             selectedIcon: Icon(Icons.admin_panel_settings),
-            label: Text('Sovereign Governance'),
+            label: Text('Governance'),
           );
         case ConsoulCapability.federationAdministration:
           return const NavigationRailDestination(
@@ -79,7 +92,7 @@ class _ConSoulState extends ConsumerState<ConSoul> {
         case ConsoulCapability.authorityMatrix:
           body = _buildAuthorityView();
           break;
-        case ConsoulCapability.sovereignGovernance:
+        case ConsoulCapability.governance:
           body = _buildGovernanceView();
           break;
         case ConsoulCapability.federationAdministration:
@@ -135,7 +148,10 @@ class _ConSoulState extends ConsumerState<ConSoul> {
         avatar: const Icon(Icons.verified_user, size: 16),
         label: Text(shortDid),
         onPressed: () {
-          // Open Identity Vault
+          // 🧠 EDUCATIONAL CONTEXT: Identity Vault
+          // The Identity Vault (provided by exoauth) is where the user 
+          // manages their did:peer keys and linked OAuth accounts. 
+          // ConSoul provides a bridge to this vault for quick identity checks.
         },
       );
     }
@@ -202,7 +218,7 @@ class _ConSoulState extends ConsumerState<ConSoul> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Sovereign Governance', style: Theme.of(context).textTheme.headlineMedium),
+          Text('Governance', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 16),
           const Text('Meadowcap capability management and mesh membership governance.'),
         ],

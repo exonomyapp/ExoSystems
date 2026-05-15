@@ -1,7 +1,7 @@
 # Specification 22: The Application Triad Architecture
 
 ## 1. Overview
-The Sovereign Exosystem comprises several independent applications—ExoTalk (messaging), Exonomy (social voucher exchange), Exocracy (project governance), RepubLet (scientific publishing), and Conscia (Sovereign Beacon)—each addressing distinct domains of increasing content complexity.
+The Exosystem comprises several independent applications—ExoTalk (messaging), Exonomy (social voucher exchange), Exocracy (project governance), RepubLet (scientific publishing), and Conscia (Beacon)—each addressing distinct content domains of varying degrees of complexity.
 
 To ensure proper access and knowledge exchange while respecting these varying levels of complexity, all advanced ecosystem applications operate on a **3-Tier "Triad" Architecture**:
 
@@ -12,7 +12,7 @@ To ensure proper access and knowledge exchange while respecting these varying le
 ---
 
 ## 2. The Ethos of Modular Interoperability
-While all applications in the Sovereign Exosystem share the foundational `exotalk_engine` (providing built-in ExoTalk chat for in-app and cross-app communication), they are engineered as **entirely distinct, independent applications**.
+While all applications in the Exosystem share the foundational `exotalk_engine` (providing built-in ExoTalk chat for in-app and cross-app communication), they are engineered as **entirely distinct, independent applications**.
 
 This modularity is the core ethos of the Exosystem:
 - They operate independently by default. An Exonomist is not automatically an Exocrat.
@@ -27,7 +27,7 @@ This modularity is the core ethos of the Exosystem:
 - **Underlying Technology**: Flutter (Dart) + Rust FFI (`exotalk_engine`).
 - **Target Audience**: Mobile users, field operators, and on-the-go contributors.
 - **Scope**: Provides a curated subset of essential features. For Exonomy, this means fast voucher generation and task claiming. For Exocracy, this means quick voting and status updates without the overhead of rendering massive Gantt charts.
-- **Custody Model**: Pure peer-to-peer (P2P). Sovereign custody of all keys and content.
+- **Custody Model**: Pure peer-to-peer (P2P). Independent custody of all keys and content.
 
 ### 3.2 The Desktop Client (`_flutter`)
 - **Underlying Technology**: Flutter (Dart) + Rust FFI (`exotalk_engine`).
@@ -37,8 +37,8 @@ This modularity is the core ethos of the Exosystem:
 
 ### 3.3 The Indexing Node (`_web`)
 - **Underlying Technology**: High-throughput Rust API (Axum/Actix) + Flutter Web Administration Dashboard.
-- **Target Audience**: Consciosophers, node operators, public searchers, and enterprise hosts.
-- **Scope**: Designed to facilitate high availability of fundamentally decentralized content. These nodes provide public or private indexing services so that projects and publications can be freely searched globally (facilitating crowdsourcing and academic discovery). These nodes also offer federation as a higher order of autonomous P2P design modeling.
+- **Target Audience**: Node operators, public searchers, and enterprise hosts.
+- **Scope**: Designed to facilitate high availability of fundamentally decentralized content. These nodes provide public or private indexing services so that projects and publications can be freely searched globally (facilitating crowdsourcing and academic discovery). These nodes also offer federation as a higher order of independent P2P design modeling.
 - **Custody Model**: **Blind Hosting**. These nodes host encrypted payloads but are entirely blind to the content itself unless explicit capabilities are presented. They only parse and index the **public metadata** that authors explicitly "decorate" their projects/publications with prior to injection.
 
 ---

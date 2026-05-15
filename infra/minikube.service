@@ -1,4 +1,4 @@
-# 🧠 EDUCATIONAL CONTEXT: Observability is a first-class citizen in the sovereign stack.
+# 🧠 EDUCATIONAL CONTEXT: Observability is a first-class citizen in the independent stack.
 # By starting Minikube on boot, we ensure that the Prometheus/Grafana stack
 # is always available to monitor the health of the P2P network.
 [Unit]

@@ -1,7 +1,7 @@
 # Specification 40: P2P SDUI & Meta-Management
 
 ## 1. Overview
-The "Process IS The Product" mandate requires an architecture that is as dynamic as the communities it serves. Traditional app updates are too slow and centralized for a sovereign mesh. **Specification 40** establishes the **Meta-Management** layer—a paradigm where global application behavior, UI layouts, and functional constraints are managed via **Server-Driven UI (SDUI)** blueprints distributed over P2P gossip.
+The "Process IS The Product" mandate requires an architecture that is as dynamic as the communities it serves. Traditional app updates are too slow and centralized for an independent mesh. **Specification 40** establishes the **Meta-Management** layer—a paradigm where global application behavior, UI layouts, and functional constraints are managed via **Server-Driven UI (SDUI)** blueprints distributed over P2P gossip.
 
 This allows the operator to instantly update the UX of the entire user population without a physical application upgrade.
 
@@ -64,7 +64,7 @@ To bridge the cryptographic reality of Meadowcap with the user-facing ConSoul da
 
 - **`operationalPulse`**: Read-only diagnostic telemetry. Safe to expose as the fallback state before full cryptographic authority is established.
 - **`authorityMatrix`**: Grants access to cryptographic node orchestration and service legislation controls.
-- **`sovereignGovernance`**: Grants access to Meadowcap capability management and mesh membership governance.
+- **`independentGovernance`**: Grants access to Meadowcap capability management and mesh membership governance.
 - **`federationAdministration`**: Grants access to the Meta-Management dashboard (P2P Mesh Topology, HITL capability proposals, and Proximity Discovery).
 - **`serviceAdministration`**: Grants access to the administration of active Conscia service decorations (Relay, Blind Indexing, Storage).
 - **`geographicContext`**: Grants access to the management of content locality and replication affinity policies.
@@ -73,8 +73,7 @@ To bridge the cryptographic reality of Meadowcap with the user-facing ConSoul da
 
 ## 7. Architectural Efficacy
 
-### 7.1 Update without Upgrade
-By moving domain logic (like categories and payment methods) into SDUI blueprints, we eliminate the need to push new binaries through app stores for routine operational changes. This preserves the **Offline-First** and **Sovereign** nature of the stack, ensuring that once a blueprint is synced, it is available regardless of network state.
+By moving domain logic (like categories and payment methods) into SDUI blueprints, we eliminate the need to push new binaries through app stores for routine operational changes. This preserves the **Offline-First** and **independent** nature of the stack, ensuring that once a blueprint is synced, it is available regardless of network state.
 
 ### 7.2 The Blueprint Data Model
 The Exosystem data model is expanded to include dedicated **Blueprint Content Types**. These are specialized Willow entries that host signed UI blueprints and functional metadata. The Conscia node treats these as high-priority sync items during mesh reconciliation.

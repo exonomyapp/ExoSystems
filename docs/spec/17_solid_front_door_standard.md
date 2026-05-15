@@ -8,7 +8,7 @@ To prevent the "rubber-band" distortion common in early responsive web design, t
 
 ### 1.1 Minimum Width (The Floor)
 - **Constraint**: `minWidth: 440px` (scaled).
-- **Rationale**: Any compression beyond this point compromises the legibility of Sovereign Identity cards and the primary "Get Started" triggers.
+- **Rationale**: Any compression beyond this point compromises the legibility of Authorial Identity cards and the primary "Get Started" triggers.
 - **Behavior**: If the viewport narrows beyond this threshold, the application MUST enable a horizontal scrollbar rather than compressing the internal UI elements. This preserves the "Persona" layout integrity.
 
 ### 1.2 Button Stability (The Anchor)
@@ -35,7 +35,7 @@ The "Exoauth" pattern enables unlimited authentication providers without vertica
 ## 4. Implementation (Exoauth)
 The Front Door is implemented as a shared Flutter package (`exoauth`).
 - **Path**: `code/exotalk/exoauth`
-- **Consumption**: All ecosystem apps (`exotalk_flutter`, `republet_lite`, `conscia_ui`) MUST consume this package via local path dependency to ensure 100% parity across the mesh.
+- **Consumption**: All ecosystem apps (`exotalk_flutter`, `republet_lite`, `conscia_flutter`) MUST consume this package via local path dependency to ensure 100% parity across the mesh.
 
 ## 5. Typography and Aesthetics
 - **Brightness Tuning**: To reduce eye strain and provide a more balanced "Dark Mode" aesthetic, the primary white text elements (headers, body text, primary button text) are toned down to an 80% intensity (e.g., using an `0xCC` alpha channel or equivalent toned-down hex) rather than pure white. This prevents the text from being overwhelmingly bright against the deep dark surfaces.
@@ -49,8 +49,8 @@ The very first screen utilizes a high-fidelity animated splash screen reflecting
 
 ### 6.2 Identity Synthesis (The "Familiar Front Door")
 - **OAuth Bridge**: To bridge the gap for users familiar with Google/Apple sign-in, the system facilitates identity creation *through* these providers.
-- **Synthesis Logic**: During the familiar OAuth flow, a `did:peer` is generated locally and cryptographically associated with the provider's token. The user feels the comfort of a standard login, while the mesh receives a sovereign P2P identifier.
-- **Sovereign Path**: A "Raw P2P" path remains available for power users to generate an unanchored `did:peer` in two taps.
+- **Synthesis Logic**: During the familiar OAuth flow, a `did:peer` is generated locally and cryptographically associated with the provider's token. The user feels the comfort of a standard login, while the mesh receives an independent P2P identifier.
+- **Independent Path**: A "Raw P2P" path remains available for power users to generate an unanchored `did:peer` in two taps.
 
 ### 6.3 Conscia Pairing & Mesh Discovery
 - **Pairing**: New installs are encouraged to link a **Conscia Lifeline** node for persistent data storage.

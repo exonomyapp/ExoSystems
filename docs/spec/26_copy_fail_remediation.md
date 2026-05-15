@@ -1,7 +1,7 @@
 # Specification 26: Copy Fail Remediation (CVE-2026-31431)
 
 ## 1. Overview
-This document details the identification and remediation of **CVE-2026-31431**, colloquially known as **"Copy Fail"**, across the Sovereign Exosystem infrastructure (Exocracy and Exonomy).
+This document details the identification and remediation of **CVE-2026-31431**, colloquially known as **"Copy Fail"**, across the Exosystem infrastructure (Exocracy and Exonomy).
 
 "Copy Fail" is a high-severity local privilege escalation (LPE) vulnerability in the Linux kernel crypto subsystem (`algif_aead`). It allows a 4-byte write into the page cache, enabling root access by modifying setuid binaries in memory.
 
@@ -16,7 +16,7 @@ This document details the identification and remediation of **CVE-2026-31431**, 
 The vulnerability affects kernels built prior to late April 2026. The `algif_aead` module was found to be present on both systems.
 
 ## 3. Remediation Strategy
-The remediation follows the standard Sovereign maintenance protocol:
+The remediation follows the standard maintenance protocol:
 1.  **Immediate Block**: Blacklist the `algif_aead` module to prevent exploitation without a reboot.
 2.  **Kernel Upgrade**: Install the patched `6.17.0-23` series kernel from the Ubuntu security repositories.
 3.  **Active Cleanup**: Drop caches to clear any potential page cache corruption.

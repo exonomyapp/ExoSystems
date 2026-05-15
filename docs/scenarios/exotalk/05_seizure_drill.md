@@ -5,7 +5,7 @@ To test the mesh, **Malik** simulates a "seizure" of one of his relay nodes by a
 
 ## Cognitive Shift
 **Centralized Expectation**: "If the server is seized, the data is lost or compromised."
-**Sovereign Reality**: "Seizure is a signal. The mesh uses the loss of a node to harden itself and migrate state to safety."
+**Decentralized Reality**: "Seizure is a signal. The mesh uses the loss of a node to harden itself and migrate state to safety."
 
 ## World Event Reference
 The use of **Palantir's Foundry** to map and raid decentralized humanitarian networks in conflict zones.

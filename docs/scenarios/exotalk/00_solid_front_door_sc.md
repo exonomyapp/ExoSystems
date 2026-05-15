@@ -9,13 +9,13 @@
 
 **Narrator VO**: "In the war-torn regions of the Levant, communication is a battlefield. Isabella, a war crimes expert in East Jerusalem, finds her digital world closing in. **Palantir** algorithms have flagged her. Her email is a liability."
 
-**Isabella VO**: "My credentials died an hour ago. The Insider sent a dead drop—a link to a 'Sovereign Front Door'. No login. No server. Just an opening into the mesh."
+**Isabella VO**: "My credentials died an hour ago. The Insider sent a dead drop—a link to a 'Solid Front Door'. No login. No server. Just an opening into the mesh."
 
 ### Scene 2: The Choice
 **Visual**: The Onboarding Menu (Link Device / Create Identity).
-**Action**: Hovering over "ADD SOVEREIGN IDENTITY".
+**Action**: Hovering over "CREATE IDENTITY".
 
-**Narrator VO**: "Sovereignty isn't given; it's claimed. Isabella chooses to build her presence from the ground up, outside the reach of the technocratic empire."
+**Narrator VO**: "Autonomy isn't given; it's claimed. Isabella chooses to build her presence from the ground up, outside the reach of the technocratic empire."
 
 ---
 
@@ -27,5 +27,5 @@
 ---
 
 ## Technical Footer
-- **Scenario Reference**: [00_solid_front_door.md](file:///home/exocrat/code/exotalk/docs/scenarios/00_solid_front_door.md)
+- **Scenario Reference**: [00_solid_front_door.md](00_solid_front_door.md)
 - **Engine State**: No active identities, networking initialized (Gossip overlay active).

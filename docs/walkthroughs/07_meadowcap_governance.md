@@ -1,38 +1,33 @@
 # Walkthrough 07: Meadowcap Capability Governance Implementation
 
-I have successfully finished implementing the **Meadowcap capability system**, migrating the ExoTalk P2P mesh from a hardcoded governance placeholder to a robust, cryptographically enforced access control system.
+The Meadowcap capability system has been implemented, transitioning the ExoTalk P2P mesh to a cryptographically enforced access control system.
 
-## Changes Made
+## Changes Implemented
 
-> [!NOTE]
-> All group conversations are now protected by cryptographic capability tokens exchanged via Iroh gossip, guaranteeing mathematical attribution for all chat events without reliance on central servers.
-
-### 1. Protocol Architecture (Rust) 🦀
+### 1. Protocol Architecture (Rust)
 - **Capability Tokens**: Implemented `PermissionLevel` and `Capability` in `protocol_internal.rs`.
-- **Ed25519 Cryptography**: Created robust `delegate_capability` and payload verification logic so that every `did:peer` can verify token authenticity autonomously using standard `ed25519-dalek`.
-- **Delegation Chains & Refinements**: Verified the ability for tokens to form provable graphs of capability delegations (`Alice -> Bob (Admin) -> Charlie (Write)`) by executing mathematical checks entirely client-side.
+- **Ed25519 Cryptography**: Implemented `delegate_capability` and payload verification logic, enabling `did:peer` verification of token authenticity locally using `ed25519-dalek`.
+- **Delegation Chains**: Implemented provable graphs of capability delegations (e.g., `Alice -> Bob (Admin) -> Charlie (Write)`) with client-side verification.
 
-### 2. Mesh Networking 🌐
-- **Lifecycle Integration**: Replaced the previous `PeeringPolicy` routing logic with a robust `CAPABILITY_STORE`.
-- **Iroh 0.31 Gossip Wiring**: Addressed the recent Iroh Stream API updates by splitting the `GossipTopic` into separate `GossipSender/GossipReceiver` streams and storing the Sender safely in the Node's active topic map.
-- **Autonomic Routing**: Implemented auto-verification wherein unverified payloads are dropped instantly, completely preventing DDOS routing of unauthorized payloads in any namespace.
+### 2. Mesh Networking
+- **Lifecycle Integration**: Replaced `PeeringPolicy` routing logic with a `CAPABILITY_STORE`.
+- **Iroh 0.31 Gossip Integration**: Updated Iroh Stream API implementation by splitting `GossipTopic` into `GossipSender` and `GossipReceiver` streams, storing the sender in the node's topic map.
+- **Payload Verification**: Implemented verification where unverified payloads are dropped, preventing unauthorized routing.
 
-### 3. Flutter UI Binding 📱
-- **`GroupStateNotifier`**: Introduced a Riverpod provider to dynamically map capabilities sourced from the Rust engine.
-- **Group Management UI**: Entirely removed the mocked "Alice/Bob/Charlie" fake roster. The member UI is now fully bound to your active capabilities map.
-- **Delegation Binding**: Connected the "Add Peer" dropdown functionality directly to the underlying `delegate_capability` API, triggering cross-peer gossip handshakes.
+### 3. Flutter UI Binding
+- **`GroupStateNotifier`**: Implemented a Riverpod provider to map capabilities from the Rust engine.
+- **Group Management UI**: Bound the member UI to the active capabilities map.
+- **Delegation Binding**: Connected "Add Peer" functionality to the `delegate_capability` API for cross-peer gossip handshakes.
 
 ## Verification
-1. **Compilation**: The `rust_lib_exotalk_flutter` backend is completely stable and compiling perfectly against `cargo check`.
-2. **API Alignment**: The flutter FFI bindings match the exported Rust endpoints completely and correctly parse the `HashMap<String, String>` roster map structure.
+1. **Compilation**: The `rust_lib_exotalk_flutter` backend verified via `cargo check`.
+2. **API Alignment**: Verified that Flutter FFI bindings match Rust endpoints and correctly parse the `HashMap<String, String>` roster map structure.
 
-## UI Improvements Preview 🎨
-The "Group Settings" modal now actively spins off of your current cryptographic roster state:
-
-![Group Roster Component](/home/exocrat/.gemini/antigravity/brain/59b317ac-b545-484c-ad34-0f81b6da1994/media__1776384503701.png)
+## UI Improvements
+The "Group Settings" modal reflects the current cryptographic roster state.
 
 > [!TIP]
-> The admin can designate users with Read, Write, or Admin privileges. All delegations are broadcast gracefully into the `CAPABILITY_STORE` across the Iroh mesh.
+> Administrators can assign Read, Write, or Admin privileges. Delegations are broadcast to the `CAPABILITY_STORE` across the Iroh mesh.
 
 ---
-The implementation perfectly mirrors the specs and fully closes out Phase 4. We are now ready to resume working on the application features or network stability!
+**Status**: Meadowcap capability governance implementation complete.

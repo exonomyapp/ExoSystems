@@ -1,6 +1,6 @@
 # Conscia Desktop (Flutter Admin Client)
 
-This is the heavy UI desktop Flutter client for Conscia, designed for Consciosophers and node operators to manage their sovereign beacons.
+This is the heavy UI desktop Flutter client for Conscia, designed for Consciosophers and node operators to manage their beacons.
 
 ## Key Features
 - Real-time peer topology visualization

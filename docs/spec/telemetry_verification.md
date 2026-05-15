@@ -37,11 +37,11 @@ The stress test successfully demonstrates that the ExoTech Bridge Monitor provid
 We have integrated manual ingress controls into every node card and row. This allows operators to directly intervene and manage service states from the UI.
 
 - **System Services (Signaling & Zrok)**: Feature a binary (ON/OFF) 3D toggle leveraging `systemctl`.
-- **Sovereign Mesh Nodes (Conscia)**: Feature a newly implemented **Tristate Toggle** (ON/SLEEP/OFF):
+- **Mesh Nodes (Conscia)**: Feature a newly implemented **Tristate Toggle** (ON/SLEEP/OFF):
     - **ON (Green)**: Process is actively monitored. Launched via absolute binary path (`/home/exocrat/code/exotalk/exotalk_engine/target/release/conscia daemon`).
     - **SLEEP (Orange - Observer-Level Sleep)**: The Bridge mutes its connection and locally ignores the Conscia node. The node process remains completely alive and functional on the host machine for other clients.
     - **OFF (Red - Global Shutdown)**: Executes a hard `pkill` to completely destroy the process at the OS level.
 - **Visuals**: Animated 3D sliding toggles with localized depth styling and alternating color-coded text labels.
 - **Diagnostics**: All Conscia toggle interactions are logged to `~/bridge_monitor_clicks.log` for remote programmatic verification via the KDVV protocol.
 
-The infrastructure is confirmed to be **production-ready** and fully controllable for the upcoming Sovereign Handshake verification.
+The infrastructure is confirmed to be **production-ready** and fully controllable for the upcoming Direct Handshake verification.

@@ -1,6 +1,6 @@
 # Walkthrough 03: Decentralized Identity System
 
-I have successfully implemented a robust, self-sovereign identity system for ExoTalk. This system ensures that your `did:peer` remains the immutable root of trust, while allowing for flexible social verification, name changes, and cross-device synchronization.
+I have successfully implemented a robust, independent identity system for ExoTalk. This system ensures that your `did:peer` remains the immutable root of trust, while allowing for flexible social verification, name changes, and cross-device synchronization.
 
 ## Features Implemented
 

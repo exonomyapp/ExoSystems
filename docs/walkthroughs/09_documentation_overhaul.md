@@ -1,27 +1,27 @@
 # Walkthrough 09: Documentation Overhaul Walkthrough
 
-We have successfully overhauled the ExoTalk documentation suite to clearly delineate the philosophical vision from the rigorous technical blueprint, and audited the specs to ensure they match our current codebase.
+The ExoTalk documentation suite has been overhauled to delineate the vision from the technical blueprint and to ensure specifications align with the codebase.
 
 ## What I Accomplished
 
-### 1. The Vision (`docs/vision.md`) 👁️
-Extracted the philosophical "Vision Statement" out of the technical blueprint and significantly expanded it into its own dedicated document. 
-*   **Concrete Framing:** I infected the narrative with stark contrasts against legacy platforms:
-    *   **Identity Sovereignty vs. Platform Bans** (The unbannable `did:peer`).
-    *   **Data Locality vs. Cloud Silos** (Offline-first Willow vs loading spinners).
-    *   **Publisher-Led vs. Algorithmic Scoreboards** (Cryptographic receipts vs engagement metrics).
-    *   **Dumb Pipes vs. Data Brokers** (Iroh relays vs corporate packet-sniffing).
+### 1. The Vision (`docs/vision.md`)
+Extracted the "Vision Statement" from the technical blueprint and expanded it into a dedicated document. 
+*   **Technical Framing:** The narrative provides technical contrasts against legacy platforms:
+    *   **Independent Identity vs. Platform Bans** (Peer-to-peer DIDs).
+    *   **Data Locality vs. Cloud Infrastructure** (Offline-first synchronization via Willow).
+    *   **Publisher-Led vs. Algorithmic Metrics** (Cryptographic receipts).
+    *   **Direct Relays vs. Data Brokers** (Iroh relays vs. centralized packet inspection).
 
-### 2. The Blueprint (`docs/blueprint.md`) 🏗️
-Re-focused the `blueprint.md` entirely into a formal Executive Summary of Architectural Decisions. It now directly links to the new `vision.md` for context, and explicitly identifies:
-*   The **Unified Reactive Engine** (Rust/Iroh).
+### 2. The Blueprint (`docs/blueprint.md`)
+Re-focused `blueprint.md` as an Executive Summary of Architectural Decisions. It links to `vision.md` for context and identifies:
+*   The **Comprehensive Reactive Engine** (Rust/Iroh).
 *   The **Flutter View** operating via `flutter_rust_bridge`.
-*   **Granular Traffic Control** (replacing Flight mode).
+*   **Granular Traffic Control**.
 
-### 3. Specification Audit (`docs/spec/*`) 🔍
-Conducted a thorough audit to mirror the latest walkthrough features into the specs:
-*   **Legacy Pruning**: Deleted entirely all obsolete `plan/*` and `spec_original.md` docs to reduce historical clutter.
-*   **Granular State Updates**: Updated `01_system_architecture.md` and `07_ui_functionality.md` to explicitly detail the **Riverpod providers** that stabilize our Flutter cursor interactions during asynchronous FFI syncs.
-*   **Traffic Control alignment**: Officially renamed `14_flight_mode.md` to `14_traffic_control.md`.
+### 3. Specification Audit (`docs/spec/*`)
+Audited specifications to reflect current features:
+*   **Legacy Removal**: Removed obsolete documentation to reduce clutter.
+*   **State Updates**: Updated `01_system_architecture.md` and `07_ui_functionality.md` to detail the Riverpod providers used for Flutter state management during FFI synchronization.
+*   **Traffic Control alignment**: Renamed `14_flight_mode.md` to `14_traffic_control.md`.
 
-You now have a perfectly pristine, deeply categorized specification that accurately mirrors the bleeding edge of the ExoTalk codebase!
+The documentation is updated to match the current state of the codebase.

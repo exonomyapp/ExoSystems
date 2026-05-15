@@ -7,6 +7,12 @@ import 'package:http/http.dart' as http;
 // taken in the ConSoul UI is translated into an HTTP request to the 
 // Conscia daemon, ensuring the interface remains a stateless reflection
 // of the underlying node's cryptographic and operational reality.
+//
+// 💡 MENTOR TIP: FutureProvider vs. StreamProvider
+// We use 'FutureProvider' here because these specific API endpoints are 
+// polled on demand or refreshed via 'ref.invalidate'. For high-frequency 
+// telemetry (like live traffic pulses), we would shift to a 'StreamProvider' 
+// connected to an SSE (Server-Sent Events) endpoint on the Conscia daemon.
 
 final baseUrl = 'http://127.0.0.1:3000';
 

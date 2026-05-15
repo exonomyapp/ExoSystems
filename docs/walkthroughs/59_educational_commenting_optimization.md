@@ -1,32 +1,32 @@
 # Walkthrough 59: Educational Commenting Optimization
 
 ## Overview
-As per the "Process IS The Product" mandate, this session focused on a comprehensive educational commenting pass across the most recently modified core files of the Exosystem. The goal was to ensure that every major architectural shift (Legislator role, Observer model, Sovereign Scaling, etc.) is documented directly within the code using the `// 🧠 Educational Context:` standard.
+This session focused on adding technical documentation to core files within the ecosystem. The objective was to document architectural implementations (e.g., service control, state management, and scaling) directly within the code using established annotation standards.
 
 ## Changes
 
-### 1. Bridge Monitor (Legislator & Observer)
+### 1. Bridge Monitor (Service Control & Monitoring)
 Updated `infra/bridge_monitor/lib/main.dart` and `telemetry_util.dart` to document:
-- **The Legislator Role**: The transition to native `systemctl` control on the Exonomy node.
-- **The Observer Model**: Why the "Sleep" state keeps daemons active while updating the UI.
-- **Surgical Telemetry**: The use of `pgrep -af` for high-efficiency, sub-10% CPU monitoring.
+- **Service Control**: The implementation of native `systemctl` control on the Exonomy node.
+- **State Monitoring**: The rationale for maintaining active daemons during "Sleep" states for UI updates.
+- **Telemetry Implementation**: The use of `pgrep -af` for efficient process monitoring.
 
-### 2. ExoTalk UI (Scaling & Gating)
+### 2. ExoTalk UI (Initialization & State Gating)
 Updated `exotalk_flutter/lib/main.dart` and `home_screen.dart` to document:
-- **Sovereign Boot Sequence**: The necessity of initializing Rust/Willow engines before the first Flutter frame.
-- **Mesh Gating**: How the `nodeSleepProvider` deterministically flattens the traffic meters to ensure state consistency.
-- **Deterministic Routing**: The `AppRouter`'s role as a cryptographic gatekeeper.
+- **Boot Sequence**: The initialization of Rust/Willow engines prior to Flutter frame rendering.
+- **State Gating**: Utilizing the `nodeSleepProvider` to maintain state consistency across traffic meters.
+- **Routing**: The role of `AppRouter` in managing node authorization.
 
-### 3. Governance & Identity (Terminal & Delegation)
+### 3. Governance & Identity
 Updated `node_management_view.dart` and `exo_auth_view.dart` to document:
-- **Terminal Abundance**: Designing high-density diagnostic views for the Admin persona.
-- **Meadowcap Delegation**: The "Identity is Permission" model for node authorization.
-- **Solid Front Door**: Implementing non-elastic frames (Spec 17) to ensure onboarding stability.
+- **Diagnostic Views**: Design of diagnostic interfaces for administrative roles.
+- **Authorization Delegation**: The permission model for node authorization based on identity.
+- **Identity Management**: Implementation of standard onboarding frames as defined in Spec 17.
 
 ## Verification
-- All modified files were reviewed to ensure they contain proper `// 🧠 Educational Context:` blocks.
-- The edits were performed iteratively from the youngest file backwards.
-- Code logic remained untouched; only documentation layers were enhanced.
+- Verified the presence of technical documentation blocks in all modified files.
+- Verified that code logic was preserved during the documentation update.
 
-## ⏭️ Next Steps
-With the infrastructure (Minikube/Exonomy) and documentation (Educational Pass) finalized, we are now ready to begin **Archon** integration and BAML prompt engineering.
+---
+
+**Verification**: Verified via code audit.

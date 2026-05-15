@@ -1,4 +1,4 @@
-# Spec 28: Sovereign Management Evolution
+# Spec 28: Management Evolution
 
 Roadmap from tactical diagnostic tools to the industrial-scale Exosystems Management Console (ExoMC).
 
@@ -8,12 +8,12 @@ Roadmap from tactical diagnostic tools to the industrial-scale Exosystems Manage
 
 - **Purpose**: A standalone diagnostic tool for the "Testing Season."
 - **Scope**: Monitors zrok shares, signaling relays, and local Conscia beacons.
-- **Adaptive Nature**: Learns to adapt to temporary technologies (GitHub Pages, dynamic URLs) to achieve the **Sovereign Handshake**.
+- **Adaptive Nature**: Learns to adapt to temporary technologies (GitHub Pages, dynamic URLs) to achieve the **Direct Handshake**.
 - **Mechanism**: Currently uses OS-scraping (`pgrep`, `systemctl`, `journalctl`) for rapid deployment.
 
 ## 2. The ExoMC: Exosystems Management Console (Strategic)
 
-**Prime Directive**: Orchestrate intelligent, rule-based relationships between sovereign nodes and industrial storage tiers.
+**Prime Directive**: Orchestrate intelligent, rule-based relationships between independent nodes and industrial storage tiers.
 
 - **Platform**: Built on **Node-Red** for maximal customization and open standards.
 - **Scope**: Industrial-scale management of the Exosystem swarm.

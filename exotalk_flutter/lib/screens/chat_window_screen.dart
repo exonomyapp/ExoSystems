@@ -1,5 +1,5 @@
 // =============================================================================
-// chat_window_screen.dart — Active Conversation View (Sovereign Generation)
+// chat_window_screen.dart — Active Conversation View
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,7 +53,7 @@ class _ChatWindowScreenState extends ConsumerState<ChatWindowScreen> {
     // 🧠 Educational Context: Reactive Message Scrolling
     // We listen to the messages provider and trigger a scroll-to-bottom 
     // whenever the message count changes. This ensures the user is always 
-    // viewing the most recent sovereign handshake/message.
+    // viewing the most recent autonomous handshake/message.
     ref.listen<int>(
       messagesProvider(activeConvoId).select((msgs) => msgs.length),
       (prev, next) {
@@ -102,53 +102,53 @@ class _ChatHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: ConsciaTheme.headerPaddingHorizontal(scale), vertical: 12.0 * scale),
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.headerPaddingHorizontal(scale), vertical: 12.0 * scale),
       decoration: BoxDecoration(
-        color: ConsciaTheme.surface(context),
-        border: Border(bottom: BorderSide(color: ConsciaTheme.border(context))),
+        color: AppTheme.surface(context),
+        border: Border(bottom: BorderSide(color: AppTheme.border(context))),
       ),
       child: Row(
         children: [
           if (!isSidebarVisible)
             IconButton(
-              icon: Icon(LucideIcons.panelLeft, size: 20.0 * scale, color: ConsciaTheme.muted(context)),
+              icon: Icon(LucideIcons.panelLeft, size: 20.0 * scale, color: AppTheme.muted(context)),
               onPressed: onToggleSidebar,
             ),
           CircleAvatar(
             radius: 18.0 * scale,
-            backgroundColor: ConsciaTheme.border(context),
-            child: Text(convo.title[0].toUpperCase(), style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold, color: ConsciaTheme.text(context))),
+            backgroundColor: AppTheme.border(context),
+            child: Text(convo.title[0].toUpperCase(), style: AppTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold, color: AppTheme.text(context))),
           ),
           SizedBox(width: 12.0 * scale),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(convo.title, style: ConsciaTheme.subHeadingStyle(context, scale)),
+                Text(convo.title, style: AppTheme.subHeadingStyle(context, scale)),
                 Row(
                   children: [
-                    Container(width: 6.0 * scale, height: 6.0 * scale, decoration: BoxDecoration(color: ConsciaTheme.accent(context), shape: BoxShape.circle)),
+                    Container(width: 6.0 * scale, height: 6.0 * scale, decoration: BoxDecoration(color: AppTheme.accent(context), shape: BoxShape.circle)),
                     SizedBox(width: 6.0 * scale),
                     // 🧠 Educational Context: Protocol Visibility
                     // We explicitly surface the protocol state in the header 
                     // to reassure the user that their conversation is being 
                     // managed by the Willow P2P layer, not a centralized cloud.
-                    Text("Willow Protocol Active", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.accent(context), fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                    Text("Willow Protocol Active", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.accent(context), fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                   ],
                 ),
               ],
             ),
           ),
           IconButton(
-            icon: Icon(LucideIcons.video, size: 20.0 * scale, color: ConsciaTheme.muted(context)),
+            icon: Icon(LucideIcons.video, size: 20.0 * scale, color: AppTheme.muted(context)),
             onPressed: () => ref.read(toastProvider.notifier).show("Video call system initializing..."),
           ),
           IconButton(
-            icon: Icon(LucideIcons.info, size: 20.0 * scale, color: ConsciaTheme.muted(context)),
+            icon: Icon(LucideIcons.info, size: 20.0 * scale, color: AppTheme.muted(context)),
             onPressed: () => showDialog(context: context, builder: (_) => GroupManagerModal(conversation: convo)),
           ),
           IconButton(
-            icon: Icon(LucideIcons.moreVertical, size: 20.0 * scale, color: ConsciaTheme.muted(context)),
+            icon: Icon(LucideIcons.moreVertical, size: 20.0 * scale, color: AppTheme.muted(context)),
             onPressed: () => ref.read(toastProvider.notifier).show("Hot reload works! 🎉"),
           ),
         ],
@@ -170,7 +170,7 @@ class _MessageList extends ConsumerWidget {
 
     return ListView.builder(
       controller: scrollCtrl,
-      padding: EdgeInsets.symmetric(horizontal: ConsciaTheme.headerPaddingHorizontal(scale), vertical: 30.0 * scale),
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.headerPaddingHorizontal(scale), vertical: 30.0 * scale),
       itemCount: messages.length,
       itemBuilder: (context, index) {
         final msg = messages[index];
@@ -199,21 +199,21 @@ class _MessageBubble extends StatelessWidget {
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.6),
         padding: EdgeInsets.symmetric(horizontal: 16.0 * scale, vertical: 12.0 * scale),
         decoration: BoxDecoration(
-          color: isMe ? ConsciaTheme.accent(context) : ConsciaTheme.surface(context),
+          color: isMe ? AppTheme.accent(context) : AppTheme.surface(context),
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(16.0 * scale),
             topRight: Radius.circular(16.0 * scale),
             bottomLeft: Radius.circular(isMe ? 16.0 * scale : 4.0 * scale),
             bottomRight: Radius.circular(isMe ? 4.0 * scale : 16.0 * scale),
           ),
-          border: isMe ? null : Border.all(color: ConsciaTheme.border(context)),
+          border: isMe ? null : Border.all(color: AppTheme.border(context)),
         ),
         child: Column(
           crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(msg.content, style: ConsciaTheme.bodyStyle(context, scale).copyWith(color: isMe ? Colors.white : ConsciaTheme.text(context), height: 1.4)),
+            Text(msg.content, style: AppTheme.bodyStyle(context, scale).copyWith(color: isMe ? Colors.white : AppTheme.text(context), height: 1.4)),
             SizedBox(height: 4.0 * scale),
-            Text(timeStr, style: ConsciaTheme.captionStyle(context, scale).copyWith(color: isMe ? Colors.white : ConsciaTheme.muted(context), fontSize: 9.0 * scale)),
+            Text(timeStr, style: AppTheme.captionStyle(context, scale).copyWith(color: isMe ? Colors.white : AppTheme.muted(context), fontSize: 9.0 * scale)),
           ],
         ),
       ),
@@ -231,10 +231,10 @@ class _ChatInput extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      padding: EdgeInsets.all(ConsciaTheme.headerPaddingHorizontal(scale)),
+      padding: EdgeInsets.all(AppTheme.headerPaddingHorizontal(scale)),
       decoration: BoxDecoration(
-        color: ConsciaTheme.surface(context),
-        border: Border(top: BorderSide(color: ConsciaTheme.border(context))),
+        color: AppTheme.surface(context),
+        border: Border(top: BorderSide(color: AppTheme.border(context))),
       ),
       child: Column(
         children: [
@@ -245,7 +245,7 @@ class _ChatInput extends ConsumerWidget {
             children: [
               _InputStubButton(icon: LucideIcons.image, label: "PHOTO", scale: scale).withGridPlacement(columnStart: 0, rowStart: 0),
               _InputStubButton(icon: LucideIcons.video, label: "VIDEO", scale: scale).withGridPlacement(columnStart: 1, rowStart: 0),
-              _InputStubButton(icon: LucideIcons.sparkles, label: "AI ASSIST", color: ConsciaTheme.gold, scale: scale).withGridPlacement(columnStart: 2, rowStart: 0),
+              _InputStubButton(icon: LucideIcons.sparkles, label: "AI ASSIST", color: AppTheme.gold, scale: scale).withGridPlacement(columnStart: 2, rowStart: 0),
             ],
           ),
           SizedBox(height: 12.0 * scale),
@@ -255,34 +255,34 @@ class _ChatInput extends ConsumerWidget {
             columnGap: 8.0 * scale,
             children: [
               IconButton(
-                icon: Icon(LucideIcons.paperclip, size: 20.0 * scale, color: ConsciaTheme.muted(context)),
+                icon: Icon(LucideIcons.paperclip, size: 20.0 * scale, color: AppTheme.muted(context)),
                 onPressed: () => ref.read(toastProvider.notifier).show("File selector opening..."),
               ).withGridPlacement(columnStart: 0, rowStart: 0),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.0 * scale),
                 decoration: BoxDecoration(
-                  color: ConsciaTheme.background(context),
+                  color: AppTheme.background(context),
                   borderRadius: BorderRadius.circular(16.0 * scale),
-                  border: Border.all(color: ConsciaTheme.border(context)),
+                  border: Border.all(color: AppTheme.border(context)),
                 ),
                 child: TextField(
                   controller: textCtrl,
-                  style: ConsciaTheme.bodyStyle(context, scale),
+                  style: AppTheme.bodyStyle(context, scale),
                   maxLines: 4,
                   minLines: 1,
                   decoration: InputDecoration(
                     hintText: "Type a message...",
-                    hintStyle: ConsciaTheme.captionStyle(context, scale),
+                    hintStyle: AppTheme.captionStyle(context, scale),
                     border: InputBorder.none,
                   ),
                 ),
               ).withGridPlacement(columnStart: 1, rowStart: 0),
               IconButton(
-                icon: Icon(LucideIcons.smile, size: 20.0 * scale, color: ConsciaTheme.muted(context)),
+                icon: Icon(LucideIcons.smile, size: 20.0 * scale, color: AppTheme.muted(context)),
                 onPressed: () => ref.read(toastProvider.notifier).show("Emoji picker coming soon."),
               ).withGridPlacement(columnStart: 2, rowStart: 0),
               Material(
-                color: ConsciaTheme.accent(context),
+                color: AppTheme.accent(context),
                 borderRadius: BorderRadius.circular(16.0 * scale),
                 child: InkWell(
                   onTap: () {
@@ -320,9 +320,9 @@ class _InputStubButton extends ConsumerWidget {
         onTap: () => ref.read(toastProvider.notifier).show("$label feature is currently in development."),
         child: Row(
           children: [
-            Icon(icon, size: 14.0 * scale, color: color ?? ConsciaTheme.muted(context)),
+            Icon(icon, size: 14.0 * scale, color: color ?? AppTheme.muted(context)),
             SizedBox(width: 6.0 * scale),
-            Text(label, style: ConsciaTheme.captionStyle(context, scale).copyWith(color: color ?? ConsciaTheme.muted(context), fontWeight: FontWeight.bold, fontSize: 10.0 * scale)),
+            Text(label, style: AppTheme.captionStyle(context, scale).copyWith(color: color ?? AppTheme.muted(context), fontWeight: FontWeight.bold, fontSize: 10.0 * scale)),
           ],
         ),
       ),

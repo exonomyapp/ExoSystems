@@ -5,7 +5,7 @@ Isabella needs to find **The Insider**. In a centralized world, she would search
 
 ## Cognitive Shift
 **Centralized Expectation**: "I’ll search for him on the server."
-**Sovereign Reality**: "We find each other through the mesh. No central index required."
+**Decentralized Reality**: "We find each other through the mesh. No central index required."
 
 ## World Event Reference
 **Amnesty International** reports on the "National Intranet" being used to isolate citizens during periods of civil unrest.

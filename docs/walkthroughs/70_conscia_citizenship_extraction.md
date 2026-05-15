@@ -1,38 +1,38 @@
-# Walkthrough 70: Conscia Citizenship Extraction
+# Walkthrough 70: Conscia Component Extraction
 
 ## Overview
-We have successfully promoted **Conscia** from a nested sub-component (`exotalk_engine/conscia/`) to a first-class, top-level citizen of the sovereign monorepo. This move formally establishes Conscia as the **Sovereign Beacon** for the entire ecosystem (ExoTalk, Exonomy, Exocracy, RepubLet), consistent with the Triad Architecture.
+Conscia has been relocated from `exotalk_engine/conscia/` to the repository root. This establishes Conscia as a service daemon for the ecosystem, consistent with the Triad Architecture.
 
 ## Key Accomplishments
 
-### 1. Crate Extraction & Promotion
-- **Relocation**: Moved the Rust binary crate from `exotalk_engine/conscia/` to root `conscia/`.
-- **Dependency Realignment**: Updated `conscia/Cargo.toml` to point to the correct relative path for `exotalk_engine/exotalk_core`.
-- **Asset Integration**: Fixed `main.rs` to point to the relocated `exotalk_engine/assets/` folder for the embedded web dashboard.
-- **Workspace Cleanup**: Removed `conscia` from the `exotalk_engine` workspace members to ensure strict domain isolation.
+### 1. Crate Extraction & Relocation
+- **Relocation**: Moved the Rust binary crate from `exotalk_engine/conscia/` to the root `conscia/` directory.
+- **Dependency Realignment**: Updated `conscia/Cargo.toml` to reference `exotalk_engine/exotalk_core` at its new relative path.
+- **Asset Integration**: Updated `main.rs` to reference the relocated `exotalk_engine/assets/` directory for the web dashboard.
+- **Workspace Cleanup**: Removed `conscia` from the `exotalk_engine` workspace to ensure domain isolation.
 
-### 2. Triad Scaffolding
-- **Parity Establishment**: Scaffolded three new Flutter projects to complete the Conscia Triad:
-  - `conscia_flutter/`: Desktop-first heavy administration client.
-  - `conscia_lite/`: Mobile-first on-the-go monitoring client.
-  - `conscia_web/`: Elevated web dashboard served by the daemon.
-- **Validation**: All three scaffolds pass `flutter analyze` with 0 errors.
+### 2. Application Scaffolding
+- **Project Creation**: Scaffolded three Flutter projects to complete the Conscia application suite:
+  - `conscia_flutter/`: Desktop administration client.
+  - `conscia_lite/`: Mobile monitoring client.
+  - `conscia_web/`: Web dashboard served by the daemon.
+- **Validation**: Scaffolds pass `flutter analyze` with zero errors.
 
 ### 3. Infrastructure & Deployment
-- **Standardized Paths**: Updated `docs/spec/36_exonomy_deployment_standard.md` to reflect the new canonical deployment path: `~/deployments/conscia/daemon/conscia`.
-- **Systemd Update**: Patched `infra/exotalk-conscia.service` to use the new `ExecStart` and `WorkingDirectory` paths.
-- **Terraform Readiness**: Updated `infra/opentofu/variables.tf` to point to the new build and deployment locations.
+- **Standardized Paths**: Updated `docs/spec/36_exonomy_deployment_standard.md` with the canonical deployment path: `~/deployments/conscia/daemon/conscia`.
+- **Systemd Update**: Updated `infra/exotalk-conscia.service` with new `ExecStart` and `WorkingDirectory` values.
+- **Tooling Update**: Updated OpenTofu configurations in `infra/opentofu/variables.tf` to reflect relocated build paths.
 
-### 4. Documentation Overhaul
-- **Spec 22**: Added Conscia as a first-class "Independent Application" alongside Exonomy and Exocracy.
-- **Ops Guide**: Fixed stale README references in `docs/conscia_ops_guide.md`.
-- **Agent Bible**: Audited `agent.md` to ensure no legacy path references remained.
+### 4. Documentation Update
+- **Spec 22**: Defined Conscia as an Independent Application.
+- **Ops Guide**: Updated references in `docs/conscia_ops_guide.md`.
+- **Agent Documentation**: Audited `agent.md` for path consistency.
 
 ## Verification Results
-- **Binary Build**: `cargo build --release --bin conscia` successful.
-- **Crate Check**: `cargo check` in `conscia/` passing cleanly.
-- **Workspace Integrity**: `cargo check -p exotalk_core` passing. (Note: Pre-existing FRB versioning issues found in `republet_ffi` identified but verified unrelated to extraction).
-- **App Analysis**: `flutter analyze` on `exotalk_flutter` passing with 0 errors.
+- **Binary Build**: `cargo build --release --bin conscia` verified.
+- **Crate Check**: `cargo check` in `conscia/` verified.
+- **Workspace Integrity**: `cargo check -p exotalk_core` verified.
+- **App Analysis**: `flutter analyze` verified for `exotalk_flutter`.
 
-## 🧠 Educational Context: The "Beacon" Promotion
-By extracting Conscia, we have decoupled the "Beacon" (the entry point for the entire mesh) from the "Chat App" (ExoTalk). This ensures that even if ExoTalk logic changes or is swapped, the sovereign beacon remains a stable, lightweight utility that serves all applications equally. Conscia is no longer a "sub-feature"; it is the foundation.
+## Educational Context: Component Decoupling
+By extracting Conscia, the service daemon is decoupled from the ExoTalk application. This ensures the daemon remains a stable utility that serves all ecosystem applications independently of application-specific logic changes.

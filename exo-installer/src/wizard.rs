@@ -1,7 +1,7 @@
 // =============================================================================
 // INTERACTIVE WIZARD (Tier 2: inquire)
 // =============================================================================
-// 🧠 EDUCATIONAL CONTEXT: Per Spec 07 §7.7, the installer uses `inquire`
+// EDUCATIONAL CONTEXT: Per Spec 07 §7.7, the installer uses `inquire`
 // (Tier 2: Interactive) for guided configuration. This is NOT a persistent
 // dashboard — it's a one-shot wizard that builds an InstallerConfig and
 // then hands off to the executor.
@@ -22,12 +22,12 @@ use crate::config::*;
 pub fn run_wizard() -> anyhow::Result<InstallerConfig> {
     println!();
     println!("{}", style("═══════════════════════════════════════════════════").cyan());
-    println!("{}", style("   🛰️  Conscia Sovereign Node — FHS Installer").cyan().bold());
+    println!("{}", style("   Conscia node — FHS Installer").cyan().bold());
     println!("{}", style("═══════════════════════════════════════════════════").cyan());
     println!();
 
     // ── Step 1: Component Selection ──────────────────────────────────────
-    // 🧠 Conscia is always installed (it IS the node). ConSoul and Zrok
+    // Conscia is always installed. ConSoul and Zrok
     // are optional — ConSoul is the desktop admin UI, and Zrok provides
     // public HTTPS URLs which are NOT required for the P2P mesh to function.
     let options = vec!["ConSoul (Desktop Admin Console)", "Zrok (Public HTTPS Tunnel)"];
@@ -51,7 +51,7 @@ pub fn run_wizard() -> anyhow::Result<InstallerConfig> {
     println!("{}", style("── Conscia Daemon Configuration ──").yellow().bold());
 
     let mesh_namespace = Text::new("Mesh namespace:")
-        .with_default("sovereign_mesh")
+        .with_default("exo_mesh")
         .with_help_message("A human-readable identifier for your mesh network")
         .prompt()?;
 
@@ -62,7 +62,7 @@ pub fn run_wizard() -> anyhow::Result<InstallerConfig> {
         .parse()
         .unwrap_or(3000);
 
-    let generate_new = Confirm::new("Generate a new sovereign identity (Ed25519 keypair)?")
+    let generate_new = Confirm::new("Generate a new cryptographic identity (Ed25519 keypair)?")
         .with_default(true)
         .with_help_message("Select 'No' to import an existing DID seed")
         .prompt()?;
@@ -77,8 +77,8 @@ pub fn run_wizard() -> anyhow::Result<InstallerConfig> {
     let zrok_config = if components.zrok {
         println!();
         println!("{}", style("── Zrok Tunnel Configuration ──").yellow().bold());
-        println!("{}", style("  ℹ  Zrok is optional — the P2P mesh works without it.").dim());
-        println!("{}", style("  ℹ  It provides public HTTPS URLs for remote browser access.").dim());
+        println!("{}", style("  Zrok is optional — the P2P mesh works without it.").dim());
+        println!("{}", style("  It provides public HTTPS URLs for remote browser access.").dim());
 
         let token = Password::new("Zrok reserved share token:")
             .with_help_message("The token from 'zrok reserve public' (e.g., 'exotalkberlin')")
@@ -124,19 +124,19 @@ pub fn run_wizard() -> anyhow::Result<InstallerConfig> {
 fn print_topology_preview(config: &InstallerConfig) {
     println!();
     println!("{}", style("═══════════════════════════════════════════════════").green());
-    println!("{}", style("   📋 Installation Preview").green().bold());
+    println!("{}", style("   Installation Preview").green().bold());
     println!("{}", style("═══════════════════════════════════════════════════").green());
     println!();
 
     // Components
     println!("{}", style("Components:").bold());
-    println!("  ✅ Conscia daemon ({}:{})", config.conscia.mesh_namespace, config.conscia.api_port);
+    println!("  Conscia daemon ({}:{})", config.conscia.mesh_namespace, config.conscia.api_port);
     if config.components.consoul {
-        println!("  ✅ ConSoul desktop admin console");
+        println!("  ConSoul desktop admin console");
     }
     if config.components.zrok {
         if let Some(ref zrok) = config.zrok {
-            println!("  ✅ Zrok tunnel → {}", zrok.backend_url);
+            println!("  Zrok tunnel → {}", zrok.backend_url);
         }
     }
 

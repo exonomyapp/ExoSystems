@@ -21,7 +21,7 @@ class PeerListModal extends ConsumerWidget {
       child: Container(
         width: (MediaQuery.of(context).size.width * 0.95).clamp(600.0, 1200.0 * scale),
         height: (MediaQuery.of(context).size.height * 0.85).clamp(500.0, 800.0 * scale),
-        decoration: ConsciaTheme.premiumCardDecoration(context, scale),
+        decoration: AppTheme.premiumCardDecoration(context, scale),
         child: Column(
           children: [
             // Modal Header
@@ -35,28 +35,28 @@ class PeerListModal extends ConsumerWidget {
                   Container(
                     padding: EdgeInsets.all(12 * scale),
                     decoration: BoxDecoration(
-                      color: ConsciaTheme.accent(context).withValues(alpha: 0.1),
+                      color: AppTheme.accent(context).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12 * scale),
-                      border: Border.all(color: ConsciaTheme.accent(context).withValues(alpha: 0.3)),
+                      border: Border.all(color: AppTheme.accent(context).withValues(alpha: 0.3)),
                     ),
-                    child: Icon(LucideIcons.network, size: 24.0 * scale, color: ConsciaTheme.accent(context)),
+                    child: Icon(LucideIcons.network, size: 24.0 * scale, color: AppTheme.accent(context)),
                   ).withGridPlacement(columnStart: 0, rowStart: 0),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Active Mesh Roster",
-                        style: ConsciaTheme.headingStyle(context, scale).copyWith(fontSize: 22.0 * scale),
+                        style: AppTheme.headingStyle(context, scale).copyWith(fontSize: 22.0 * scale),
                       ),
                       Text(
                         "Real-time visibility into cryptographic peers and network entry points.",
-                        style: ConsciaTheme.captionStyle(context, scale),
+                        style: AppTheme.captionStyle(context, scale),
                       ),
                     ],
                   ).withGridPlacement(columnStart: 1, rowStart: 0),
                   _PeerCountBadge(scale: scale).withGridPlacement(columnStart: 2, rowStart: 0),
                   IconButton(
-                    icon: Icon(LucideIcons.x, size: 20.0 * scale, color: ConsciaTheme.muted(context)),
+                    icon: Icon(LucideIcons.x, size: 20.0 * scale, color: AppTheme.muted(context)),
                     onPressed: () => Navigator.of(context).pop(),
                   ).withGridPlacement(columnStart: 3, rowStart: 0),
                 ],
@@ -86,7 +86,7 @@ class PeerListModal extends ConsumerWidget {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Center(child: Text("Error: $err", style: TextStyle(color: ConsciaTheme.error(context)))),
+                error: (err, _) => Center(child: Text("Error: $err", style: TextStyle(color: AppTheme.error(context)))),
               ),
             ),
           ],
@@ -108,9 +108,9 @@ class _PeerCountBadge extends ConsumerWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12 * scale, vertical: 6 * scale),
       decoration: BoxDecoration(
-        color: ConsciaTheme.background(context),
+        color: AppTheme.background(context),
         borderRadius: BorderRadius.circular(20 * scale),
-        border: Border.all(color: ConsciaTheme.border(context)),
+        border: Border.all(color: AppTheme.border(context)),
       ),
       child: LayoutGrid(
         columnSizes: [auto, auto],
@@ -120,15 +120,15 @@ class _PeerCountBadge extends ConsumerWidget {
           Container(
             width: 6 * scale,
             height: 6 * scale,
-            decoration: BoxDecoration(color: ConsciaTheme.accent(context), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: AppTheme.accent(context), shape: BoxShape.circle),
           ).withGridPlacement(columnStart: 0, rowStart: 0),
           Text(
             "$count PEERS ACTIVE",
-            style: ConsciaTheme.bodyStyle(context, scale).copyWith(
+            style: AppTheme.bodyStyle(context, scale).copyWith(
               fontSize: 10 * scale,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.5 * scale,
-              color: ConsciaTheme.accent(context),
+              color: AppTheme.accent(context),
             ),
           ).withGridPlacement(columnStart: 1, rowStart: 0),
         ],
@@ -148,7 +148,7 @@ class _PeerCard extends StatelessWidget {
     final knownNodes = {
       "2f4300ae2c116d3c0f87cea35cc0254900a217558878d55010e435e30b0cc9b4": ("Exocracy (Host)", "Nexus Beacon", LucideIcons.castle),
       "83fa401028e4f8b8cf9ad85801fb27b8905faffec13ee22caa2a1a9b09c052e1": ("Exonomy (Node)", "Federated Node", LucideIcons.satellite),
-      "613e962785bff825e9bb522428a78f457195b3fc7d327f694c662bbcb541eb87": ("ExoTalk (Flutter)", "Sovereign App", LucideIcons.smartphone),
+      "613e962785bff825e9bb522428a78f457195b3fc7d327f694c662bbcb541eb87": ("ExoTalk (Flutter)", "Messaging App", LucideIcons.smartphone),
     };
 
     final nodeInfo = knownNodes[peer.nodeId] ?? ("Unknown Peer", "Anonymous Node", LucideIcons.helpCircle);
@@ -159,9 +159,9 @@ class _PeerCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: ConsciaTheme.surface(context).withValues(alpha: 0.4),
+        color: AppTheme.surface(context).withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(16 * scale),
-        border: Border.all(color: ConsciaTheme.border(context)),
+        border: Border.all(color: AppTheme.border(context)),
       ),
       padding: EdgeInsets.all(20 * scale),
       child: Column(
@@ -176,24 +176,24 @@ class _PeerCard extends StatelessWidget {
                 width: 44 * scale,
                 height: 44 * scale,
                 decoration: BoxDecoration(
-                  color: ConsciaTheme.background(context),
+                  color: AppTheme.background(context),
                   borderRadius: BorderRadius.circular(12 * scale),
-                  border: Border.all(color: ConsciaTheme.border(context)),
+                  border: Border.all(color: AppTheme.border(context)),
                 ),
-                child: Icon(nodeInfo.$3, size: 20 * scale, color: ConsciaTheme.accent(context)),
+                child: Icon(nodeInfo.$3, size: 20 * scale, color: AppTheme.accent(context)),
               ).withGridPlacement(columnStart: 0, rowStart: 0),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     nodeInfo.$1,
-                    style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold, fontSize: 15 * scale),
+                    style: AppTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold, fontSize: 15 * scale),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     "${peer.nodeId.substring(0, 8)}...${peer.nodeId.substring(peer.nodeId.length - 8)}",
-                    style: ConsciaTheme.captionStyle(context, scale).copyWith(fontFamily: 'monospace', fontSize: 10 * scale),
+                    style: AppTheme.captionStyle(context, scale).copyWith(fontFamily: 'monospace', fontSize: 10 * scale),
                   ),
                 ],
               ).withGridPlacement(columnStart: 1, rowStart: 0),
@@ -205,10 +205,10 @@ class _PeerCard extends StatelessWidget {
             spacing: 6 * scale,
             runSpacing: 6 * scale,
             children: [
-              _Badge(label: nodeInfo.$2, color: ConsciaTheme.accent(context), scale: scale),
+              _Badge(label: nodeInfo.$2, color: AppTheme.accent(context), scale: scale),
               if (hasLocal) _Badge(label: "LOCAL", color: Colors.blue, scale: scale),
               if (hasDirect) _Badge(label: "DIRECT", color: Colors.orange, scale: scale),
-              if (hasRelay) _Badge(label: "RELAY", color: ConsciaTheme.muted(context), scale: scale),
+              if (hasRelay) _Badge(label: "RELAY", color: AppTheme.muted(context), scale: scale),
             ],
           ),
           SizedBox(height: 16 * scale),
@@ -219,7 +219,7 @@ class _PeerCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8 * scale),
-                border: Border.all(color: ConsciaTheme.border(context).withValues(alpha: 0.5)),
+                border: Border.all(color: AppTheme.border(context).withValues(alpha: 0.5)),
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -228,7 +228,7 @@ class _PeerCard extends StatelessWidget {
                     padding: EdgeInsets.only(bottom: 2 * scale),
                     child: Text(
                       "• $addr",
-                      style: ConsciaTheme.captionStyle(context, scale).copyWith(fontFamily: 'monospace', fontSize: 9 * scale),
+                      style: AppTheme.captionStyle(context, scale).copyWith(fontFamily: 'monospace', fontSize: 9 * scale),
                     ),
                   )).toList(),
                 ),
@@ -251,10 +251,10 @@ class _StatusIndicator extends StatelessWidget {
       width: 8 * scale,
       height: 8 * scale,
       decoration: BoxDecoration(
-        color: ConsciaTheme.accent(context),
+        color: AppTheme.accent(context),
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(color: ConsciaTheme.accent(context).withValues(alpha: 0.5), blurRadius: 4 * scale, spreadRadius: 2 * scale),
+          BoxShadow(color: AppTheme.accent(context).withValues(alpha: 0.5), blurRadius: 4 * scale, spreadRadius: 2 * scale),
         ],
       ),
     );
@@ -300,16 +300,16 @@ class _EmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LucideIcons.search, size: 48 * scale, color: ConsciaTheme.muted(context).withValues(alpha: 0.3)),
+          Icon(LucideIcons.search, size: 48 * scale, color: AppTheme.muted(context).withValues(alpha: 0.3)),
           SizedBox(height: 24 * scale),
           Text(
             "No active peers found in mesh",
-            style: ConsciaTheme.headingStyle(context, scale).copyWith(fontSize: 18 * scale, color: ConsciaTheme.muted(context)),
+            style: AppTheme.headingStyle(context, scale).copyWith(fontSize: 18 * scale, color: AppTheme.muted(context)),
           ),
           SizedBox(height: 8 * scale),
           Text(
             "Looking for beacons and federated nodes...",
-            style: ConsciaTheme.captionStyle(context, scale),
+            style: AppTheme.captionStyle(context, scale),
           ),
         ],
       ),

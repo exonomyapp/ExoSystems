@@ -1,43 +1,42 @@
 # Walkthrough 12: The SvelteKit Migration
 
-*This document records the replacement of React/Next.js with Svelte/SvelteKit for all heavyweight desktop applications in the Sovereign Exosystem.*
+This document records the replacement of React/Next.js with Svelte/SvelteKit for desktop applications in the Exosystem.
 
-## 🧹 Why We Left React Behind
+## Rationale for SvelteKit
 
-When RepubLet was first scaffolded (Walkthrough 10), we used Next.js as the desktop frontend framework. However, as the Exosystem expanded (Exonomy, Exocracy), we re-evaluated the frontend technology stack.
+During the expansion of the Exosystem (Exonomy, Exocracy), the frontend technology stack was re-evaluated.
 
-### The Problem with React
-React ships a massive Virtual DOM engine to the user's browser. On every state change, React diffs the entire virtual tree against the real DOM to figure out what changed. This is computationally expensive, memory-heavy, and philosophically misaligned with our Rust-first, zero-overhead architecture.
+### Technical Limitations of React
+React utilizes a Virtual DOM engine that diffs the virtual tree against the real DOM on state changes. This process increases memory and CPU usage.
 
-### Why Svelte Wins
-Svelte takes a radically different approach: **it compiles away at build time.** Instead of shipping a framework to the browser, the Svelte compiler analyzes your components and outputs tiny, surgically precise vanilla JavaScript that updates the DOM directly. No virtual DOM. No diffing. No framework overhead.
+### Svelte Benefits
+Svelte compiles components at build time into vanilla JavaScript that updates the DOM directly. This removes the need for a framework runtime in the browser, reducing overhead.
 
-This "compile to nothing" philosophy perfectly mirrors Rust's own zero-cost abstraction principle.
+This approach aligns with the resource-efficient design of the Rust backend.
 
-## 🔧 The Surgical Swap
+## Migration Process
 
-Because we had already fully decoupled the Rust backend (`republet_desktop`) from the frontend UI (Walkthrough 10 & 11), replacing the entire frontend framework required **zero changes to any Rust code**.
+Because the Rust backend (`republet_desktop`) is decoupled from the frontend UI, replacing the frontend framework did not require modifications to the Rust code.
 
-The operation was:
-1. Delete the entire `republet_web/` Next.js directory.
-2. Scaffold a new SvelteKit + Vite + TypeScript project in its place.
-3. Recreate the `src-tauri` symlink pointing back to `../exotalk_engine/republet_desktop`.
+The migration involved:
+1. Deleting the `republet_web/` Next.js directory.
+2. Initializing a new SvelteKit, Vite, and TypeScript project.
+3. Reconfiguring the `src-tauri` symlink to point to `../exotalk_engine/republet_desktop`.
 
-The Rust engine didn't even notice the swap happened. This is the ultimate vindication of the decoupled architecture.
+The decoupled architecture allowed for a frontend replacement without modifications to the Rust backend.
 
-## 📐 The Platform Matrix
+## Platform Matrix
 
-With SvelteKit established, the Exosystem now follows a clear technology split:
+The Exosystem utilizes a dual-framework strategy:
 
-| Technology | Used For | Why |
+| Technology | Used For | Rationale |
 |---|---|---|
-| **Flutter** | ExoTalk, Exonomy, RepubLet Lite, Exocracy Lite | Standardized social/feed UIs that need cross-platform mobile + desktop from one codebase |
-| **SvelteKit + Tauri** | RepubLet Web, Exocracy Web | Complex document editing and data visualization that benefit from the mature JS library ecosystem (ProseMirror, D3.js, Gantt libraries) |
+| **Flutter** | ExoTalk, Exonomy, RepubLet Lite, Exocracy Lite | Cross-platform mobile and desktop deployment from a single codebase for social and feed interfaces. |
+| **SvelteKit + Tauri** | RepubLet Web, Exocracy Web | Document editing and data visualization utilizing the JavaScript library ecosystem (ProseMirror, D3.js). |
 
-## 🧮 The Numbers
+## Performance Metrics
 
 | Metric | Next.js | SvelteKit |
 |---|---|---|
 | `npm install` packages | ~300+ | 48 |
-| Vulnerabilities | Variable | 0 |
-| Framework shipped to user | ~80KB+ (React runtime) | 0 (compiled away) |
+| Framework runtime shipped to user | ~80KB+ (React) | 0 (Compiled) |

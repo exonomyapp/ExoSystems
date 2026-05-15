@@ -11,7 +11,7 @@ We use the **exotalk.tech** domain as our global namespace.
 - **ExoTalk CLI**: `tech.exotalk.ExoTalkCLI`
 - **Republet App**: `tech.exotalk.Republet`
 - **Exonomy App**: `tech.exotalk.Exonomy`
-- **Conscia Agency**: `tech.exotalk.Conscia`
+- **Conscia Beacon**: `tech.exotalk.Conscia`
 
 ### B. Docker Distribution (GHCR.io)
 Official images are hosted at `ghcr.io/exotalk/`. We use a tagging strategy (e.g., `:latest`, `:headless`) to manage build flavors.
@@ -25,11 +25,11 @@ We maintain a permanent, high-availability **Conscia Beacon** at `conscia.exotal
 
 | Component | Role | App ID (Flatpak/Android) | Docker Image Name |
 | :--- | :--- | :--- | :--- |
-| **ExoTalk** | Flagship Sovereign App | `tech.exotalk.ExoTalk` | `ghcr.io/exotalk/exotalk` |
+| **ExoTalk** | Flagship Messaging App | `tech.exotalk.ExoTalk` | `ghcr.io/exotalk/exotalk` |
 | **ExoTalk CLI** | Headless Automation | `tech.exotalk.ExoTalkCLI` | `ghcr.io/exotalk/exotalk:headless` |
 | **Republet** | Independent Content App | `tech.exotalk.Republet` | `ghcr.io/exotalk/republet` |
 | **Exonomy** | Independent Economic App | `tech.exotalk.Exonomy` | `ghcr.io/exotalk/exonomy` |
-| **Conscia** | Network Agency | `tech.exotalk.Conscia` | `ghcr.io/exotalk/conscia` |
+| **Conscia** | Network Beacon | `tech.exotalk.Conscia` | `ghcr.io/exotalk/conscia` |
 
 ---
 

@@ -2,15 +2,15 @@
 
 [ 🏠 Back to Exosystem Root ](../README.md)
 
-The digital landscape of the early 2020s was defined by a Faustian bargain: in exchange for "exposure" and "connectivity," users surrendered their data, their identities, and their digital sovereignty to monolithic brokers. These brokers became the gatekeepers of truth, the arbiters of visibility, and the single points of failure for the global conversation. 
+The digital landscape of the early 2020s was defined by a Faustian bargain: in exchange for "exposure" and "connectivity," users surrendered their data, their identities, and their digital autonomy to monolithic brokers. These brokers became the gatekeepers of truth, the arbiters of visibility, and the single points of failure for the global conversation. 
 
 The Exotalk architecture is a rejection of this bargain. It is built on the premise that a digital node should be as free as the person who owns it and as connectable as the physics of the internet allows.
 
-## Identity Sovereignty vs. Platform Bans
+## Identity Autonomy vs. Platform Bans
 
 In the centralized web, your digital identity is rented. A corporation can flip a switch and delete your entire online presence—your connections, your history, your voice—without recourse or transparency. 
 
-In ExoTalk, to be "free" means that no third party can prevent a node from existing. Your identity is moored to a **cryptographic keypair (`did:peer`)** synthesized via **ExoAuth (The Universal Passport)**. You carry your identity, and your network is derived from the cryptographic attestations of those choosing to listen to you.
+In ExoTalk, to be "free" means that no third party can prevent a node from existing. Your identity is moored to a **cryptographic keypair (`did:peer`)** synthesized via **ExoAuth (The Cryptographic Passport)**. You carry your identity, and your network is derived from the cryptographic attestations of those choosing to listen to you.
 
 ## Data Locality vs. Cloud Silos
 
@@ -32,8 +32,8 @@ Autonomy is a hollow victory if the node is isolated behind a firewall. Traditio
 
 Our commitment to "maximal connectability" uses **Iroh**. When direct UDP hole-punching fails, ExoTalk automatically routes through stateless **DERP relays**. However, we treat the relay not as a "server" that holds or processes our data, but as a "dumb pipe." It is a raw utility that facilitates the handshake. End-to-end encryption is maintained at every step. This ensures that a user in a highly restrictive corporate office in London can seamlessly exchange encrypted gossip with a user on cellular data in Nairobi, without a single centralized server ever seeing the contents of the payload.
 
-## Conscia: The Sovereign Lifeline
+## Conscia: The Persistent Lifeline
 
-Finally, we address the reality of human behavior. Users are not always online, and mobile devices have limited batteries. Our vision incorporates **Conscia** nodes. These are specialized, always-on Willow nodes that act as your **Sovereign Lifeline**. They provide the "persistence" that users have come to expect from the cloud, but they do so as passive, non-authoritative participants. 
+Finally, we address the reality of human behavior. Users are not always online, and mobile devices have limited batteries. Our vision incorporates **Conscia** nodes. These are specialized, always-on Willow nodes that act as your **Persistent Lifeline**. They provide the "persistence" that users have come to expect from the cloud, but they do so as passive, non-authoritative participants. 
 
 They cannot alter history, they cannot read encrypted private channels, and they cannot fake identity. They exist to serve your reach, ensuring that when you go offline, your voice stays alive in the mesh.

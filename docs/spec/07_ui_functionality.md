@@ -1,6 +1,6 @@
 # UI Functionality Features
 
-- **Sovereign Sidebar (Left Panel):**
+- **Main Sidebar (Left Panel):**
   - **Header**: Navigation hub containing the collapse toggle and persona status.
   - **Search**: Integrated connection search bar.
   - **Connection List**: Vertical list of active secure channels with presence indicators.
@@ -19,8 +19,8 @@ The interface is designed for high-determinism automation to support headless P2
 - **Welcome Screen**: `Enter` or `Space` triggers the onboarding menu. The "Get Started" button is `autofocus: true` to allow immediate programmatic interaction.
 - **Modals**: Global `CallbackShortcuts` ensure that all critical dialog actions (Sync, Confirm, Cancel) are reachable via standard keyboard events, eliminating reliance on pixel-coordinate mouse clicks.
 
-### 7.3 Sovereignty Drawer
-The Sovereign Sidebar is the primary navigation and control hub.
+### 7.3 Navigation Drawer
+The Main Sidebar is the primary navigation and control hub.
 - **Resizability**: Users can drag the right edge to adjust sidebar width (200px - 600px). State is persisted across sessions.
 - **Collapsibility**: The sidebar can be collapsed to a minimal state to maximize workspace area.
 - **Quick Controls**: Flight Mode, Theme Tristate, and Account Settings are pinned to the sidebar footer.
@@ -44,7 +44,7 @@ ExoTalk includes a native sidebar-integrated interface for managing a user's net
   - **Meadowcap Capabilities:** Displays active delegations (e.g., WRITER role) and provides controls for capability grant and revocation.
 - **Capability Governance:** The UI enforces the principle of least privilege, presenting only the control options the current user possesses over each specific node.
 
-### 7.6 Sovereign Technical Footer
+### 7.6 Technical Footer
 The sidebar includes a high-density environment dashboard below the Account Settings gear.
 - **Visual Style**: Monospace, small-font telemetry blocks aligned to a strict grid.
 - **Refresh Rate**: 500ms for high-priority traffic pulses.

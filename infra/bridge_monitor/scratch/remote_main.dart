@@ -48,7 +48,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> {
       port: 8080,
     ),
     BridgeNode(
-      name: "Sovereign Mesh Node",
+      name: "autonomous Mesh Node",
       machine: "EXONOMY",
       role: "Conscia Beacon (P2P)",
       port: 3000,

@@ -14,7 +14,7 @@
 **Visual**: Message replication logs showing Hangzhou mirroring Beirut data.
 **Action**: Sending a test message through the federated link.
 
-**Narrator VO**: "Sovereignty without isolation. The mesh bypasses the blockade, linking disparate loyalties into a single, unassailable truth-layer."
+**Narrator VO**: "Autonomy without isolation. The mesh bypasses the blockade, linking disparate loyalties into a single, unassailable truth-layer."
 
 ---
 
@@ -26,5 +26,5 @@
 ---
 
 ## Technical Footer
-- **Scenario Reference**: [04_cross_machine_federation.md](file:///home/exocrat/code/exotalk/docs/scenarios/04_cross_machine_federation.md)
+- **Scenario Reference**: [04_cross_machine_federation.md](04_cross_machine_federation.md)
 - **Engine State**: Meadowcap delegation complete, Iroh gossip synced.

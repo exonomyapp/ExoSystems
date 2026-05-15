@@ -1,10 +1,10 @@
 # 32. Archon Workflow Standard
 
-This specification governs the use of **Archon** as the tactical execution engine within the Sovereign Exosystem. Archon translates high-level architectural plans into deterministic actions.
+This specification governs the use of **Archon** as the tactical execution engine within the Exosystem. Archon translates high-level architectural plans into deterministic actions.
 
 ## 1. YAML DAG Principles
 
-All autonomous coding tasks must be defined as Directed Acyclic Graphs (DAGs) in YAML format.
+All automated coding tasks must be defined as Directed Acyclic Graphs (DAGs) in YAML format.
 
 *   **Idempotency**: Every Archon step must be safe to execute multiple times without causing corrupt state.
 *   **Strict Verification**: No Archon DAG may terminate successfully without a validation step. For backend code, this means `cargo test`. For UI code, this enforces the **KDVV (Keystroke-Driven, Visual-Verified)** protocol via `xdotool` and `scrot` execution within the DAG.

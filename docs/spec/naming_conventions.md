@@ -1,6 +1,6 @@
 # Specification: Naming Conventions
 
-This document defines the naming conventions for assets within the Sovereign Exosystem documentation and production pipeline.
+This document defines the naming conventions for assets within the Exosystem documentation and production pipeline.
 
 ## 1. Scenario Asset Ordering
 
@@ -24,7 +24,7 @@ For assets (videos, audios, images) that are referenced within both the Scenario
 
 ## 3. Infrastructure & URLs
 
-To ensure cross-reboot stability and professional branding, all public-facing sovereign infrastructure must follow the **Stable Service Token** standard.
+To ensure cross-reboot stability and professional branding, all public-facing persistent infrastructure must follow the **Stable Service Token** standard.
 
 ### 3.1. Public zrok Shares
 All public URLs must be **reserved** using the `zrok reserve` command to prevent ephemeral token rotation.

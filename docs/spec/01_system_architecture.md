@@ -1,8 +1,8 @@
 # System Architecture
 
-## 1. Sovereign Engine Workspace
+## 1. Engine Workspace
 
-The entire Exosystem is powered by a single Rust Cargo workspace (`exotalk_engine/`) that enforces strict app isolation to prevent bloat.
+The entire Exosystem is powered by a single Rust Cargo workspace (defined by the root `Cargo.toml`) that enforces strict app isolation to prevent bloat.
 
 ### Core
 - **`exotalk_core`**: The agnostic P2P engine. Manages raw data synchronization (Willow), networking (Iroh), and cryptographic identity (Meadowcap). It has zero awareness of application-level data models.
@@ -22,7 +22,12 @@ Each Flutter application has its own isolated FFI bridge to guarantee that no fo
 - **`exocracy_ffi`**: Binds `exotalk_core` + `exocracy_schema` → Exocracy Lite Flutter.
 
 ### Shared Modules
-- **`exoauth`**: A pure Flutter Dart package serving as the unified "Solid Front Door" for the entire Sovereign Exosystem. It provides the core identity UI (`WelcomeScreen`) and is consumed by all primary Exotalk applications via dependency injection to standardize the authentication workflow.
+- **`exoauth`**: A pure Flutter Dart package serving as the unified "Solid Front Door" for the entire Exosystem. It provides the core identity UI (`WelcomeScreen`) and is consumed by all primary Exotalk applications via dependency injection to standardize the authentication workflow.
+
+### Independent Backends (Tauri)
+Tauri desktop backends link directly to the engine core but reside in the monorepo root for architectural clarity:
+- **`republet_desktop`**: The SvelteKit/Tauri desktop backend for RepubLet.
+- **`exocracy_desktop`**: The SvelteKit/Tauri desktop backend for Exocracy.
 
 ### Standalone Binaries
 - **`conscia`**: A headless daemon/beacon providing 24/7 message persistence for the swarm.
@@ -32,11 +37,11 @@ Each Flutter application has its own isolated FFI bridge to guarantee that no fo
 | Technology | Applications | Rationale |
 |---|---|---|
 | Flutter (Mobile) | ExoTalk, Exocracy Lite, RepubLet Lite | Standardized feed/social UIs, compact mobile-first layouts |
-| Flutter (Desktop/Web) | CMC, Exotalk, Exocracy Flutter, RepubLet Flutter, Exonomy Flutter | High-density grids, Gantt charts, complex telemetry, and node management |
+| Flutter (Desktop/Web) | ConSoul, Exotalk, Exocracy Flutter, RepubLet Flutter, Exonomy Flutter | High-density grids, Gantt charts, complex telemetry, and node management |
 
 ## 3. UI System Architecture
 
 All Flutter applications utilize a unified **Solid Identity** design system implemented in `ExoTheme`. 
 
 - **Theme-Awareness**: A context-aware design token system ensures that the UI dynamically responds to Tristate Theme switching (Light/Dark/System) across all components.
-- **Visual Consistency**: High-density horizontal layouts and tactile feedback loops are standardized to ensure a professional, sovereign feel throughout the exosystem.
+- **Visual Consistency**: High-density horizontal layouts and tactile feedback loops are standardized to ensure a professional, independent feel throughout the exosystem.

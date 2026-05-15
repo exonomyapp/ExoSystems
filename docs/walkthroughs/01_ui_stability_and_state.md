@@ -1,32 +1,31 @@
-# Walkthrough 01: UI Health & Interaction Stability Walkthrough
+# Walkthrough 01: UI Stability and State Management
 
-We have successfully resolved the "unhealthy" UI behaviors (stuck cursors, hindered hovering) by aligning the EarthTalk Flutter architecture with industry best practices for high-performance reactive applications.
+UI interaction issues (cursor inconsistencies, hover failures) have been addressed by aligning the ExoTalk Flutter architecture with high-performance reactive patterns.
 
-## Key Achievements
+## Key Accomplishments
 
 ### 1. Granular State Management
-We transitioned from a monolithic `chatProvider` to a specialized provider Exosystem. This prevents a single message update from rebuilding the entire application, which was the root cause of the cursor synchronization failures.
-- **`userProfileProvider`**: Manages identity without affecting the sidebar.
-- **`conversationListProvider`**: Manages the peer list independently.
-- **`messagesProvider(convoId)`**: A family provider ensuring chat threads are isolated from each other.
+Transitioned from a monolithic provider to specialized providers. This isolation prevents message updates from triggering full application rebuilds, resolving cursor synchronization issues.
+- **`userProfileProvider`**: Manages identity state.
+- **`conversationListProvider`**: Manages the peer list.
+- **`messagesProvider(convoId)`**: A family provider ensuring chat thread isolation.
 
 ### 2. Widget Stabilization
-Implemented architectural anchors to ensure the interaction layer remains stable during background data synchronization:
-- **`ValueKey` Support**: Integrated keys into the Sidebar connections list to prevent hit-test recalculations from dropping hover states.
-- **Optimized Rebuild Scope**: `HomeScreen` and `SidebarMenu` now watch only their required data slices, significantly reducing the frame processing load.
+Implemented structural components to ensure interaction stability during background data synchronization:
+- **`ValueKey` Support**: Integrated keys into the Sidebar connections list to maintain hover states during hit-test recalculations.
+- **Optimized Rebuild Scope**: `HomeScreen` and `SidebarMenu` watch specific data slices to reduce frame processing load.
 
-### 3. Proactive Engine Boot
-Refined the application lifecycle to ensure the P2P engine is ready before the first frame is drawn:
-- Integrated `initWillowDatabase()` and `initNetwork()` directly into the `main.dart` startup sequence.
-- Added global initialization watchers to ensure a clean UI transition once the engine is hot.
+### 3. Engine Initialization
+Refined the application lifecycle to ensure the P2P engine initialization is complete during the startup sequence:
+- Integrated `initWillowDatabase()` and `initNetwork()` into the `main.dart` startup sequence.
+- Added initialization watchers to manage the transition after engine startup.
 
-## Validation Results
+## Verification Results
 
-- **Cursor Consistency**: The mouse pointer now correctly reverts from "hand" to "arrow" when leaving interactive elements, even during active data updates.
-- **Interaction Fluidity**: Hover splashes and animations no longer "jank" or stutter when switching between conversations.
+- **Cursor Consistency**: The mouse pointer correctly reverts when leaving interactive elements during data updates.
+- **UI Responsiveness**: Hover states and animations maintain consistency when switching between conversations.
 
 ## Verification Command
-Run the following on **Exocracy**:
 ```bash
 export PATH="/home/exocrat/flutter/bin:$PATH" && flutter run -d linux
 ```

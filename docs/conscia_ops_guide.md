@@ -129,15 +129,15 @@ To link nodes so they share gossip namespaces and provide high-availability back
 1.  **Obtain Node ID**: Start Conscia on both machines. Copy the **Node ID** from the Laptop's dashboard or console.
 2.  **Associate via ExoTalk**: Open ExoTalk on your main device. Use the **Conscia Nodes** sidebar to add the Laptop's Node ID.
 3.  **Delegate Capabilities**: Navigate to the **Node Management** dashboard for the new node.
-4.  **Authorize**: In the **Capabilities** section, grant the Laptop node a role (e.g., **WRITER** or **ADMIN**). This generates a Meadowcap token that authorizes the laptop to participate in your sovereign mesh.
+4.  **Authorize**: In the **Capabilities** section, grant the Laptop node a role (e.g., **WRITER** or **ADMIN**). This generates a Meadowcap token that authorizes the laptop to participate in your mesh.
 
 Both nodes are now federated. You can monitor their shared health via the **Governance Mission Control** in ExoTalk.
 
 ---
 
-## Architectural Vision: The Unified Node Dashboard
+## Architectural Vision: The ConSoul Node Dashboard
 
-When architecting the administrative interface for Conscia, it is tempting to follow traditional SaaS patterns and build two distinct dashboards: a simple one for end-users, and a complex one for sys-admins. In our decentralized, P2P ecosystem, **we enforce a Single Unified UI strategy driven by Progressive Disclosure.**
+When architecting the administrative interface for Conscia, it is tempting to follow traditional SaaS patterns and build two distinct dashboards: a simple one for end-users, and a complex one for sys-admins. In our decentralized, P2P ecosystem, **we enforce a ConSoul UI strategy driven by Progressive Disclosure.**
 
 ### 1. The "Level-Up" Pathway
 In a decentralized world, today's end-user is tomorrow's mesh network operator. Splitting the UIs creates an intimidating wall. A unified UI allows users to naturally "level up." They start by viewing simple node health statistics. As they learn more, or as their cryptographic authority increases, new advanced tools organically appear within the interface they already know.

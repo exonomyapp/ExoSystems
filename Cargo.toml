@@ -32,17 +32,18 @@ resolver = "2"
 # 5. STANDALONE BINARIES
 # - conscia: A headless beacon (uses core).
 members = [
-    "exotalk_core",
-    "exotalk_schema",
-    "republet_schema",
-    "exonomy_schema",
-    "exocracy_schema",
-    "exotalk_ffi",
-    "republet_ffi",
-    "exonomy_ffi",
-    "exocracy_ffi",
+    "exotalk_engine/exotalk_core",
+    "exotalk_engine/exotalk_schema",
+    "exotalk_engine/republet_schema",
+    "exotalk_engine/exonomy_schema",
+    "exotalk_engine/exocracy_schema",
+    "exotalk_engine/exotalk_ffi",
+    "exotalk_engine/republet_ffi",
+    "exotalk_engine/exonomy_ffi",
+    "exotalk_engine/exocracy_ffi",
     "republet_desktop",
-    "exocracy_desktop", "exotalk_wasm",
+    "exocracy_desktop", 
+    "exotalk_engine/exotalk_wasm",
 ]
 
 [profile.dev]

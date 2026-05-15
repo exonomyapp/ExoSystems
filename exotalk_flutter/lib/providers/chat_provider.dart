@@ -2,11 +2,11 @@
 // chat_provider.dart — Riverpod State Management Layer
 // =============================================================================
 //
-// This file is the central nervous system of the Flutter UI. It defines all
-// Riverpod providers that bridge the Rust backend to the widget tree:
+// This file defines the Riverpod providers that interface the Rust backend 
+// to the widget tree:
 //
 //   UserProfileNotifier  — The active user's identity (DID, name, avatar, proofs,
-//                           OAuth links). Reads from the Rust IdentityVault on init
+//                           OAuth links). Reads from identity storage on init
 //                           and after any mutation (rename, verify, link).
 //
 //   ConversationListNotifier — Global list of conversations. Loaded from Rust on
@@ -19,7 +19,7 @@
 //                          Uses FamilyNotifier so each conversation has independent
 //                          state, preventing cross-chat rebuilds.
 //
-// Data flow: Rust IdentityVault (JSON) → FRB bridge → Provider state → UI widgets
+// Data flow: Identity storage (JSON) → FRB bridge → Provider state → UI widgets
 // =============================================================================
 
 import 'dart:convert';
@@ -62,11 +62,9 @@ class UserProfile {
 
 // --- PROVIDERS ---
 
-// 🧠 Educational Context: The Sovereign State Hub
-/// Manages the active user's identity and profile. This notifier is the single 
-/// source of truth for identity state across the application, ensuring that 
-/// all components (Sidebar, Settings, Mesh Meter) react instantly to identity 
-/// changes or vault mutations.
+/// Manages the active user's identity and profile. This notifier maintains 
+/// the identity state across the application, ensuring that 
+/// all components react to identity changes or storage updates.
 class UserProfileNotifier extends Notifier<UserProfile> {
   @override
   UserProfile build() {
@@ -75,18 +73,18 @@ class UserProfileNotifier extends Notifier<UserProfile> {
   }
 
   Future<void> _initIdentity() async {
-    await refreshFromVault();
+    await refreshFromStorage();
   }
 
-  Future<void> refreshFromVault() async {
-    final vault = await getActiveIdentity();
-    if (vault.did.isEmpty) {
+  Future<void> refreshFromStorage() async {
+    final identityData = await getActiveIdentity();
+    if (identityData.did.isEmpty) {
       debugPrint("UserProfileNotifier: No active profile session.");
       state = UserProfile(name: 'Signed Out', did: '', secret: '');
       return;
     }
     
-    String? url = vault.avatarUrl.isEmpty ? null : vault.avatarUrl;
+    String? url = identityData.avatarUrl.isEmpty ? null : identityData.avatarUrl;
     Uint8List? bytes;
     if (url != null && url.startsWith('data:image')) {
       try {
@@ -94,34 +92,34 @@ class UserProfileNotifier extends Notifier<UserProfile> {
       } catch (_) {}
     }
     state = UserProfile(
-      name: vault.displayName, 
-      did: vault.did, 
-      avatarUrl: vault.avatarUrl,
+      name: identityData.displayName, 
+      did: identityData.did, 
+      avatarUrl: identityData.avatarUrl,
       avatarBytes: bytes,
-      isVerified: vault.verifiedLinks.any((l) => l.isVerified),
-      proofString: vault.proofString,
-      verifiedLinks: vault.verifiedLinks,
-      nameHistory: vault.nameHistory,
+      isVerified: identityData.verifiedLinks.any((l) => l.isVerified),
+      proofString: identityData.proofString,
+      verifiedLinks: identityData.verifiedLinks,
+      nameHistory: identityData.nameHistory,
       linkedAccounts: await getOauthLinks(),
-      secret: vault.secret,
-      ingressEnabled: vault.ingressEnabled,
-      egressEnabled: vault.egressEnabled,
+      secret: identityData.secret,
+      ingressEnabled: identityData.ingressEnabled,
+      egressEnabled: identityData.egressEnabled,
     );
   }
 
   Future<void> updateProfile(String name, String did, Uint8List? bytes, String? url) async {
-    final vault = await updateActiveProfile(name: name, avatar: url ?? "");
+    final identityData = await updateActiveProfile(name: name, avatar: url ?? "");
     state = UserProfile(
-      name: vault.displayName, 
-      did: vault.did, 
+      name: identityData.displayName, 
+      did: identityData.did, 
       avatarBytes: bytes, 
-      avatarUrl: vault.avatarUrl,
-      secret: vault.secret,
-      verifiedLinks: vault.verifiedLinks,
-      nameHistory: vault.nameHistory,
-      proofString: vault.proofString,
-      ingressEnabled: vault.ingressEnabled,
-      egressEnabled: vault.egressEnabled,
+      avatarUrl: identityData.avatarUrl,
+      secret: identityData.secret,
+      verifiedLinks: identityData.verifiedLinks,
+      nameHistory: identityData.nameHistory,
+      proofString: identityData.proofString,
+      ingressEnabled: identityData.ingressEnabled,
+      egressEnabled: identityData.egressEnabled,
     );
   }
 }
@@ -217,7 +215,6 @@ final filteredConversationsProvider = Provider<List<Conversation>>((ref) {
   }).toList();
 });
 
-// 🧠 Educational Context: Scoped Message Persistence
 /// Manages messages for a SPECIFIC conversation.
 /// By utilizing FamilyNotifier keyed to the conversation ID, we achieve 
 /// total isolation of message streams. This prevents "cross-chat" rebuild 
@@ -237,7 +234,7 @@ class MessageListNotifier extends FamilyNotifier<List<Message>, String> {
 
   Future<void> send(String content) async {
     final user = ref.read(userProfileProvider);
-    final newMsg = await sendWillowMessage(
+    final newMsg = await sendMessage(
       conversationId: arg,
       authorDid: user.did,
       content: content,

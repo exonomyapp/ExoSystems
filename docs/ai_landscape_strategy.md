@@ -1,4 +1,4 @@
-# The Sovereign Exosystem: Strategic Position in the 2026 AI Landscape
+# The Exosystem: Strategic Position in the 2026 AI Landscape
 
 ## Table of Contents
 1. [The 5-Layer Industrial AI Stack](#1-the-5-layer-industrial-ai-stack)
@@ -30,7 +30,7 @@ In this paradigm, the user is fundamentally a tenant. Access to intelligence, li
 
 ## 3. The P2P Existential Threat
 ##### Why the Exosystem's local-first mesh (Willow/Iroh) and decentralized identity disrupt the data silos required to maintain centralized algorithmic dominance.
-The Sovereign Exosystem represents an existential threat to this centralized stack because it fundamentally rejects the premise that intelligence and data must be routed through a central broker. The hyperscaler business model relies on **Infrastructure Lock-In and Rent Extraction**. They invest billions in capital expenditure to build hyper-dense data centers, and recoup this by charging exorbitant ingress/egress data fees and hourly compute rates.
+The Exosystem represents an existential threat to this centralized stack because it fundamentally rejects the premise that intelligence and data must be routed through a central broker. The hyperscaler business model relies on **Infrastructure Lock-In and Rent Extraction**. They invest billions in capital expenditure to build hyper-dense data centers, and recoup this by charging exorbitant ingress/egress data fees and hourly compute rates.
 
 If users can rely on a **local-first, peer-to-peer mesh (Iroh/Willow)** for their data routing, and use cryptographically secure DIDs for identity, the application layer (Layer 5) is instantly decoupled from the hyperscaler infrastructure (Layer 3). This introduces devastating economic impacts to legacy data center stakeholders:
 - **The Egress Fee Collapse:** Hyperscalers make massive margins on data leaving their network. If users communicate via direct UDP hole-punching or stateless DERP relays, the data physically bypasses the AWS/Azure core routing layers, driving egress revenues to zero.
@@ -39,11 +39,11 @@ If users can rely on a **local-first, peer-to-peer mesh (Iroh/Willow)** for thei
 
 ## 4. AI Implementation in a Perfect P2P World
 ##### A P2P approach challenges traditional cloud servers by introducing decentralized routing and persistence mechanisms. Always-on Conscia nodes replace centralized servers, and inference can be pushed to decentralized compute networks (like Bittensor or Morpheus) or handled entirely locally.
-In a realized Sovereign Exosystem, the goal is to explore replacing traditional controlling servers with decentralized routing and persistence mechanisms. 
+In a realized Exosystem, the goal is to explore replacing traditional controlling servers with decentralized routing and persistence mechanisms. 
 
-- **Conscia Nodes as the Substrate:** Instead of AWS hosting a central API, users deploy their own always-on **Conscia Nodes**. These could act as "Sovereign Lifelines" that buffer encrypted data, aiming to ensure high availability (HA) without central authority.
+- **Conscia Nodes as the Substrate:** Instead of AWS hosting a central API, users deploy their own always-on **Conscia Nodes**. These could act as "Lifelines" that buffer encrypted data, aiming to ensure high availability (HA) without central authority.
 - **Decentralized Execution:** AI inference would not need to occur in a centralized silo. It could happen either purely locally (on-device) or be brokered through decentralized compute networks (e.g., Bittensor, Morpheus, Petals) where inference is commoditized and privacy is preserved through encrypted payloads.
-- **Sovereign Agents:** Agentic AI could operate strictly on behalf of the user's `did:peer`. An ideal AI agent in the Exosystem would not report data back to OpenAI; it would live within your Identity Vault, orchestrating tasks across Exonomy and Exocracy using your secure cryptographic capabilities.
+- **Agentic AI:** Agentic AI could operate strictly on behalf of the user's `did:peer`. An ideal AI agent in the Exosystem would not report data back to OpenAI; it would live within your Identity Vault, orchestrating tasks across Exonomy and Exocracy using your secure cryptographic capabilities.
 
 ## 5. Integrating AI into the Exosystem: SLMs and Conscia
 ##### Exosystem is exploring pragmatic steps that include leveraging Small Language Models (SLMs) on-device via FFI, using Conscia nodes as a private inference relay, and utilizing "blind hosting" for secure federated learning.
@@ -56,7 +56,7 @@ To pragmatically integrate AI within the current `exotalk_engine` architecture, 
 ## 6. Small Language Models (SLMs): The 2026 Competitive Landscape
 ##### Comparing the cutting-edge SLMs designed for local inference and their specific hardware requirements across the Exosystem application triad.
 
-In 2026, the distinction between massive "data-center-only" models and highly optimized "local" models is sharp. Distillation techniques have enabled Small Language Models (SLMs) in the 7B–8B parameter range to perform at levels previously reserved for massive 70B+ parameter models. These are the models intended for on-device execution within the Sovereign Exosystem.
+In 2026, the distinction between massive "data-center-only" models and highly optimized "local" models is sharp. Distillation techniques have enabled Small Language Models (SLMs) in the 7B–8B parameter range to perform at levels previously reserved for massive 70B+ parameter models. These are the models intended for on-device execution within the Exosystem.
 
 ### The Leading SLMs (7B-8B Parameters)
 - **DeepSeek-R1-Distill-Llama-8B:** A highly capable, dense model distilled from DeepSeek's massive MoE reasoning models. It excels at multi-step logic and coding tasks, making it ideal for running agentic Exocracy workflows locally without external API calls.
@@ -73,4 +73,4 @@ To run these 7B-8B SLMs locally (typically using 4-bit quantization via `llama.c
 | **Desktop / Home Server** | Dedicated GPU (e.g., NVIDIA RTX 4060 Ti / RTX 3090) with **16GB+ VRAM** and 32GB+ System RAM. | Easily runs multiple 8B models simultaneously or higher parameter (14B-32B) models at blistering speeds. | Operates as a **Conscia Inference Relay**, securely serving the user's mobile devices and participating in decentralized network compute bounties. |
 
 ---
-*This document serves as the foundational perspective for integrating autonomous, private intelligence into the Sovereign Exosystem.*
+*This document serves as the foundational perspective for integrating independent, private intelligence into the Exosystem.*

@@ -1,9 +1,9 @@
 // =============================================================================
-// exo_auth_view.dart — The "Solid Front Door" (Spec 17)
+// exo_auth_view.dart — Auth View (Spec 17)
 // =============================================================================
-// This component is the primary entry point for the ExoTalk ecosystem.
-// It follows Spec 17's "Non-Elastic Frame" protocol, ensuring that 
-// sovereign identity cards and onboarding triggers maintain structural 
+// This component is the primary entry point for ExoTalk.
+// It follows Spec 17's "Fixed Frame" protocol, ensuring that 
+// identity components and onboarding elements maintain structural 
 // stability across all desktop and mobile viewports.
 // =============================================================================
 import 'package:flutter/material.dart';
@@ -37,9 +37,9 @@ class ExoAuthView extends ConsumerStatefulWidget {
 class _ExoAuthViewState extends ConsumerState<ExoAuthView> {
   final MenuController _menuController = MenuController();
 
-  // 🧠 Educational Context: The OAuth-to-Sovereign Bridge
-  // This function facilitates the transition from centralized OAuth providers 
-  // (Google/GitHub) to decentralized Sovereign identities (did:peer). 
+  // EDUCATIONAL CONTEXT: OAuth Integration
+  // This function facilitates the transition from OAuth providers 
+  // (Google/GitHub) to identities (did:peer). 
   // It checks if a linked local persona already exists; if not, it triggers 
   // the creation of a new, local-only vault that is permanently associated 
   // with the cryptographic hash of the OAuth 'sub' field.
@@ -100,7 +100,7 @@ class _ExoAuthViewState extends ConsumerState<ExoAuthView> {
                 await ref.read(identityProvider.notifier).refreshManifest();
                 await ref.read(identityProvider.notifier).switchIdentity(newDid);
               },
-              child: Text("Create New Sovereign Persona", style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text("Create New Persona", style: TextStyle(fontWeight: FontWeight.bold)),
             ),
             SizedBox(height: 16),
             Divider(),
@@ -160,7 +160,7 @@ class _ExoAuthViewState extends ConsumerState<ExoAuthView> {
         bindings: {
           SingleActivator(LogicalKeyboardKey.enter): () => _menuController.open(),
           SingleActivator(LogicalKeyboardKey.space): () => _menuController.open(),
-          // Dev shortcut: CTRL+1 — sign in as the first sovereign identity
+          // Dev shortcut: CTRL+1 — sign in as the first autonomous identity
           SingleActivator(LogicalKeyboardKey.digit1, control: true): () {
             final identities = ref.read(identityProvider).knownIdentities;
             if (identities.isNotEmpty) {
@@ -187,11 +187,10 @@ class _ExoAuthViewState extends ConsumerState<ExoAuthView> {
                 padding: EdgeInsets.symmetric(horizontal: isMobile ? 16.0 * scale : 24.0 * scale, vertical: 32.0 * scale),
                 child: Container(
                   key: const Key('welcome_screen_card'),
-                  // 🧠 Educational Context: The Solid Front Door (Spec 17)
-                  // We apply a non-elastic frame via hard-coded constraints scaled 
+                  // EDUCATIONAL CONTEXT: Fixed Frame Layout (Spec 17)
+                  // We apply a fixed frame via constraints scaled 
                   // by 'uiScaleProvider'. This ensures that the onboarding 
-                  // experience feels heavy, intentional, and physically stable 
-                  // regardless of window size regressions.
+                  // experience remains consistent regardless of window size.
                   constraints: BoxConstraints(
                     minWidth: isMobile ? 0 : 440.0 * scale,
                     maxWidth: isMobile ? double.infinity : 600.0 * scale,
@@ -224,7 +223,7 @@ class _ExoAuthViewState extends ConsumerState<ExoAuthView> {
                           child: ConstrainedBox(
                             constraints: BoxConstraints(maxWidth: 400.0 * scale),
                             child: Text(
-                              "Your self-sovereign, peer-to-peer workspace is ready.\nHow would you like to get started?",
+                              "Your private, peer-to-peer workspace is ready.\nHow would you like to get started?",
                               textAlign: TextAlign.center,
                               style: ConsciaTheme.bodyStyle(context, scale).copyWith(color: ConsciaTheme.muted(context), height: 1.6),
                             ),
@@ -238,7 +237,7 @@ class _ExoAuthViewState extends ConsumerState<ExoAuthView> {
                       if (identities.isNotEmpty) {
                         rowSizes.addAll([auto, 12.px, auto, 12.px]);
                         gridChildren.add(Center(
-                          child: Text("SOVEREIGN IDENTITIES", textAlign: TextAlign.center, style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.5, color: ConsciaTheme.accent(context)))
+                          child: Text("REGISTERED IDENTITIES", textAlign: TextAlign.center, style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold, letterSpacing: 1.5, color: ConsciaTheme.accent(context)))
                         ).withGridPlacement(columnStart: 0, rowStart: currentRow++));
                         gridChildren.add(SizedBox().withGridPlacement(columnStart: 0, rowStart: currentRow++));
                         gridChildren.add(Center(
@@ -361,7 +360,7 @@ class _OnboardingMenuState extends ConsumerState<_OnboardingMenu> {
           elevation: 4,
         ),
         icon: Icon(LucideIcons.plus, size: 20 * scale),
-        label: Text("ADD SOVEREIGN IDENTITY", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2 * scale)),
+        label: Text("ADD IDENTITY", style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2 * scale)),
       ),
     );
   }

@@ -6,9 +6,16 @@ class ProposalInbox extends ConsumerWidget {
   const ProposalInbox({super.key});
 
   // 🧠 EDUCATIONAL CONTEXT: Human-in-the-Loop (HITL) Adjudication
-  // A core tenet of the Exosystem is that sovereign operators must manually 
+  // A core tenet of the Exosystem is that operators must manually 
   // review capability petitions from client applications (like Synesys) to prevent
-  // autonomous network infiltration and ensure cryptographic authority remains intentional.
+  // network infiltration and ensure cryptographic authority remains intentional.
+  //
+  // 💡 MENTOR TIP: Riverpod Watch/Read Patterns
+  // We use 'ref.watch' for 'petitionsProvider' to ensure the UI rebuilds 
+  // automatically when new petitions arrive via the Conscia daemon. Conversely, 
+  // we use 'ref.read' in the 'onPressed' callback (line 73) because we only 
+  // need to trigger a one-off action, not listen for ongoing changes to the 
+  // action provider itself.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncPetitions = ref.watch(petitionsProvider);
@@ -79,7 +86,11 @@ class ProposalInbox extends ConsumerWidget {
               icon: const Icon(Icons.close, color: Colors.red),
               label: const Text('Deny'),
               onPressed: () {
-                // Deny logic would involve removing the request
+                // 🧠 EDUCATIONAL CONTEXT: Deny Logic
+                // Denying a petition simply removes it from the pending queue. 
+                // Since the P2P mesh is permissionless for discovery but 
+                // permissioned for synchronization, a denied peer can still 
+                // "see" the node but cannot "sync" with it.
               },
             ),
           ],

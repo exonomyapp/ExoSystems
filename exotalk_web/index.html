@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExoTalk | Sovereign Messaging</title>
+    <title>ExoTalk | Independent Messaging</title>
     <link rel="stylesheet" href="index.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,14 +11,13 @@
 </head>
 <body>
     <!-- 
-      Sovereign Loading Overlay
-      This component mitigates theUX friction of downloading the large (~5-10MB) 
-      Wasm binary payload. It provides deterministic, visual feedback during the 
-      synchronization process to maintain a premium feel.
+      Loading Overlay
+      This component provides visual feedback during the 
+      synchronization process.
     -->
     <div id="loading-overlay">
         <div class="loader-container">
-            <div class="loader-text">Initializing Sovereign Session</div>
+            <div class="loader-text">Initializing Session</div>
             <div class="loader-bar">
                 <div id="loader-progress" class="loader-progress"></div>
             </div>
@@ -38,22 +37,22 @@
 
     <main>
         <section class="hero">
-            <h1>Defend Your <br>Digital Sovereignty</h1>
-            <p>A zero-harvest, P2P messaging application engineered to operate beyond the reach of centralized "kill chains" and algorithmic surveillance.</p>
+            <h1>Defend Your <br>Digital Autonomy</h1>
+            <p>A zero-harvest, P2P messaging application engineered to operate without centralized intermediaries.</p>
             <div id="demo-controls">
                 <!-- This button triggers the Wasm session initialization and WebRTC handshake -->
-                <button id="launch-btn" class="cta-button">Launch Sovereign Demo</button>
+                <button id="launch-btn" class="cta-button">Launch Demo</button>
             </div>
         </section>
 
         <section class="features">
             <div class="feature-card">
-                <h3>Sovereign Identity</h3>
-                <p>Local Ed25519 key generation via ExoAuth. Your identity is synthesized locally, never stored in the cloud.</p>
+                <h3>Identity Management</h3>
+                <p>Local Ed25519 key generation via ExoAuth. Your identity is generated locally, never stored in the cloud.</p>
             </div>
             <div class="feature-card">
-                <h3>Mesh Dynamics</h3>
-                <p>Real-time visualization of P2P ingress/egress flows. Gossip directly with peers without a central relay.</p>
+                <h3>Network Mesh</h3>
+                <p>Real-time visualization of P2P ingress/egress flows. Communicate directly with peers without a central relay.</p>
             </div>
             <div class="feature-card">
                 <h3>Zero-Harvest</h3>
@@ -63,16 +62,16 @@
     </main>
 
     <footer>
-        &copy; 2026 The Sovereign Exosystem. Built for the frontlines of digital resistance.
+        &copy; 2026 The Exosystem. Built for secure, private communications.
     </footer>
 
     <!-- 
       Core Logic Module 
       Imports the compiled Rust WebAssembly bindings and manages the interaction
-      between the DOM and the Sovereign Engine.
+      between the DOM and the Engine.
     -->
     <script type="module">
-        import init, { SovereignSession } from './pkg/exotalk_wasm.js';
+        import init, { autonomousSession } from './pkg/exotalk_wasm.js';
 
         async function run() {
             try {
@@ -112,15 +111,15 @@
                 // Triggers the local identity synthesis and begins the signaling process
                 // to join the remote ExoTalk mesh.
                 document.getElementById('launch-btn').addEventListener('click', async () => {
-                    const session = new SovereignSession("DemoUser");
-                    const did = session.synthesize_did();
-                    alert(`Sovereign Identity Synthesized: ${did}\nConnecting to mesh...`);
+                    const session = new session("DemoUser");
+                    const did = session.generate_did();
+                    alert(`Identity Generated: ${did}\nConnecting to mesh...`);
                     
                     // Connects to the zrok tunnel endpoint hosting the signaling relay
                     await session.connect_to_mesh("wss://signaling.exotalk.tech");
                 });
             } catch (err) {
-                console.error("Failed to initialize Sovereign Engine:", err);
+                console.error("Failed to initialize Engine:", err);
             }
         }
 

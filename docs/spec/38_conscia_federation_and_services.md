@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-Conscia nodes are the sovereign infrastructure backbone of the Exosystem. Each node operates as an autonomous, headless P2P participant that provides enabling services — relay, indexing, discovery, persistence, authentication, observability, and federation — without exercising control over user content.
+Conscia nodes are the core infrastructure backbone of the Exosystem. Each node operates as an independent, headless P2P participant that provides enabling services — relay, indexing, discovery, persistence, authentication, observability, and federation — without exercising control over user content.
 
 This specification defines:
 - The federation protocol by which Conscia nodes discover and peer with one another
@@ -21,7 +21,7 @@ This specification defines:
 
 Federation is a mutual, Human-in-the-Loop relationship between two Conscia nodes. Neither node can unilaterally federate with another.
 
-![Federation Handshake — The five-step mutual peering sequence between two sovereign Conscia nodes](./assets/federation_handshake.png)
+![Federation Handshake — The five-step mutual peering sequence between two independent Conscia nodes](./assets/federation_handshake.png)
 
 **Step-by-step:**
 
@@ -92,7 +92,7 @@ Node operators configure content locality policies via the ConSoul interface. Th
 
 | Rule Type | Description | Use Case |
 |---|---|---|
-| **Replication affinity** | Prefer replicating metadata to nodes in specific regions | A Nairobi parish wants circle metadata to stay on African nodes for latency and data sovereignty |
+| **Replication affinity** | Prefer replicating metadata to nodes in specific regions | A Nairobi parish wants circle metadata to stay on African nodes for latency and data autonomy |
 | **Replication exclusion** | Prevent metadata from reaching specific regions | Sensitive community data must not leave a geographic boundary |
 | **Latency threshold** | Maximum acceptable round-trip time for synchronization partners | A real-time coordination circle requires sub-200ms sync partners |
 | **Bandwidth priority** | Allocate relay bandwidth preferentially to specific federation peers | A high-traffic urban node needs guaranteed bandwidth to its primary cluster |
@@ -173,7 +173,7 @@ Through ConsciaLet, operators can:
 - **Topology Oversight**: Visualize the local mesh neighborhood and monitor the health of active federation channels.
 
 ### 6.3 SDUI Integration
-ConsciaLet is injected into the ConSoul navigation rail via the `federationAdministration` capability. It leverages the **Application Triad** architecture to ensure that the management of these sovereign relationships remains strictly local and private to the node operator.
+ConsciaLet is injected into the ConSoul navigation rail via the `federationAdministration` capability. It leverages the **Application Triad** architecture to ensure that the management of these independent relationships remains strictly local and private to the node operator.
 
 ---
 
@@ -247,13 +247,13 @@ The Conscierge operates as:
 | **Petition triage** | The Conscierge pre-screens incoming petitions using SLM-driven policy evaluation, forwarding only those that require HITL review to the home operator |
 | **Governance summarization** | Summarizes cross-cluster governance events (capability grants, revocations, federation state changes) into digestible reports |
 | **Sync optimization** | Uses SLM inference to prioritize which metadata batches to sync first based on demand patterns and content relevance |
-| **Communication proxy** | Maintains its own ExoTalk chat identity, enabling asynchronous communication between cluster operators via the Conscierge's sovereign messaging channel |
-| **Telemetry logging** | Keeps all internal logs and non-host telemetry in its own local store, separate from the host cluster's data — maintaining sovereignty over its operational records |
+| **Communication proxy** | Maintains its own ExoTalk chat identity, enabling asynchronous communication between cluster operators via the Conscierge's direct messaging channel |
+| **Telemetry logging** | Keeps all internal logs and non-host telemetry in its own local store, separate from the host cluster's data — maintaining autonomy over its operational records |
 | **Health monitoring** | Continuously monitors the health of its host cluster and reports back to the home cluster via federation gossip topics |
 
 ### 8.4 Deployment Model
 
-![Conscierge Deployment Model — A diplomatic sidecar running on remote cluster infrastructure, connected via a dedicated sovereign channel](./assets/conscierge_deployment.png)
+![Conscierge Deployment Model — A diplomatic sidecar running on remote cluster infrastructure, connected via a dedicated direct channel](./assets/conscierge_deployment.png)
 
 The Conscierge is deployed by the home cluster's operator onto the remote cluster's infrastructure (with the remote operator's consent, mediated by the federation handshake). Each cluster can host Conscierges from multiple federation partners.
 
@@ -282,7 +282,7 @@ The `GET /api/discovery` endpoint serves as the public identity card of a Consci
 
 | Field | Description |
 |---|---|
-| `did` | The node's sovereign `did:peer` identity |
+| `did` | The node's independent `did:peer` identity |
 | `node_id` | The Iroh network node identifier |
 | `node_name` | Human-readable name assigned during onboarding |
 | `version` | Conscia daemon version |

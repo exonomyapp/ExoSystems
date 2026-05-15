@@ -19,7 +19,7 @@ This document presents the first scenario as a 6-frame comic strip storyboard. T
 ### Frame 3: The Dead Drop
 ![Frame 3: Dead Drop](00_solid_front_door_fr3_dead_drop.png)
 
-> **Isabella VO**: "The Insider sent a dead drop—a link to a 'Sovereign Front Door'."
+> **Isabella VO**: "The Insider sent a dead drop—a link to a 'Solid Front Door'."
 
 ---
 
@@ -33,7 +33,7 @@ This document presents the first scenario as a 6-frame comic strip storyboard. T
 ### Frame 5: The Choice
 ![Frame 5: Choice](00_solid_front_door_fr5_choice.png)
 
-> **Narrator VO**: "Sovereignty isn't given; it's claimed."
+> **Narrator VO**: "Autonomy isn't given; it's claimed."
 
 ---
 

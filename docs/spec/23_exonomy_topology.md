@@ -1,7 +1,7 @@
 # Specification 23: Exonomy Topology
 
 ## 1. Overview
-Exonomy is a completely distinct, standalone **social media platform** within the Sovereign Exosystem. 
+Exonomy is a completely distinct, standalone **social media platform** within the Exosystem. 
 
 Unlike traditional platforms that rely on hollow "likes" (e.g., for pictures of cappuccino art or cat trick videos), Exonomy uses **vouchers as economic instigators**. The "Exonomist" creates and exchanges these vouchers, and can optionally buy or sell them for real-world fiat currency. 
 
@@ -9,7 +9,7 @@ While Exonomy naturally interoperates with higher-level apps (for instance, its 
 
 ## 2. Triad Distribution Matrix
 
-To handle the complexity of voucher content management without sacrificing sovereign custody, Exonomy is distributed across the Application Triad:
+To handle the complexity of voucher content management without sacrificing local custody, Exonomy is distributed across the Application Triad:
 
 | Tier | Component | Primary Role |
 | :--- | :--- | :--- |
@@ -24,4 +24,4 @@ To handle the complexity of voucher content management without sacrificing sover
 +- **Enterprise**: Sideloaded, centrally-managed APKs for controlled organizational voucher systems.
 
 ## 3. The Indexing Relay
-The `exonomy_web` node acts as a "Consciosophical" facilitator. It hosts encrypted voucher payloads blindly, only indexing the explicitly decorated metadata (e.g., bounty amount, skill requirements, geographic tags) published by the Exonomist. This allows global crowdsourcing of tasks without exposing the underlying cryptographically sealed proof-of-work.
+The `exonomy_web` node acts as an indexing facilitator. It hosts encrypted voucher payloads blindly, only indexing the explicitly decorated metadata (e.g., bounty amount, skill requirements, geographic tags) published by the Exonomist. This allows global crowdsourcing of tasks without exposing the underlying cryptographically sealed proof-of-work.

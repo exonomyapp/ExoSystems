@@ -2,7 +2,7 @@
 
 > **"Walkthroughs serve as the historical record, not source code or specs."** — *[Agent Protocol](agent.md)*
 
-The Sovereign Exosystem uses a **Sequential Walkthrough System** to document all technical transitions, architectural decisions, and verification audits.
+The Exosystem uses a **Sequential Walkthrough System** to document all technical transitions, architectural decisions, and verification audits.
 
 For a granular record of development, refer to the **[docs/walkthroughs/](docs/walkthroughs/)** directory.
 
@@ -11,9 +11,9 @@ For a granular record of development, refer to the **[docs/walkthroughs/](docs/w
 ### May 2026: The Conscia Citizenship Campaign
 - **Walkthrough 70-71**: Extraction of Conscia as a first-class top-level citizen. Root README restoration (Pappus).
 - **Walkthrough 68-69**: Exoauth native plugin portability and SDUI integration.
-- **Walkthrough 66-67**: Sovereign node stabilization and persistence.
+- **Walkthrough 66-67**: Node stabilization and persistence.
 
-### April 2026: The Sovereign Identity Foundation
+### April 2026: The Identity Foundation
 - **Walkthrough 01-10**: Initial engine decoupling, identity synthesis, and the birth of the Application Triad.
 
 ---

@@ -13,7 +13,7 @@ Focused on achieving 1:1 feature parity with the legacy web platform.
 - **Key Actions:** Resolved Linux rendering issues, established robust state management for user identities, and ensured the P2P chat functionality functioned reliably in the native container.
 
 ## Phase 3: Finalization & Refinement (`23b511`)
-Polishing the Flutter client for a production-ready "Sovereign Workspace" experience.
+Polishing the Flutter client for a production-ready "Independent Workspace" experience.
 - **Goal:** Refine native UX and finalize backend integration.
 - **Key Actions:** Refined UI/UX for account and group management, finalized Rust backend (Willow/Conscia) integration, and established the baseline for the future decentralized identity system.
 

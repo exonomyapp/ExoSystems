@@ -6,10 +6,16 @@ class GeographicContextScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 🧠 EDUCATIONAL CONTEXT: Sovereignty via Locality
+    // 🧠 EDUCATIONAL CONTEXT: Autonomy via Locality
     // Geographic routing (Spec 38) prevents "Cloud Colonialism" by allowing
     // operators to enforce content replication boundaries and latency-aware
     // peering based on physical-world proximity and policy.
+    //
+    // 💡 MENTOR TIP: Latency-Aware Federation
+    // By setting a 'Latency Threshold', we ensure that the node only 
+    // synchronizes with peers that are 'electrically close'. This prevents 
+    // a slow or distant node from bottlenecking the gossip throughput of 
+    // a high-performance local mesh.
     
     return Container(
       padding: const EdgeInsets.all(24.0),

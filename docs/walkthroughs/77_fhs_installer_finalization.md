@@ -1,48 +1,48 @@
-# Walkthrough 77: Enterprise FHS Modular Installer
+# Walkthrough 77: FHS Modular Installer
 
-This walkthrough documents the successful implementation of the **Enterprise FHS Modular Installer**, fulfilling the final milestone of **[Campaign 1](../plans/upcoming_milestones_and_fhs.md)**. We have transitioned the Exosystem node from manual, user-space scripts to a professional, automated, and security-hardened Linux distribution standard.
+This walkthrough documents the implementation of the **FHS Modular Installer**, fulfilling the deployment milestone. The Exosystem node has transitioned from manual scripts to a standard Linux distribution configuration.
 
-## 🚀 Key Accomplishments
+## Key Accomplishments
 
-### 1. Signaling Absorption & Component Reduction
-We eliminated the standalone Python signaling server by absorbing its functionality natively into the **Conscia** Rust daemon.
+### 1. Signaling Integration
+Standalone Python signaling server functionality was absorbed into the **Conscia** Rust daemon.
 - **Native Routes**: Added `/api/signaling` (POST) and `/api/signaling/:target` (GET) to the Axum router.
-- **Zero-Dependency**: Removed the requirement for a Python runtime on the node.
-- **Result**: The deployment surface is reduced from 4 components to **2 core** (Conscia + ConSoul) and **1 optional** (Zrok).
+- **Zero-Dependency**: Removed the Python runtime requirement on the node.
+- **Result**: The deployment surface consists of 2 core components (Conscia + ConSoul) and 1 optional component (Zrok).
 
-### 2. The `exo-installer` Crate
-Created a standalone Rust crate ([exo-installer/](../../exo-installer/)) that orchestrates the entire FHS provisioning lifecycle.
-- **Guided Wizard**: Uses `inquire` (Tier 2 Interactive) for a high-fidelity terminal experience.
-- **Idempotent Engine**: Provisions the `exo-sys` system user, directory hierarchy, and security permissions.
+### 2. Installer Crate
+Created a Rust crate (`exo-installer/`) to manage the FHS provisioning lifecycle.
+- **Guided Wizard**: Utilizes the `inquire` library for a terminal interface.
+- **Idempotency**: Provisions the `exo-sys` system user, directory hierarchy, and permissions.
 - **FHS Compliance**: Enforces standard paths (`/opt/exo`, `/etc/exo`, `/var/lib/exo`, `/var/log/exo`).
-- **Health Verification**: Queries systemd post-install to ensure all services are active.
+- **Health Verification**: Queries systemd post-install to verify service status.
 
-### 3. Debian Packaging Infrastructure
-Established the foundation for native `.deb` distribution ([exo-installer/debian/](../../exo-installer/debian/)).
-- **Debconf Parity**: The `.deb` installation process uses `debconf` to provide the same interactive configuration as the TUI wizard.
-- **Standardized postinst**: Automates service registration and FHS hygiene during `apt install`.
+### 3. Debian Packaging
+Established the foundation for native `.deb` distribution.
+- **Debconf Integration**: The `.deb` installation process utilizes `debconf` for configuration.
+- **Standardized postinst**: Automates service registration and directory management during installation.
 
 ### 4. Build Orchestration
-Created a monorepo-root **[Makefile](../../Makefile)** to unify the build process.
+Created a root `Makefile` to unify the build process.
 - `make build-all`: Compiles Conscia (Rust), ConSoul (Flutter), and the Installer (Rust).
-- `make package`: Stages all artifacts into a standardized `dist/` directory for release.
+- `make package`: Stages artifacts into a `dist/` directory.
 
-## 🛠️ Technical Summary
+## Technical Summary
 
 | Feature | Implementation | Path |
 |---|---|---|
 | **Signaling** | Axum routes in Conscia | [main.rs](../../conscia/src/main.rs) |
 | **Installer** | Rust (inquire + indicatif) | [exo-installer/](../../exo-installer/) |
 | **Packaging** | Debian control/config/postinst | [debian/](../../exo-installer/debian/) |
-| **Systemd** | Hardened FHS-units | [templates/](../../exo-installer/templates/) |
+| **Systemd** | FHS-units | [templates/](../../exo-installer/templates/) |
 | **Makefile** | Multi-language build script | [Makefile](../../Makefile) |
 
-## 🧪 Verification Results
+## Verification Results
 
-- ✅ **Conscia Build**: Native signaling routes compile and serve successfully.
-- ✅ **Installer Build**: The `exo-installer` binary compiles without warnings and performs root checks.
-- ✅ **Makefile**: `make help` and build targets verified.
-- ✅ **Documentation**: [FHS Installer Spec](../releases/fhs_installer_specification.md) and [Spec 36](../spec/36_exonomy_deployment_standard.md) updated with ConSoul branding and **[Tier 2 TUI strategy](../spec/07_ui_functionality.md)**.
+- **Conscia Build**: Native signaling routes compile and serve successfully.
+- **Installer Build**: The `exo-installer` binary compiles and performs root checks.
+- **Makefile**: Build targets verified.
+- **Documentation**: [FHS Installer Spec](../releases/fhs_installer_specification.md) and [Spec 36](../spec/36_exonomy_deployment_standard.md) updated with ConSoul branding.
 
 ---
-**The Sovereign Node is now ready for professional distribution.**
+**Status**: Implementation complete.

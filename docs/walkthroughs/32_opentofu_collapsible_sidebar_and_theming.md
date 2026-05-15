@@ -1,43 +1,40 @@
 # Walkthrough 32: OpenTofu Migration, Collapsible Sidebar & Centralized Theming
 
-This walkthrough documents three architectural refinements: adopting OpenTofu as the official IaC tool, replacing the node management modal with a native sidebar-integrated view, and centralizing version theming discipline.
+This walkthrough documents three architectural refinements: adopting OpenTofu as the IaC tool, replacing the node management modal with a native sidebar-integrated view, and centralizing version theming.
 
 ## 1. Infrastructure: Terraform → OpenTofu
 
-After evaluating Terraform, Pulumi, and OpenTofu against the ExoTalk vision of enabling non-technical users to provision sovereign Conscia servers on cloud providers:
+OpenTofu was evaluated against Terraform and Pulumi for provisioning Conscia servers:
 
-- **Pulumi** was eliminated because it would force a third programming language (TypeScript/Go) into our Dart/Rust monorepo.
-- **Terraform** was eliminated due to HashiCorp's BSL license change, which conflicts with ExoTalk's sovereign, open-source ethos.
-- **OpenTofu** was selected as the winner: it is the Linux Foundation's open-source fork of Terraform, fully compatible with the existing provider ecosystem (GCP, AWS), uses declarative HCL (no stack fragmentation), and guarantees open governance.
+- **Pulumi** was excluded to avoid introducing additional programming languages (TypeScript/Go) into the Dart/Rust monorepo.
+- **Terraform** was excluded due to the BSL license change, which is not compatible with project requirements.
+- **OpenTofu** was selected for its compatibility with the existing provider ecosystem (GCP, AWS), use of declarative HCL, and open governance.
 
-**Change:** Renamed `infra/terraform/` → `infra/opentofu/`. The `main.tf` and `variables.tf` files are unchanged in content; only the directory reflects our commitment to OpenTofu.
+**Change:** Renamed `infra/terraform/` to `infra/opentofu/`. The `main.tf` and `variables.tf` files remain unchanged in content; the directory name reflects the migration to OpenTofu.
 
 ## 2. Node Management: Modal → Sidebar-Integrated View
 
-The previous modal-based node management was a poor UX decision. Node management is a core operational concern, not an ephemeral dialog. It now lives natively in the sidebar and main content area.
+Node management has been moved from a modal to a native sidebar and main content area view.
 
 ### Changes Made
-- **Deleted** `lib/widgets/modals/node_management_modal.dart` — the modal artifact.
-- **Created** `lib/screens/node_management_view.dart` — a full-screen view that renders in the main content area (where the chat window sits) when a Conscia node is selected from the sidebar.
+- **Deleted** `lib/widgets/modals/node_management_modal.dart`.
+- **Created** `lib/screens/node_management_view.dart`: A full-screen view rendered in the main content area when a Conscia node is selected.
 - **Modified** `lib/screens/home_screen.dart`:
   - Added `MainView` enum and `activeMainViewProvider` to track whether the user is viewing a Chat or the Node Management screen.
-  - Replaced the flat `_ConversationList` with `_SidebarContent`, which contains two collapsible `ExpansionTile` groups:
-    1. **Chats** — the conversation list (collapsible).
-    2. **Conscia Nodes** — the node roster with a "Manage Roster" entry (collapsible).
-  - Collapsing one group frees vertical space for the other.
-  - Clicking a chat sets `activeMainViewProvider` to `MainView.chat`; clicking "Manage Roster" sets it to `MainView.nodeManagement`.
-  - Removed the server icon button from the footer controls (no longer needed).
+  - Replaced the `_ConversationList` with `_SidebarContent`, containing two collapsible `ExpansionTile` groups:
+    1. **Chats**: The conversation list.
+    2. **Conscia Nodes**: The node roster.
+  - Clicking a chat sets `activeMainViewProvider` to `MainView.chat`; selecting a node sets it to `MainView.nodeManagement`.
+  - Removed the server icon button from the footer controls.
 
 ## 3. Centralized Version Theming
 
-- **Modified** `lib/src/theme.dart` — added `ConsciaTheme.versionStyle(context, scale)` which enforces Courier monospace at 10px with the muted color token.
-- **Modified** `lib/widgets/modals/account_manager.dart` — replaced the inline `TextStyle(fontFamily: 'Courier', fontSize: 10 * scale, color: ConsciaTheme.muted(context))` with the centralized `ConsciaTheme.versionStyle(context, scale)`.
-
-All future version labels must use this token.
+- **Modified** `lib/src/theme.dart`: Added `ConsciaTheme.versionStyle(context, scale)` to standardize Courier monospace at 10px with the muted color token.
+- **Modified** `lib/widgets/modals/account_manager.dart`: Replaced inline styling with the centralized `ConsciaTheme.versionStyle` token.
 
 ## Verification
 
 | Check | Result |
 |---|---|
-| `flutter analyze` | ✓ 0 errors (3 pre-existing info-level `avoid_print` warnings) |
-| `flutter build linux --debug` | ✓ Built `build/linux/x64/debug/bundle/exotalk_flutter` |
+| `flutter analyze` | 0 errors |
+| `flutter build linux --debug` | Successful build of `exotalk_flutter` |

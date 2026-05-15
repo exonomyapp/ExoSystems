@@ -2,24 +2,17 @@
 // messaging.rs — Conversation & Message Engine (Post-Modularization)
 // =============================================================================
 //
-// 🧠 Educational Context: Separation of Concerns
-// This module was extracted from the monolithic `willow.rs` during the
-// exoauth_core modularization (Walkthrough 67). It contains ONLY the
-// chat/messaging logic that depends on the P2P network layer (Iroh).
+// Separation of Concerns
+// This module contains the chat/messaging logic that depends on 
+// the P2P network layer (Iroh).
 //
 // Identity operations (DID generation, proofs, OAuth links, verified links)
-// now live in the portable `exoauth_core` crate at `exoauth/rust/`, which
-// can be consumed independently by any Flutter app (e.g. ThreeSteps).
+// live in the portable `exoauth_core` crate at `exoauth/rust/`.
 //
 // Key Design Decision:
-//   - `initWillowDatabase(did, secret)` now takes explicit identity params
-//     instead of reading from a global static. This decouples messaging
-//     initialization from identity lifecycle management.
-//   - `delegateCapability(delegatorDid, delegatorSecret, ...)` follows the
-//     same pattern — the caller provides credentials rather than relying
-//     on a shared mutable identity vault.
-//
-// See: docs/walkthroughs/67_exoauth_core_modularization.md
+//   - `init_database(did, secret)` takes explicit identity parameters.
+//   - `delegate_capability` callers provide credentials rather than relying
+//     on shared mutable identity storage.
 // =============================================================================
 
 use tokio::sync::RwLock;
@@ -68,7 +61,7 @@ async fn save_db_to_disk() {
     }
 }
 
-pub async fn init_willow_database(did: String, secret: String) -> Result<bool, String> {
+pub async fn init_database(did: String, secret: String) -> Result<bool, String> {
     network::start_iroh_node(did, secret).await?;
 
     if let Ok(data) = std::fs::read_to_string(storage_path("db_conversations.json").await) {
@@ -93,7 +86,7 @@ pub async fn fetch_conversations() -> Vec<Conversation> {
     db.clone()
 }
 
-pub async fn send_willow_message(conversation_id: String, author_did: String, content: String) -> Message {
+pub async fn send_message(conversation_id: String, author_did: String, content: String) -> Message {
     let timestamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
     

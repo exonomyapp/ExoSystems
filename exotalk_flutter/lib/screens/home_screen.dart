@@ -1,5 +1,4 @@
-// =============================================================================
-// home_screen.dart — Primary Layout Shell (Sovereign Generation)
+// home_screen.dart — Primary Layout Shell
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +14,7 @@ import '../widgets/modals/new_chat_dialog.dart';
 import 'chat_window_screen.dart';
 import '../widgets/theme_selector.dart';
 import '../widgets/pulsing_icon.dart';
-import '../providers/conscia_provider.dart';
+import '../providers/relay_provider.dart';
 import '../src/rust/api/messaging.dart';
 import '../widgets/modals/peer_list_modal.dart';
 import '../widgets/modals/governance_mission_control.dart';
@@ -50,18 +49,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final isCtrl = HardwareKeyboard.instance.isControlPressed;
 
-    // Dev shortcut: CTRL+P — ping Conscia
+    // Dev shortcut: CTRL+P — ping Relay
     if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyP) {
-      debugPrint('[DEV] CTRL+P: Pinging Conscia...');
-      ref.read(identityServiceProvider).pingConscia();
+      debugPrint('[DEV] CTRL+P: Pinging Relay...');
+      ref.read(identityServiceProvider).pingRelay();
       return true;
     }
 
-    // 🧠 Educational Context: Local Node Control
     // Dev shortcut: CTRL+S — toggle node sleep
-    // This allows the user to manually simulate the Conscia node going into 
+    // This allows the user to manually simulate the node going into 
     // standby mode, which in turn gates the UI's mesh traffic visualization 
-    // to ensure total state consistency across the triad.
+    // to ensure total state consistency.
     if (isCtrl && event.logicalKey == LogicalKeyboardKey.keyS) {
       final isSleeping = ref.read(nodeSleepProvider);
       ref.read(nodeSleepProvider.notifier).state = !isSleeping;
@@ -103,18 +101,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           context: context,
           builder: (BuildContext dialogContext) {
             return AlertDialog(
-              backgroundColor: ConsciaTheme.surface(dialogContext),
+              backgroundColor: AppTheme.surface(dialogContext),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: Text("Sign Out", style: ConsciaTheme.headingStyle(dialogContext, scale)),
-              content: Text("Are you sure you want to sign out?", style: ConsciaTheme.bodyStyle(dialogContext, scale)),
+              title: Text("Sign Out", style: AppTheme.headingStyle(dialogContext, scale)),
+              content: Text("Are you sure you want to sign out?", style: AppTheme.bodyStyle(dialogContext, scale)),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text("Cancel", style: TextStyle(color: ConsciaTheme.muted(dialogContext))),
+                  child: Text("Cancel", style: TextStyle(color: AppTheme.muted(dialogContext))),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: ConsciaTheme.error(dialogContext),
+                    backgroundColor: AppTheme.error(dialogContext),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
@@ -150,7 +148,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isSigningOut = identity.isSigningOut;
 
     return Scaffold(
-      backgroundColor: ConsciaTheme.background(context),
+      backgroundColor: AppTheme.background(context),
       body: IgnorePointer(
         ignoring: isSigningOut,
         child: Opacity(
@@ -229,8 +227,8 @@ class _ExoSidebar extends ConsumerWidget {
       curve: Curves.easeInOutCubic,
       width: isVisible ? (width * scale) : 0,
       decoration: BoxDecoration(
-        color: ConsciaTheme.surface(context),
-        border: Border(right: BorderSide(color: ConsciaTheme.border(context))),
+        color: AppTheme.surface(context),
+        border: Border(right: BorderSide(color: AppTheme.border(context))),
       ),
       child: Stack(
         children: [
@@ -275,8 +273,8 @@ class _SidebarToggle extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.0 * scale),
         child: Container(
           padding: EdgeInsets.all(12.0 * scale),
-          decoration: ConsciaTheme.solidDecoration(context, radius: 12.0 * scale),
-          child: Icon(LucideIcons.panelLeft, size: 20.0 * scale, color: ConsciaTheme.text(context)),
+          decoration: AppTheme.solidDecoration(context, radius: 12.0 * scale),
+          child: Icon(LucideIcons.panelLeft, size: 20.0 * scale, color: AppTheme.text(context)),
         ),
       ),
     );
@@ -295,7 +293,7 @@ class _EmptyStateView extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: ConsciaTheme.mainGradient(context),
+          colors: AppTheme.mainGradient(context),
         ),
       ),
         child: SingleChildScrollView(
@@ -310,12 +308,12 @@ class _EmptyStateView extends ConsumerWidget {
             children: [
               _ExoLogo(scale: scale),
               SizedBox(height: 40.0 * scale),
-              Text("Welcome to ExoTalk", style: ConsciaTheme.headingStyle(context, scale).copyWith(fontSize: 36.0 * scale)),
+              Text("Welcome to ExoTalk", style: AppTheme.headingStyle(context, scale).copyWith(fontSize: 36.0 * scale)),
               SizedBox(height: 16.0 * scale),
               Text(
-                "A self-sovereign messaging platform built on the Willow protocol. Your identity, your data, your mesh.",
+                "A self-autonomous messaging platform built on the Willow protocol. Your identity, your data, your mesh.",
                 textAlign: TextAlign.center,
-                style: ConsciaTheme.bodyStyle(context, scale).copyWith(color: ConsciaTheme.muted(context), height: 1.5),
+                style: AppTheme.bodyStyle(context, scale).copyWith(color: AppTheme.muted(context), height: 1.5),
               ),
               SizedBox(height: 48.0 * scale),
               const _IdentityDashboard(),
@@ -338,7 +336,7 @@ class _IdentityDashboard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final scale = ref.watch(uiScaleProvider);
     final identity = ref.watch(identityProvider);
-    final status = ref.watch(consciaStatusProvider).value;
+    final status = ref.watch(relayStatusProvider).value;
 
     return Column(
       children: [
@@ -355,14 +353,14 @@ class _IdentityDashboard extends ConsumerWidget {
           width: 420.0 * scale,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           decoration: BoxDecoration(
-            color: ConsciaTheme.hover(context),
+            color: AppTheme.hover(context),
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: ConsciaTheme.border(context)),
+            border: Border.all(color: AppTheme.border(context)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(LucideIcons.fingerprint, size: 16 * scale, color: ConsciaTheme.accent(context)),
+              Icon(LucideIcons.fingerprint, size: 16 * scale, color: AppTheme.accent(context)),
               SizedBox(width: 8),
               Expanded(
                 child: Tooltip(
@@ -371,9 +369,9 @@ class _IdentityDashboard extends ConsumerWidget {
                     identity.activeDid != null 
                       ? "Identity: ${identity.activeDid!}"
                       : "Scanning Identities...",
-                    style: ConsciaTheme.bodyStyle(context, scale).copyWith(
+                    style: AppTheme.bodyStyle(context, scale).copyWith(
                       fontSize: 13 * scale,
-                      color: ConsciaTheme.muted(context),
+                      color: AppTheme.muted(context),
                       fontFamily: 'JetBrainsMono',
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -430,7 +428,7 @@ class _CopyButtonState extends State<_CopyButton> with SingleTickerProviderState
       return ScaleTransition(
         scale: _scaleAnimation,
         child: IconButton(
-          icon: Icon(LucideIcons.copy, size: 16 * widget.scale, color: widget.enabled ? ConsciaTheme.muted(context) : ConsciaTheme.muted(context).withValues(alpha: 0.3)),
+          icon: Icon(LucideIcons.copy, size: 16 * widget.scale, color: widget.enabled ? AppTheme.muted(context) : AppTheme.muted(context).withValues(alpha: 0.3)),
           onPressed: !widget.enabled ? null : () async {
             await _animController.forward();
             await _animController.reverse();
@@ -494,10 +492,9 @@ class _MeshMeterState extends ConsumerState<_MeshMeter>
     if (!mounted || ref.read(identityProvider).isSigningOut) return;
     
     final user = ref.read(userProfileProvider);
-    final status = ref.read(consciaStatusProvider).value;
+    final status = ref.read(relayStatusProvider).value;
     
-    // 🧠 Educational Context: The Mesh Gating Pattern
-    // Activity criteria: toggles are on AND (we are connected OR we have peers OR we just started)
+    // Mesh activity criteria: toggles are on AND (we are connected OR we have peers OR we just started)
     // We assume activity if toggles are on to show the node is "alive" and searching.
     final bool isIngressActive = user.ingressEnabled;
     final bool isEgressActive = user.egressEnabled;
@@ -533,7 +530,7 @@ class _MeshMeterState extends ConsumerState<_MeshMeter>
   Widget build(BuildContext context) {
     final scale = ref.watch(uiScaleProvider);
     final user = ref.watch(userProfileProvider);
-    final status = ref.watch(consciaStatusProvider).value;
+    final status = ref.watch(relayStatusProvider).value;
     final isConnected = status?.isConnected ?? false;
     final peerCount = status?.activePeers ?? 0;
     final hasLiveLink = isConnected || peerCount > 0;
@@ -552,13 +549,13 @@ class _MeshMeterState extends ConsumerState<_MeshMeter>
                 isSleeping ? "MESH SLEEPING" : (!isConnected
                     ? "UNREACHABLE — MESH PAUSED"
                     : (isFlightMode ? "MESH PAUSED — FLIGHT MODE" : "MESH TRAFFIC")),
-                style: ConsciaTheme.bodyStyle(context, scale).copyWith(
+                style: AppTheme.bodyStyle(context, scale).copyWith(
                   fontSize: 10 * scale,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2.0 * scale,
-                  color: isSleeping ? ConsciaTheme.warning(context) : (!isConnected || isFlightMode
-                      ? ConsciaTheme.error(context)
-                      : ConsciaTheme.accent(context)),
+                  color: isSleeping ? AppTheme.warning(context) : (!isConnected || isFlightMode
+                      ? AppTheme.error(context)
+                      : AppTheme.accent(context)),
                 ),
               ),
               if (!isFlightMode && peerCount > 0) ...[
@@ -568,15 +565,15 @@ class _MeshMeterState extends ConsumerState<_MeshMeter>
                   child: InkWell(
                     onTap: () => showDialog(context: context, builder: (_) => const PeerListModal()),
                     borderRadius: BorderRadius.circular(4 * scale),
-                    hoverColor: ConsciaTheme.accent(context).withValues(alpha: 0.1),
+                    hoverColor: AppTheme.accent(context).withValues(alpha: 0.1),
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 4 * scale, vertical: 2 * scale),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(LucideIcons.network, size: 14 * scale, color: ConsciaTheme.accent(context)),
+                          Icon(LucideIcons.network, size: 14 * scale, color: AppTheme.accent(context)),
                           SizedBox(width: 4 * scale),
-                          Text("$peerCount PEERS", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.accent(context), fontWeight: FontWeight.bold, fontSize: 9 * scale)),
+                          Text("$peerCount PEERS", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.accent(context), fontWeight: FontWeight.bold, fontSize: 9 * scale)),
                         ],
                       ),
                     ),
@@ -593,10 +590,10 @@ class _MeshMeterState extends ConsumerState<_MeshMeter>
                         showDialog(context: context, builder: (_) => const GovernanceMissionControlModal());
                       },
                       borderRadius: BorderRadius.circular(4 * scale),
-                      hoverColor: ConsciaTheme.accent(context).withValues(alpha: 0.1),
+                      hoverColor: AppTheme.accent(context).withValues(alpha: 0.1),
                       child: Padding(
                         padding: EdgeInsets.all(8 * scale),
-                        child: Icon(LucideIcons.shieldCheck, size: 18 * scale, color: ConsciaTheme.accent(context)),
+                        child: Icon(LucideIcons.shieldCheck, size: 18 * scale, color: AppTheme.accent(context)),
                       ),
                     ),
                   ),
@@ -620,7 +617,7 @@ class _MeshMeterState extends ConsumerState<_MeshMeter>
                   : "Paused",
               bars: _ingressBars,
               enabled: user.ingressEnabled && !isSleeping,
-              color: ConsciaTheme.meshInbound(context).withValues(alpha: isSleeping ? 0.3 : 1.0),
+              color: AppTheme.meshInbound(context).withValues(alpha: isSleeping ? 0.3 : 1.0),
               animation: _controller,
               scale: scale,
             ),
@@ -631,7 +628,7 @@ class _MeshMeterState extends ConsumerState<_MeshMeter>
                   : "Paused",
               bars: _egressBars,
               enabled: user.egressEnabled && !isSleeping,
-              color: ConsciaTheme.meshOutbound(context).withValues(alpha: isSleeping ? 0.3 : 1.0),
+              color: AppTheme.meshOutbound(context).withValues(alpha: isSleeping ? 0.3 : 1.0),
               animation: _controller,
               scale: scale,
             ),
@@ -668,7 +665,7 @@ class _MeshLane extends StatelessWidget {
   Widget build(BuildContext context) {
     final laneWidth = 160.0 * scale;
     final laneHeight = 40.0 * scale;
-    final mutedColor = ConsciaTheme.muted(context);
+    final mutedColor = AppTheme.muted(context);
 
     return Column(
       children: [
@@ -684,7 +681,7 @@ class _MeshLane extends StatelessWidget {
             SizedBox(width: 4 * scale),
             Text(
               label,
-              style: ConsciaTheme.bodyStyle(context, scale).copyWith(
+              style: AppTheme.bodyStyle(context, scale).copyWith(
                 fontSize: 9 * scale,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5 * scale,
@@ -699,12 +696,12 @@ class _MeshLane extends StatelessWidget {
           width: laneWidth,
           height: laneHeight,
           decoration: BoxDecoration(
-            color: ConsciaTheme.surface(context),
+            color: AppTheme.surface(context),
             borderRadius: BorderRadius.circular(6 * scale),
             border: Border.all(
               color: enabled
                   ? color.withValues(alpha: 0.3)
-                  : ConsciaTheme.border(context),
+                  : AppTheme.border(context),
             ),
           ),
           child: ClipRRect(
@@ -717,7 +714,7 @@ class _MeshLane extends StatelessWidget {
                     bars: bars,
                     enabled: enabled,
                     activeColor: color,
-                    mutedColor: ConsciaTheme.border(context),
+                    mutedColor: AppTheme.border(context),
                     t: animation.value,
                   ),
                   size: Size(laneWidth, laneHeight),
@@ -730,7 +727,7 @@ class _MeshLane extends StatelessWidget {
         // Subtitle
         Text(
           enabled ? subtitle : (label == "INBOUND" ? "Paused" : "Paused"),
-          style: ConsciaTheme.bodyStyle(context, scale).copyWith(
+          style: AppTheme.bodyStyle(context, scale).copyWith(
             fontSize: 9 * scale,
             color: enabled ? color.withValues(alpha: 0.6) : mutedColor,
           ),
@@ -842,18 +839,18 @@ class _ExoLogo extends StatelessWidget {
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: RadialGradient(
-              colors: [ConsciaTheme.accentDark(context), ConsciaTheme.background(context)],
+              colors: [AppTheme.accentDark(context), AppTheme.background(context)],
             ),
           ),
         ),
-        Icon(LucideIcons.shield, size: 80.0 * scale, color: ConsciaTheme.accent(context)),
+        Icon(LucideIcons.shield, size: 80.0 * scale, color: AppTheme.accent(context)),
         Positioned(
           bottom: 20.0 * scale,
           right: 20.0 * scale,
           child: Container(
             padding: EdgeInsets.all(8.0 * scale),
-            decoration: BoxDecoration(color: ConsciaTheme.background(context), shape: BoxShape.circle, border: Border.all(color: ConsciaTheme.accent(context))),
-            child: Icon(LucideIcons.lock, size: 24.0 * scale, color: ConsciaTheme.accent(context)),
+            decoration: BoxDecoration(color: AppTheme.background(context), shape: BoxShape.circle, border: Border.all(color: AppTheme.accent(context))),
+            child: Icon(LucideIcons.lock, size: 24.0 * scale, color: AppTheme.accent(context)),
           ),
         ),
       ],
@@ -875,8 +872,8 @@ class _LargeActionButton extends StatelessWidget {
     
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: isEnabled ? ConsciaTheme.accent(context) : ConsciaTheme.muted(context).withValues(alpha: 0.1),
-        foregroundColor: isEnabled ? Colors.white : ConsciaTheme.muted(context).withValues(alpha: 0.5),
+        backgroundColor: isEnabled ? AppTheme.accent(context) : AppTheme.muted(context).withValues(alpha: 0.1),
+        foregroundColor: isEnabled ? Colors.white : AppTheme.muted(context).withValues(alpha: 0.5),
         padding: EdgeInsets.symmetric(horizontal: 40.0 * scale, vertical: 20.0 * scale),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0 * scale)),
         elevation: 0,
@@ -886,10 +883,10 @@ class _LargeActionButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 20 * scale, color: isEnabled ? Colors.white : ConsciaTheme.muted(context).withValues(alpha: 0.5)),
+            Icon(icon, size: 20 * scale, color: isEnabled ? Colors.white : AppTheme.muted(context).withValues(alpha: 0.5)),
             SizedBox(width: 12),
           ],
-          Text(label, style: ConsciaTheme.subHeadingStyle(context, scale).copyWith(color: isEnabled ? Colors.white : ConsciaTheme.muted(context).withValues(alpha: 0.5), fontWeight: FontWeight.w800)),
+          Text(label, style: AppTheme.subHeadingStyle(context, scale).copyWith(color: isEnabled ? Colors.white : AppTheme.muted(context).withValues(alpha: 0.5), fontWeight: FontWeight.w800)),
         ],
       ),
     );
@@ -940,17 +937,17 @@ class _SidebarHeader extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: ConsciaTheme.headerPaddingVertical(scale)),
+        SizedBox(height: AppTheme.headerPaddingVertical(scale)),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: ConsciaTheme.headerPaddingHorizontal(scale)),
+          padding: EdgeInsets.symmetric(horizontal: AppTheme.headerPaddingHorizontal(scale)),
           child: Row(
             children: [
               PopupMenuButton<String>(
                 enabled: !isSigningOut,
                 tooltip: "Switch Persona",
                 offset: Offset(0, 50.0 * scale),
-                color: ConsciaTheme.surface(context),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0 * scale), side: BorderSide(color: ConsciaTheme.border(context))),
+                color: AppTheme.surface(context),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0 * scale), side: BorderSide(color: AppTheme.border(context))),
                 onSelected: (value) {
                   if (value == "add") {
                     showDialog(context: context, builder: (_) => AccountManagerModal());
@@ -967,12 +964,12 @@ class _SidebarHeader extends ConsumerWidget {
                       children: [
                         CircleAvatar(
                           radius: 12.0 * scale,
-                          backgroundColor: identity.did == identityState.activeDid ? ConsciaTheme.accent(context) : ConsciaTheme.border(context),
+                          backgroundColor: identity.did == identityState.activeDid ? AppTheme.accent(context) : AppTheme.border(context),
                           child: Text(identity.displayName.isNotEmpty ? identity.displayName[0] : '?', style: TextStyle(fontSize: 10.0 * scale, color: Colors.white)),
                         ),
                         SizedBox(width: 12.0 * scale),
-                        Expanded(child: Text(identity.displayName, style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontWeight: identity.did == identityState.activeDid ? FontWeight.bold : FontWeight.normal))),
-                        if (identity.did == identityState.activeDid) Icon(LucideIcons.check, size: 14.0 * scale, color: ConsciaTheme.accent(context)),
+                        Expanded(child: Text(identity.displayName, style: AppTheme.bodyStyle(context, scale).copyWith(fontWeight: identity.did == identityState.activeDid ? FontWeight.bold : FontWeight.normal))),
+                        if (identity.did == identityState.activeDid) Icon(LucideIcons.check, size: 14.0 * scale, color: AppTheme.accent(context)),
                       ],
                     ),
                   )),
@@ -981,9 +978,9 @@ class _SidebarHeader extends ConsumerWidget {
                     value: "add",
                     child: Row(
                       children: [
-                        Icon(LucideIcons.userPlus, size: 16.0 * scale, color: ConsciaTheme.accent(context)),
+                        Icon(LucideIcons.userPlus, size: 16.0 * scale, color: AppTheme.accent(context)),
                         SizedBox(width: 12.0 * scale),
-                        Text("Add Profile", style: ConsciaTheme.bodyStyle(context, scale).copyWith(color: ConsciaTheme.accent(context), fontWeight: FontWeight.bold)),
+                        Text("Add Profile", style: AppTheme.bodyStyle(context, scale).copyWith(color: AppTheme.accent(context), fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -991,18 +988,18 @@ class _SidebarHeader extends ConsumerWidget {
                     value: "signout",
                     child: Row(
                       children: [
-                        Icon(LucideIcons.logOut, size: 16.0 * scale, color: ConsciaTheme.error(context)),
+                        Icon(LucideIcons.logOut, size: 16.0 * scale, color: AppTheme.error(context)),
                         SizedBox(width: 12.0 * scale),
-                        Text("Sign Out", style: ConsciaTheme.bodyStyle(context, scale).copyWith(color: ConsciaTheme.error(context))),
+                        Text("Sign Out", style: AppTheme.bodyStyle(context, scale).copyWith(color: AppTheme.error(context))),
                       ],
                     ),
                   ),
                 ],
                 child: CircleAvatar(
                   radius: 22.0 * scale,
-                  backgroundColor: ConsciaTheme.border(context),
+                  backgroundColor: AppTheme.border(context),
                   backgroundImage: (!isSigningOut && user.avatarBytes != null) ? MemoryImage(user.avatarBytes!) : null,
-                  child: (isSigningOut || user.avatarBytes == null) ? Icon(LucideIcons.user, size: 20.0 * scale, color: ConsciaTheme.muted(context)) : null,
+                  child: (isSigningOut || user.avatarBytes == null) ? Icon(LucideIcons.user, size: 20.0 * scale, color: AppTheme.muted(context)) : null,
                 ),
               ),
               SizedBox(width: 12.0 * scale),
@@ -1010,18 +1007,18 @@ class _SidebarHeader extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(isSigningOut ? "Signing out..." : user.name, style: ConsciaTheme.subHeadingStyle(context, scale), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    Text(isSigningOut ? "Closing session" : user.did, style: ConsciaTheme.captionStyle(context, scale).copyWith(fontFamily: 'monospace'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(isSigningOut ? "Signing out..." : user.name, style: AppTheme.subHeadingStyle(context, scale), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(isSigningOut ? "Closing session" : user.did, style: AppTheme.captionStyle(context, scale).copyWith(fontFamily: 'monospace'), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
               IconButton(
-                icon: Icon(LucideIcons.doorOpen, size: 18.0 * scale, color: isSigningOut ? ConsciaTheme.muted(context) : ConsciaTheme.error(context)),
+                icon: Icon(LucideIcons.doorOpen, size: 18.0 * scale, color: isSigningOut ? AppTheme.muted(context) : AppTheme.error(context)),
                 tooltip: "Exit Workspace",
                 onPressed: isSigningOut ? null : () => ref.read(identityProvider.notifier).signOut(),
               ),
               IconButton(
-                icon: Icon(LucideIcons.panelLeft, size: 18.0 * scale, color: ConsciaTheme.muted(context)),
+                icon: Icon(LucideIcons.panelLeft, size: 18.0 * scale, color: AppTheme.muted(context)),
                 tooltip: "Collapse Sidebar",
                 onPressed: isSigningOut ? null : () => ref.read(sidebarVisibleProvider.notifier).state = false,
               ),
@@ -1040,15 +1037,15 @@ class _SidebarSearch extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: ConsciaTheme.headerPaddingHorizontal(scale), vertical: 10.0 * scale),
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.headerPaddingHorizontal(scale), vertical: 10.0 * scale),
       child: TextField(
         onChanged: (v) => ref.read(searchQueryProvider.notifier).state = v,
         decoration: InputDecoration(
           hintText: "Search connections...",
-          hintStyle: ConsciaTheme.captionStyle(context, scale),
-          prefixIcon: Icon(LucideIcons.search, size: 16.0 * scale, color: ConsciaTheme.muted(context)),
+          hintStyle: AppTheme.captionStyle(context, scale),
+          prefixIcon: Icon(LucideIcons.search, size: 16.0 * scale, color: AppTheme.muted(context)),
           filled: true,
-          fillColor: ConsciaTheme.background(context),
+          fillColor: AppTheme.background(context),
           contentPadding: EdgeInsets.zero,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide.none),
         ),
@@ -1077,47 +1074,47 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: ConsciaTheme.surfaceElevated(context),
+        backgroundColor: AppTheme.surfaceElevated(context),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.0 * scale),
-          side: BorderSide(color: ConsciaTheme.border(context)),
+          side: BorderSide(color: AppTheme.border(context)),
         ),
         title: Row(
           children: [
-            Icon(LucideIcons.serverCog, size: 20.0 * scale, color: ConsciaTheme.accent(context)),
+            Icon(LucideIcons.serverCog, size: 20.0 * scale, color: AppTheme.accent(context)),
             SizedBox(width: 12.0 * scale),
-            Text("Add Conscia Node", style: ConsciaTheme.subHeadingStyle(context, scale)),
+            Text("Add Relay Node", style: AppTheme.subHeadingStyle(context, scale)),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Enter the Node ID of the Conscia instance to associate.", style: ConsciaTheme.captionStyle(context, scale)),
+            Text("Enter the Node ID of the relay instance to associate.", style: AppTheme.captionStyle(context, scale)),
             SizedBox(height: 16.0 * scale),
             TextField(
               controller: controller,
               autofocus: true,
-              style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontFamily: 'monospace'),
-              decoration: ConsciaTheme.inputDecoration(context, "Node ID (e.g. did:peer:...)", scale),
+              style: AppTheme.bodyStyle(context, scale).copyWith(fontFamily: 'monospace'),
+              decoration: AppTheme.inputDecoration(context, "Node ID (e.g. did:peer:...)", scale),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text("Cancel", style: TextStyle(color: ConsciaTheme.muted(context))),
+            child: Text("Cancel", style: TextStyle(color: AppTheme.muted(context))),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: ConsciaTheme.accent(context),
+              backgroundColor: AppTheme.accent(context),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0 * scale)),
             ),
             onPressed: () async {
               final nodeId = controller.text.trim();
               if (nodeId.isNotEmpty) {
-                await ref.read(associatedConsciaProvider.notifier).associateNode(nodeId);
+                await ref.read(associatedRelayProvider.notifier).associateNode(nodeId);
                 ref.invalidate(peerListProvider);
                 if (ctx.mounted) Navigator.pop(ctx);
               }
@@ -1143,28 +1140,28 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
       children: [
         if (pendingRequests.isNotEmpty)
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: ConsciaTheme.headerPaddingHorizontal(scale)),
+            padding: EdgeInsets.symmetric(horizontal: AppTheme.headerPaddingHorizontal(scale)),
             child: ExpansionTile(
               initiallyExpanded: true,
               title: Row(
                 children: [
-                  Text("Requests", style: ConsciaTheme.subHeadingStyle(context, scale).copyWith(color: ConsciaTheme.accent(context))),
+                  Text("Requests", style: AppTheme.subHeadingStyle(context, scale).copyWith(color: AppTheme.accent(context))),
                   SizedBox(width: 8.0 * scale),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 6.0 * scale, vertical: 2.0 * scale),
-                    decoration: BoxDecoration(color: ConsciaTheme.accent(context), borderRadius: BorderRadius.circular(10.0 * scale)),
-                    child: Text("${pendingRequests.length}", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: Colors.white, fontSize: 10.0 * scale, fontWeight: FontWeight.bold)),
+                    decoration: BoxDecoration(color: AppTheme.accent(context), borderRadius: BorderRadius.circular(10.0 * scale)),
+                    child: Text("${pendingRequests.length}", style: AppTheme.captionStyle(context, scale).copyWith(color: Colors.white, fontSize: 10.0 * scale, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
-              collapsedIconColor: ConsciaTheme.muted(context),
-              iconColor: ConsciaTheme.accent(context),
+              collapsedIconColor: AppTheme.muted(context),
+              iconColor: AppTheme.accent(context),
               children: pendingRequests.map((reqId) {
                 final isSelected = reqId == selectedNodeId;
                 return Container(
                   margin: EdgeInsets.only(bottom: 2.0 * scale),
                   decoration: BoxDecoration(
-                    color: isSelected ? ConsciaTheme.selection(context) : Colors.transparent,
+                    color: isSelected ? AppTheme.selection(context) : Colors.transparent,
                     borderRadius: BorderRadius.circular(12.0 * scale),
                   ),
                   child: ListTile(
@@ -1172,17 +1169,17 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
                       ref.read(selectedNodeIdProvider.notifier).state = reqId;
                       ref.read(activeMainViewProvider.notifier).state = MainView.nodeManagement;
                     },
-                    leading: Icon(LucideIcons.userPlus, size: 16.0 * scale, color: ConsciaTheme.accent(context)),
+                    leading: Icon(LucideIcons.userPlus, size: 16.0 * scale, color: AppTheme.accent(context)),
                     title: Text(
                       reqId,
-                      style: ConsciaTheme.captionStyle(context, scale).copyWith(
+                      style: AppTheme.captionStyle(context, scale).copyWith(
                         fontFamily: 'monospace',
-                        color: isSelected ? ConsciaTheme.text(context) : ConsciaTheme.muted(context),
+                        color: isSelected ? AppTheme.text(context) : AppTheme.muted(context),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    trailing: Icon(LucideIcons.chevronRight, size: 14.0 * scale, color: ConsciaTheme.muted(context)),
+                    trailing: Icon(LucideIcons.chevronRight, size: 14.0 * scale, color: AppTheme.muted(context)),
                     dense: true,
                   ),
                 );
@@ -1191,13 +1188,13 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
           ),
         Expanded(
           child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: ConsciaTheme.headerPaddingHorizontal(scale)),
+            padding: EdgeInsets.symmetric(horizontal: AppTheme.headerPaddingHorizontal(scale)),
             children: [
               ExpansionTile(
                 initiallyExpanded: true,
-                title: Text("Chats", style: ConsciaTheme.subHeadingStyle(context, scale)),
-                collapsedIconColor: ConsciaTheme.muted(context),
-                iconColor: ConsciaTheme.accent(context),
+                title: Text("Chats", style: AppTheme.subHeadingStyle(context, scale)),
+                collapsedIconColor: AppTheme.muted(context),
+                iconColor: AppTheme.accent(context),
                 // Use default trailing (Flutter animates it automatically)
                 children: [
                   _ConversationList(conversations: widget.conversations, activeConvoId: widget.activeConvoId, scale: scale),
@@ -1207,13 +1204,13 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: ConsciaTheme.headerPaddingHorizontal(scale)),
+          padding: EdgeInsets.symmetric(horizontal: AppTheme.headerPaddingHorizontal(scale)),
           child: ExpansionTile(
           initiallyExpanded: true,
           onExpansionChanged: (expanded) => setState(() => _nodesExpanded = expanded),
-          title: Text("Conscia Nodes", style: ConsciaTheme.subHeadingStyle(context, scale)),
-          collapsedIconColor: ConsciaTheme.muted(context),
-          iconColor: ConsciaTheme.accent(context),
+          title: Text("Relay Nodes", style: AppTheme.subHeadingStyle(context, scale)),
+          collapsedIconColor: AppTheme.muted(context),
+          iconColor: AppTheme.accent(context),
           // Custom trailing: animated chevron + add icon
           // We rebuild the trailing ourselves so the + icon stays clickable
           // and the chevron correctly reflects expansion state.
@@ -1227,7 +1224,7 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
                   onTap: () => _showAddNodeDialog(context),
                   child: Padding(
                     padding: EdgeInsets.all(4.0 * scale),
-                    child: Icon(LucideIcons.plus, size: 16.0 * scale, color: ConsciaTheme.accent(context)),
+                    child: Icon(LucideIcons.plus, size: 16.0 * scale, color: AppTheme.accent(context)),
                   ),
                 ),
               ),
@@ -1236,7 +1233,7 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
                 turns: _nodesExpanded ? 0.0 : 0.5,
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut,
-                child: Icon(LucideIcons.chevronDown, size: 16.0 * scale, color: ConsciaTheme.muted(context)),
+                child: Icon(LucideIcons.chevronDown, size: 16.0 * scale, color: AppTheme.muted(context)),
               ),
             ],
           ),
@@ -1244,17 +1241,17 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
             peersAsync.when(
               loading: () => Padding(
                 padding: EdgeInsets.all(16.0 * scale),
-                child: Center(child: SizedBox(width: 16.0 * scale, height: 16.0 * scale, child: CircularProgressIndicator(strokeWidth: 2, color: ConsciaTheme.accent(context)))),
+                child: Center(child: SizedBox(width: 16.0 * scale, height: 16.0 * scale, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.accent(context)))),
               ),
               error: (err, stack) => Padding(
                 padding: EdgeInsets.all(16.0 * scale),
-                child: Text("Could not load nodes.", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.error(context))),
+                child: Text("Could not load nodes.", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.error(context))),
               ),
               data: (peers) {
                 if (peers.isEmpty) {
                   return Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0 * scale, vertical: 12.0 * scale),
-                    child: Text("No nodes in roster.", style: ConsciaTheme.captionStyle(context, scale)),
+                    child: Text("No nodes in roster.", style: AppTheme.captionStyle(context, scale)),
                   );
                 }
                 return Column(
@@ -1263,7 +1260,7 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
                     return Container(
                       margin: EdgeInsets.only(bottom: 2.0 * scale),
                       decoration: BoxDecoration(
-                        color: isSelected ? ConsciaTheme.selection(context) : Colors.transparent,
+                        color: isSelected ? AppTheme.selection(context) : Colors.transparent,
                         borderRadius: BorderRadius.circular(12.0 * scale),
                       ),
                       child: ListTile(
@@ -1274,16 +1271,16 @@ class _SidebarContentState extends ConsumerState<_SidebarContent> {
                         leading: PulsingNodeIcon(isSleeping: isSleeping, scale: scale),
                         title: Text(
                           peer.nodeId,
-                          style: ConsciaTheme.captionStyle(context, scale).copyWith(
+                          style: AppTheme.captionStyle(context, scale).copyWith(
                             fontFamily: 'monospace',
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? ConsciaTheme.text(context) : ConsciaTheme.muted(context),
+                            color: isSelected ? AppTheme.text(context) : AppTheme.muted(context),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0 * scale)),
-                        hoverColor: ConsciaTheme.hover(context),
+                        hoverColor: AppTheme.hover(context),
                         dense: true,
                       ),
                     );
@@ -1336,7 +1333,7 @@ class _ConversationTile extends ConsumerWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 4.0 * scale),
       decoration: BoxDecoration(
-        color: isActive ? ConsciaTheme.selection(context) : Colors.transparent,
+        color: isActive ? AppTheme.selection(context) : Colors.transparent,
         borderRadius: BorderRadius.circular(12.0 * scale),
       ),
       child: ListTile(
@@ -1347,11 +1344,11 @@ class _ConversationTile extends ConsumerWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0 * scale)),
         leading: CircleAvatar(
           radius: 18.0 * scale,
-          backgroundColor: ConsciaTheme.border(context),
-          child: Text(convo.title[0].toUpperCase(), style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.text(context), fontWeight: FontWeight.bold)),
+          backgroundColor: AppTheme.border(context),
+          child: Text(convo.title[0].toUpperCase(), style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.text(context), fontWeight: FontWeight.bold)),
         ),
-        title: Text(convo.title, style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
-        subtitle: Text("Secure channel active", style: ConsciaTheme.captionStyle(context, scale)),
+        title: Text(convo.title, style: AppTheme.bodyStyle(context, scale).copyWith(fontWeight: isActive ? FontWeight.bold : FontWeight.normal)),
+        subtitle: Text("Secure channel active", style: AppTheme.captionStyle(context, scale)),
       ),
     );
   }
@@ -1368,13 +1365,13 @@ class _SidebarFooter extends ConsumerWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.0 * scale, vertical: 20.0 * scale),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: ConsciaTheme.border(context)))),
+      decoration: BoxDecoration(border: Border(top: BorderSide(color: AppTheme.border(context)))),
       child: Column(
         children: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: isSigningOut ? ConsciaTheme.muted(context).withValues(alpha: 0.1) : ConsciaTheme.selection(context),
-              foregroundColor: isSigningOut ? ConsciaTheme.muted(context).withValues(alpha: 0.5) : ConsciaTheme.text(context),
+              backgroundColor: isSigningOut ? AppTheme.muted(context).withValues(alpha: 0.1) : AppTheme.selection(context),
+              foregroundColor: isSigningOut ? AppTheme.muted(context).withValues(alpha: 0.5) : AppTheme.text(context),
               minimumSize: Size(double.infinity, 44.0 * scale),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0 * scale)),
               elevation: 0,
@@ -1385,7 +1382,7 @@ class _SidebarFooter extends ConsumerWidget {
               children: [
                 Icon(LucideIcons.plus, size: 16.0 * scale),
                 SizedBox(width: 8.0 * scale),
-                Flexible(child: Text("Talk Securely", style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
+                Flexible(child: Text("Talk Securely", style: AppTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis)),
               ],
             ),
           ),
@@ -1422,7 +1419,7 @@ class _SidebarBottomControls extends ConsumerWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 4.0 * scale, horizontal: 8.0 * scale),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: ConsciaTheme.border(context).withValues(alpha: 0.5))),
+        border: Border(top: BorderSide(color: AppTheme.border(context).withValues(alpha: 0.5))),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1432,14 +1429,14 @@ class _SidebarBottomControls extends ConsumerWidget {
             children: [
               IconButton(
                 icon: Icon(isFlightMode ? LucideIcons.planeLanding : LucideIcons.plane, size: 18.0 * scale),
-                color: isFlightMode ? ConsciaTheme.error(context) : ConsciaTheme.muted(context),
+                color: isFlightMode ? AppTheme.error(context) : AppTheme.muted(context),
                 tooltip: isFlightMode ? "Mesh Paused (Flight Mode)" : "Mesh Active",
                 onPressed: isSigningOut ? null : () => _toggleFlightMode(ref, user),
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(minWidth: 32.0 * scale, minHeight: 32.0 * scale),
               ),
               IconButton(
-                icon: Icon(LucideIcons.settings, size: 18.0 * scale, color: ConsciaTheme.muted(context)),
+                icon: Icon(LucideIcons.settings, size: 18.0 * scale, color: AppTheme.muted(context)),
                 tooltip: "Settings",
                 onPressed: isSigningOut ? null : () => showDialog(context: context, builder: (_) => AccountManagerModal()),
                 padding: EdgeInsets.zero,
@@ -1461,27 +1458,27 @@ class _StatusFooter extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statusAsync = ref.watch(consciaStatusProvider);
+    final statusAsync = ref.watch(relayStatusProvider);
     final isSleeping = ref.watch(nodeSleepProvider);
     return statusAsync.when(
       data: (status) {
-        final text = isSleeping ? "Lifeline Asleep" : (status.isConnected ? "Lifeline Active" : "Mesh Disconnected");
-        final color = isSleeping ? ConsciaTheme.warning(context) : (status.isConnected ? ConsciaTheme.accent(context) : ConsciaTheme.error(context));
+        final text = isSleeping ? "Relay Asleep" : (status.isConnected ? "Relay Active" : "Mesh Disconnected");
+        final color = isSleeping ? AppTheme.warning(context) : (status.isConnected ? AppTheme.accent(context) : AppTheme.error(context));
         
         return InkWell(
           onTap: () async {
-            ref.read(toastProvider.notifier).show("Dialing Lifeline node...", type: ToastType.info);
-            await ref.read(identityServiceProvider).pingConscia();
+            ref.read(toastProvider.notifier).show("Dialing Relay node...", type: ToastType.info);
+            await ref.read(identityServiceProvider).pingRelay();
           },
           borderRadius: BorderRadius.circular(8.0 * scale),
-          hoverColor: ConsciaTheme.selection(context),
+          hoverColor: AppTheme.selection(context),
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: 4.0 * scale, horizontal: 8.0 * scale),
             child: Row(
               children: [
                 Container(width: 8.0 * scale, height: 8.0 * scale, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
                 SizedBox(width: 8.0 * scale),
-                Flexible(child: Text(text, style: ConsciaTheme.captionStyle(context, scale), overflow: TextOverflow.ellipsis)),
+                Flexible(child: Text(text, style: AppTheme.captionStyle(context, scale), overflow: TextOverflow.ellipsis)),
                 if (status.activePeers > 0) ...[
                   SizedBox(width: 12.0 * scale),
                   Material(
@@ -1489,15 +1486,15 @@ class _StatusFooter extends ConsumerWidget {
                     child: InkWell(
                       onTap: () => showDialog(context: context, builder: (_) => const PeerListModal()),
                       borderRadius: BorderRadius.circular(4.0 * scale),
-                      hoverColor: ConsciaTheme.accent(context).withValues(alpha: 0.1),
+                      hoverColor: AppTheme.accent(context).withValues(alpha: 0.1),
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 6 * scale, vertical: 4 * scale),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(LucideIcons.network, size: 14.0 * scale, color: ConsciaTheme.accent(context)),
+                            Icon(LucideIcons.network, size: 14.0 * scale, color: AppTheme.accent(context)),
                             SizedBox(width: 4.0 * scale),
-                            Text("${status.activePeers}", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.accent(context), fontWeight: FontWeight.bold)),
+                            Text("${status.activePeers}", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.accent(context), fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -1514,10 +1511,10 @@ class _StatusFooter extends ConsumerWidget {
                           showDialog(context: context, builder: (_) => const GovernanceMissionControlModal());
                         },
                         borderRadius: BorderRadius.circular(4 * scale),
-                        hoverColor: ConsciaTheme.accent(context).withValues(alpha: 0.1),
+                        hoverColor: AppTheme.accent(context).withValues(alpha: 0.1),
                         child: Padding(
                           padding: EdgeInsets.all(8 * scale),
-                          child: Icon(LucideIcons.shieldCheck, size: 18.0 * scale, color: ConsciaTheme.accent(context)),
+                          child: Icon(LucideIcons.shieldCheck, size: 18.0 * scale, color: AppTheme.accent(context)),
                         ),
                       ),
                     ),
@@ -1529,7 +1526,7 @@ class _StatusFooter extends ConsumerWidget {
         );
       },
       loading: () => LinearProgressIndicator(),
-      error: (_, _) => Text("Status Error", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.error(context))),
+      error: (_, _) => Text("Status Error", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.error(context))),
     );
   }
 }

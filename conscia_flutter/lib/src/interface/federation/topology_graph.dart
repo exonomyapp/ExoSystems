@@ -11,7 +11,13 @@ class TopologyGraph extends ConsumerWidget {
     // 🧠 EDUCATIONAL CONTEXT: Force-Directed Visualization
     // We use flutter_graph_view to visualize organic, multi-dimensional P2P mesh 
     // relationships. Static tables cannot adequately represent dynamic gossip routes,
-    // cluster proximity, or relay node dependencies within a sovereign mesh topology.
+    // cluster proximity, or relay node dependencies within a mesh topology.
+    //
+    // 💡 MENTOR TIP: Live Telemetry
+    // The 'topologyProvider' (defined in conscia_provider.dart) fetches live 
+    // graph data from the Conscia daemon's /api/federation/topology endpoint. 
+    // By using the 'ForceDirected' algorithm, the graph naturally organizes 
+    // itself as new nodes join or leave the mesh.
     
     final asyncTopology = ref.watch(topologyProvider);
 

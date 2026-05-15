@@ -1,12 +1,12 @@
 import 'models.dart';
 
-/// IdentityService: The programmatic 'Front Door' for all ExoTalk identity operations.
+/// IdentityService: The interface for all ExoTalk identity operations.
 /// 
 /// ARCHITECTURAL PHILOSOPHY: Service-First Control.
-/// This interface must encapsulate every action a user can take in the UI (e.g., signing in, 
-/// adding nodes, syncing). By ensuring every UI button simply calls a method here, 
-/// we enable headless emulation and verify that the 'Engine' works independently 
-/// of the 'Visuals'.
+/// This interface encapsulates every action a user can take in the UI (e.g., signing in, 
+/// adding nodes, syncing). By ensuring every UI button calls a method here, 
+/// we enable headless emulation and verify that the backend logic works independently 
+/// of the user interface.
 abstract class IdentityService {
   /// Loads the device manifest containing all registered profiles.
   Future<DeviceManifest> getDeviceManifest();
@@ -14,20 +14,20 @@ abstract class IdentityService {
   /// Persists changes to the device manifest.
   Future<void> saveDeviceManifest(DeviceManifest manifest);
 
-  /// Generates a new sovereign identity (did:peer).
-  Future<IdentityVault> generateNewIdentity();
+  /// Generates a new identity (did:peer).
+  Future<IdentityRecord> generateNewIdentity();
 
   /// Sets a specific identity as active and initializes its session.
   Future<bool> switchActiveProfile(String did);
 
-  /// Retrieves the fully detailed IdentityVault for the currently active profile.
-  Future<IdentityVault> getActiveProfileVault();
+  /// Retrieves the fully detailed IdentityRecord for the currently active profile.
+  Future<IdentityRecord> getActiveProfileVault();
 
   /// Signs out the current active profile and shuts down background tasks.
   Future<void> signOutProfile();
 
   /// Updates the metadata for the active profile.
-  Future<IdentityVault> updateActiveProfile({
+  Future<IdentityRecord> updateActiveProfile({
     required String name,
     required String avatar,
   });
@@ -48,7 +48,7 @@ abstract class IdentityService {
     required String sub,
   });
 
-  /// Creates a new sovereign profile using OAuth credentials.
+  /// Creates a new profile using OAuth credentials.
   Future<String> createProfileFromOauth({
     required String provider,
     required String sub,
@@ -98,7 +98,7 @@ abstract class IdentityService {
   /// on the decentralized mesh, but all local secrets are destroyed.
   Future<void> discardIdentity(String did);
 
-  Future<void> pingConscia();
+  Future<void> pingRelay();
 
   // ===========================================================================
   // Identity Proofs

@@ -137,7 +137,7 @@ to relay for *whom*.
 - Con: The sender must know the topology of the mesh — which nodes exist and which
   are federated with which. This is private infrastructure information the sender
   should not need to know.
-- **Verdict: Inappropriate for a sovereign mesh where topology is not public.**
+- **Verdict: Inappropriate for an independent mesh where topology is not public.**
 
 ### What We Decided
 
@@ -226,7 +226,7 @@ In a pure P2P world (no Conscia), states ② and ③ collapse into one. Conscia 
 **Option C — ② + ③ always on (Client Received, automatic).**
 - Senders always know when Malik's device downloaded the message.
 - Pro: Stronger delivery confirmation.
-- Con: Malik loses control over his operational security. This is the WhatsApp model—unacceptable for a sovereignty-first platform.
+- Con: Malik loses control over his operational security. This is the WhatsApp model—unacceptable for an autonomy-first platform.
 - **Verdict: Too invasive as a default.**
 
 **Option D — ② + ③ + ④ always on (full read receipts, automatic).**
@@ -234,7 +234,7 @@ In a pure P2P world (no Conscia), states ② and ③ collapse into one. Conscia 
 - Pro: Unambiguous delivery semantics.
 - Con: This is essentially surveillance. Recipients cannot choose whether to reveal
   that they have read a message.
-- **Verdict: Not appropriate for a sovereignty-focused platform.**
+- **Verdict: Not appropriate for an autonomy-focused platform.**
 
 **Option E — ② always on; ③ and ④ opt-in per conversation (our choice).**
 - By default, only Node Received is reported. Recipients can choose to share Client

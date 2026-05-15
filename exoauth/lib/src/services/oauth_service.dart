@@ -1,11 +1,11 @@
 // =============================================================================
-// oauth_service.dart — OAuth Authentication Service ("Inward Recovery")
+// oauth_service.dart — OAuth Authentication Service
 // =============================================================================
 //
 // This service handles the OAuth 2.0 Authorization Code flow for linking
-// centralized auth providers to the user's did:peer identity. These links
-// serve as "Recovery Anchors" — they do NOT own the identity but allow the
-// user to prove who they are to a Conscia node during device-loss recovery.
+// auth providers to the user's did:peer identity. These links
+// serve as recovery mechanisms — they do not own the identity but allow the
+// user to prove identity to a Conscia node during device-loss recovery.
 //
 // Flow: authorize → exchange code for token → fetch userinfo → return (sub, name)
 //
@@ -13,9 +13,9 @@
 // Provider architecture:
 //   - Loopback Flow: We utilize a local HTTP server (127.0.0.1:8080) for the 
 //     redirect_uri. This ensures that OAuth tokens are captured directly by 
-//     the client process without requiring a central "ExoTalk Proxy" server.
+//     the client process without requiring a central proxy server.
 //
-//   - Self-Sovereign Bridge: OAuth data is used ONLY as a discovery/recovery 
+//   - Identity Integration: OAuth data is used ONLY as a discovery/recovery 
 //     mechanism. The user's primary identity remains the `did:peer`.
 //
 // See: docs/spec/02_identity_and_access.md §2.4.2 for the recovery model.

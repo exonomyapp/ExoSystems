@@ -34,6 +34,7 @@ We utilize the **pgEdge Spock** extension for logical multi-master replication w
 
 ### Phase 1: Cluster Scaffolding (KIND)
 - Deploy the 3-node pgEdge cluster (`exoNode`, `endoNode`, `nextNode`) in KIND.
+- **Deployment Architecture**: Each node is deployed as an independent Kubernetes Deployment with its own Service, rather than a single StatefulSet. A StatefulSet treats all replicas as identical clones with sequential naming (`pgedge-0`, `pgedge-1`, `pgedge-2`) and cannot assign distinct configurations or behavioral roles to individual pods. Since each node serves a fundamentally different operational purpose, separate Deployments are the only viable approach.
 - Configure internal logical replication using the **Spock** extension.
 - Verify cluster health and multi-master write-sync via the pgEdge CLI.
 

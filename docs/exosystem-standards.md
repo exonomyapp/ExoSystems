@@ -1,13 +1,13 @@
-# Sovereign Exosystem: Development Standards
+# Exosystem: Development Standards
 
-This document serves as the central "Master Record" for all technical, aesthetic, and operational standards within the Sovereign Exosystem. All applications (ExoTalk, RepubLet, Exonomy, Exocracy) must adhere to these guidelines to ensure a unified user experience and architectural resilience.
+This document serves as the central "Master Record" for all technical, aesthetic, and operational standards within the Exosystem. All applications (ExoTalk, RepubLet, Exonomy, Exocracy) must adhere to these guidelines to ensure a unified user experience and architectural resilience.
 
 ## 1. UI/UX & Aesthetics (The Conscia Standard)
 
-The Exosystem aesthetic is defined by "Sovereign Tech"—premium, high-visibility, and high-performance.
+The Exosystem aesthetic is premium, high-visibility, and high-performance.
 
 ### Visual Identity
-- **Palette**: Deep dark backgrounds (`#0D1117`), high-contrast surfaces (`#161B22`), and "Sovereign Green" accents (`#238636`).
+- **Palette**: Deep dark backgrounds (`#0D1117`), high-contrast surfaces (`#161B22`), and "Exosystem Green" accents (`#238636`).
 - **Glassmorphism**: Use `backdrop-filter: blur()` and semi-transparent layers for headers, sidebars, and overlays to create visual depth and hierarchy.
 - **Aesthetic Excellence**: Avoid browser defaults. Use modern typography (e.g., 'Inter', 'Outfit'), smooth gradients, and subtle micro-animations (e.g., "glow" effects on active states).
 
@@ -32,7 +32,7 @@ The Exosystem aesthetic is defined by "Sovereign Tech"—premium, high-visibilit
 ### Appearance & Theming
 - **Tristate Toggle**: Every application must provide a clearly accessible **Tristate Toggle** for theme selection:
     1.  **Light Mode**: Standard high-contrast light theme.
-    2.  **Dark Mode**: The primary Conscia-style "Sovereign" dark theme.
+    2.  **Dark Mode**: The primary Conscia-style dark theme.
     3.  **System Mode**: Automatically follows the host operating system's theme preference.
 - **Default State**: Applications should default to **System Mode** on first run.
 - **Persistence**: The user's selection must be persisted locally in the Identity Vault to ensure consistency across sessions.
@@ -47,7 +47,7 @@ The Exosystem aesthetic is defined by "Sovereign Tech"—premium, high-visibilit
 - **Security Warnings**: Any action that risks identity loss (e.g., key rotation) must be preceded by a professional disclosure modal.
 
 ### Commercial Transitions
-- **Conscire Interactions**: Actions that transition the user from free anonymity to commercialized reporting (the "Conscire" action) must be styled with premium variants (e.g., gold or emerald accents) to signify a change in the data-sovereignty contract.
+- **Conscire Interactions**: Actions that transition the user from free anonymity to commercialized reporting (the "Conscire" action) must be styled with premium variants (e.g., gold or emerald accents) to signify a change in the data-autonomy contract.
 
 ## 4. The Agent Protocol (Operational Excellence)
 

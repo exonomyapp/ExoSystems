@@ -1,16 +1,16 @@
-# 🏗️ Sovereign Infrastructure (Infra)
+# Infrastructure (Infra)
 
-[ 🏠 Back to Exosystem Root ](../README.md)
+[ Back to Exosystem Root ](../README.md)
 
-This directory contains the supporting infrastructure required to maintain, monitor, and relay the Sovereign Exosystem mesh. It bridges the gap between the headless Rust engine and the public internet.
+This directory contains the supporting infrastructure required to maintain, monitor, and relay the Exosystem mesh. It connects the headless Rust engine to the public internet.
 
 ## Components
 
 ### 1. [ExoTech Bridge Monitor](bridge_monitor/README.md)
-A high-fidelity Flutter dashboard for real-time telemetry and node health monitoring. It allows operators to:
+A Flutter dashboard for real-time telemetry and node health monitoring. It allows operators to:
 - Verify P2P ingress/egress flows.
 - Audit system logs via `journalctl` and `tail`.
-- Switch between compact list and immersive card views.
+- Switch between list and card views.
 
 ### 2. [Signaling Relay](signaling_server.py)
 A lightweight Python HTTP server that facilitates the initial WebRTC handshake (SDP exchange) between browser nodes and beacons. 

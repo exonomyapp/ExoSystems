@@ -1,6 +1,6 @@
 # 30. Agentic SDLC Architecture
 
-This specification outlines the foundational architecture of the Sovereign Exosystem's Agent-Driven Software Development Life Cycle (SDLC). It defines the tools, hardware deployment strategy, and the philosophical boundaries of AI-assisted engineering.
+This specification outlines the foundational architecture of the Exosystem's Agent-Driven Software Development Life Cycle (SDLC). It defines the tools, hardware deployment strategy, and the philosophical boundaries of AI-assisted engineering.
 
 ## 1. The Stack: Strategy, Tactics, and Reliability
 
@@ -14,7 +14,7 @@ To maintain the high-density complexity of the Exosystem while scaling rapidly, 
 
 We explicitly separate the execution of Agentic tasks from the persistence of their telemetry and memory.
 
-### 2.1 Exocracy (The Sovereign Workstation)
+### 2.1 Exocracy Workstation
 *   **Role**: Primary compilation environment, IDE host, and active agent execution host.
 *   **Hardware**: High-performance CPU (i7), 32GB RAM.
 *   **Responsibilities**: 
@@ -23,7 +23,7 @@ We explicitly separate the execution of Agentic tasks from the persistence of th
     *   Fires OpenTelemetry (OTel) signals over the network to the observability layer.
 
 ### 2.2 Exonomy (The Infrastructure Node / Conscia Host)
-*   **Role**: The highly-available "Sovereign Lifeline" for the SDLC stack.
+*   **Role**: The highly-available "Lifeline" for the SDLC stack.
 *   **Hardware**: Lower tier CPU, 12GB RAM, highly available.
 *   **Responsibilities**:
     *   Hosts **Minikube**, providing self-healing container orchestration.

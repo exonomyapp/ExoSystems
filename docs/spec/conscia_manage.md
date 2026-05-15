@@ -1,7 +1,7 @@
 # Specification: Conscia Node Management UI
 
-## Philosophy: Top-Down Sovereignty
-The Conscia Management interface is designed to provide a unified governance experience for standalone nodes and federated clusters. It follows a **Top-Down Information Hierarchy**, ensuring that the most critical, generally applicable information is surfaced first, while specialized administrative controls are selectively exposed at the bottom.
+## Philosophy: Top-Down Management
+The Conscia Management interface is designed to provide a standardized governance experience for standalone nodes and federated clusters. It follows a **Top-Down Information Hierarchy**, ensuring that the most critical, generally applicable information is surfaced first, while specialized administrative controls are selectively exposed at the bottom.
 
 ## UI Architecture
 

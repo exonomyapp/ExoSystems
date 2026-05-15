@@ -1,5 +1,4 @@
-// =============================================================================
-// toast_provider.dart — Human-Like Notification State (Sovereign Generation)
+// toast_provider.dart — Notification State Management
 // =============================================================================
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';

@@ -1,31 +1,26 @@
-# Walkthrough 15: OAuth Onboarding & Sovereign Dashboard Overhaul
+# Walkthrough 15: OAuth Onboarding & Home Dashboard Update
 
-This session focused on transitioning ExoTalk from a basic messaging shell to a production-grade, sovereign identity platform with a high-fidelity user experience.
+This session focused on transitioning ExoTalk to an identity management platform.
 
-## 1. Seamless OAuth Onboarding (Google & GitHub)
-We replaced the manual identity creation with an AI-orchestrated OAuth flow.
-- **Autonomous Setup**: Used the browser subagent to configure GCP and GitHub projects without user intervention.
-- **Loopback Auth**: Implemented a local loopback listener (`http://127.0.0.1:8080`) to handle desktop authentication securely.
-- **Link or Generate**: If no existing `did:peer` is found, the user can choose to link their social account to an existing DID (via paste) or generate a new one pre-seeded with their social metadata.
+## 1. OAuth Onboarding (Google & GitHub)
+Manual identity creation has been replaced with an automated OAuth flow.
+- **Project Configuration**: Configuration of GCP and GitHub projects for authentication.
+- **Loopback Auth**: Implemented a local loopback listener (`http://127.0.0.1:8080`) to handle desktop authentication.
+- **Link or Generate**: Users can choose to link their social account to an existing DID or generate a new one using social metadata.
 
 ## 2. Notification & Conflict Resolution
-To maintain sovereignty, we introduced a manual resolution flow for identity divergence.
-- **Notification System**: A new `NotificationOverlay` provides system-level alerts (Info, Warning, Error, Conflict).
-- **Interactive Resolution**: Instead of the app "presuming" to overwrite data during sync, it prompts the user to "Sync Network" or "Keep Local".
-- **Screen Candy**: Choice-specific animations (Glow Insertion vs. Discard Fade) provide tangible feedback for cryptographic decisions.
+A manual resolution flow for identity divergence was introduced.
+- **Notification System**: The `NotificationOverlay` provides system-level alerts (Info, Warning, Error, Conflict).
+- **Interactive Resolution**: The application prompts the user to "Sync Network" or "Keep Local" when data divergence is detected.
+- **UI Feedback**: Choice-specific animations provide feedback for synchronization decisions.
 
-## 3. The Sovereign Home Dashboard
-We replaced the redundant "Access Local Replica" button with an active, mode-aware dashboard.
+## 3. Home Dashboard
+The "Access Local Replica" button was replaced with a mode-aware dashboard.
 - **Identity Snapshot**: Displays the active DID fingerprint and tenancy mode.
-- **Mesh Traffic Visualizer**:
-    - **Isolated Mode**: Shows a single harmonic wave representing a dedicated keyspace.
-    - **Multiplexed Mode**: Shows complex interference patterns representing global node traffic.
-- **Actionable Primary**: A prominent "Start New Conversation" action.
+- **Mesh Traffic Visualization**: Displays networking activity based on whether the system is in Isolated or Multiplexed mode.
+- **Primary Action**: "Start New Conversation" button.
 
 ## How to Verify
-1. **OAuth Flow**: Launch the app and click "Sign in with Google" or "Sign in with GitHub". Verify the browser opens and returns you to a populated profile.
-2. **Conflict UI**: Use the `NotificationOverlay` to trigger a mock conflict and test the "Screen Candy" resolution animations.
-3. **Traffic View**: Observe the animated waves at the bottom of the Home Screen and confirm they change complexity based on whether you are in Isolated or Multiplexed mode.
-
----
-*Documentation updated as per `agent.md` chores.*
+1. **OAuth Flow**: Launch the application and select "Sign in with Google" or "Sign in with GitHub". Verify the browser returns to a populated profile.
+2. **Conflict UI**: Use the `NotificationOverlay` to trigger a conflict and test the resolution animations.
+3. **Traffic View**: Observe the traffic visualization on the Home Screen and confirm complexity changes based on the tenancy mode.

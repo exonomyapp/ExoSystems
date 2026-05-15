@@ -1,17 +1,17 @@
-# ⚙️ ExoTalk Engine Workspace
+# ExoTalk Engine Workspace
 
-[ 🏠 Back to Exosystem Root ](../README.md)
+[ Back to Root ](../README.md)
 
-This is the pure beating heart of the Sovereign application Exosystem. It contains no UI logic, operating entirely on fundamental cryptography, peer-to-peer networking (via Iroh), and offline-first database syncing (via Willow).
+This is the core logic of the ExoTalk application. It handles cryptography, peer-to-peer networking (via Iroh), and offline-first database syncing (via Willow).
 
 ## Workspace Domains
 
-To prevent "App Bloat," this engine is strictly modularized into 12 isolated domains:
+The engine is modularized into specific domains:
 
 ### 1. The Core
-*   **`exotalk_core`**: The pure engine. It knows nothing about chat messages, scientific reports, vouchers, or project trees. It only synchronizes raw agnostic bytes across the internet.
+*   **`exotalk_core`**: The synchronization engine. It handles generic data synchronization across the network.
 
-### 2. Pure Data Schemas
+### 2. Data Schemas
 These crates contain the specific data formats (structs) for different domains.
 *   **`exotalk_schema`**: Stores the definitions for `DirectMessage`, `UserProfile`, etc.
 *   **`republet_schema`**: Stores definitions for `ScientificReport`, `Dataset`, etc.
@@ -26,16 +26,16 @@ These crates bind the `exotalk_core` to specific `schema` crates and expose them
 *   **`exocracy_ffi`**: Merges generic core bytes with `exocracy_schema` for the Exocracy Lite app.
 
 ### 4. Tauri Desktop Backends
-These crates bypass FFI entirely and use `exotalk_core` as a native Rust library for maximum performance.
+These crates bypass FFI and use `exotalk_core` as a native Rust library.
 *   **`republet_desktop`**: The Rust backend for the RepubLet SvelteKit desktop app.
 *   **`exocracy_desktop`**: The Rust backend for the Exocracy SvelteKit desktop app.
 
 ### 5. Standalone Binaries & Wasm
-*   **`conscia`**: A headless daemon/beacon designed to run on a Linux server to act as an always-on relay node perfectly routing traffic between peer devices.
-*   **[`exotalk_wasm`](exotalk_wasm/README.md)**: The WebAssembly core for browser-based Sovereign Sessions.
+*   **`conscia`**: A headless daemon designed to run on a Linux server to act as a relay node routing traffic between peer devices.
+*   **[`exotalk_wasm`](exotalk_wasm/README.md)**: The WebAssembly core for browser-based sessions.
 
 ## Building
-To verify all 12 isolated parts compile harmoniously:
+To verify all workspace components compile:
 ```bash
 cargo check --workspace
 ```

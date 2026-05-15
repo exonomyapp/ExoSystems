@@ -18,7 +18,7 @@ The Exosystem node is composed of three selectable components:
 |---|-----------|------|-------------|
 | 1 | **Conscia** | Rust daemon | Core API, Willow relay, and native Signaling relay |
 | 2 | **Zrok** | External binary | Secure overlay network tunneling (Optional) |
-| 3 | **ConSoul** | Flutter desktop app | Sovereign administrative console for the node |
+| 3 | **ConSoul** | Flutter desktop app | Administrative console for the node |
 
 Components 1 and 2 are **headless backend services** managed by systemd under the `exo-sys` user. Component 3 is a **GUI application** that runs under the human operator's session and communicates with the backend strictly via API.
 
@@ -103,7 +103,7 @@ All services transition from user-level units to **system-level units** at `/etc
 ### 5.1 Unit Template: `exo-conscia.service`
 ```ini
 [Unit]
-Description=Conscia - Sovereign Lifeline Daemon
+Description=Conscia - Lifeline Daemon
 After=network-online.target
 Wants=network-online.target
 

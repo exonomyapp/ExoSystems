@@ -13,7 +13,7 @@ Because native GitHub Projects does not visually differentiate between human sta
 
 All tasks are driven through GitHub Issues with strict state definitions:
 
-1.  **Todo**: Backlog, awaiting the Sovereign PM to scope into a PRD.
+1.  **Todo**: Backlog, awaiting the Lead PM to scope into a PRD.
 2.  **In Progress (Agent)**: An Archon DAG or BMAD phase is actively executing. Human intervention is not required.
 3.  **Blocked (Needs Human)**: The agent has encountered a failure it cannot self-correct, or the Architect requires human sign-off on a major topological change.
 4.  **Review (Doc Expert)**: Code is complete; the Documentation Expert is enforcing hygiene and generating READMEs.

@@ -5,7 +5,7 @@
 
 ## Cognitive Shift
 **Centralized Expectation**: "I need to use a US-based cloud (AWS/Google) to get global scale."
-**Sovereign Reality**: "We federate across jurisdictions. My Hangzhou cluster provides the backbone that the Western sanctions cannot touch."
+**Decentralized Reality**: "We federate across jurisdictions. My Hangzhou cluster provides the backbone that the Western sanctions cannot touch."
 
 ## World Event Reference
 The US-led sanctions on Lebanese and Iranian banking/tech infrastructure as a tool of geopolitical coercion.

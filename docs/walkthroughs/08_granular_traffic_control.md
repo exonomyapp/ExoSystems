@@ -1,27 +1,30 @@
-# Walkthrough 08: Granular Traffic Control Walkthrough
+# Walkthrough 08: Granular Traffic Control
 
-I have successfully finished implementing the **Granular Traffic Control** system, replacing the global "Flight Mode" state with independent Inbound/Outbound toggles.
+The Granular Traffic Control system has been implemented, replacing the global network state with independent Inbound/Outbound toggles.
 
-## What I Accomplished
+## Changes Implemented
 
-### 1. Architectural Changes (Rust Core) 🦀
-- **Identity Vault Upgrade**: The `IdentityVault` schema in `willow.rs` now permanently persists your `ingress_enabled` and `egress_enabled` settings across application reboots.
-- **Granular Network Logic**: Modified `network_internal.rs` to replace the single `FLIGHT_MODE` boolean with `INGRESS_PAUSED` and `EGRESS_PAUSED`.
+### 1. Architectural Changes (Rust Core)
+- **Identity Vault Schema Update**: The `IdentityVault` schema in `willow.rs` persists `ingress_enabled` and `egress_enabled` settings across reboots.
+- **Network Logic**: Replaced the `FLIGHT_MODE` boolean with `INGRESS_PAUSED` and `EGRESS_PAUSED` in `network_internal.rs`.
 - **Gossip Filtering**:
-  - The underlying Iroh accept loop now silently ignores connections if *Ingress* is paused.
-  - The application skips `GossipEvent::Received` parsing when *Ingress* is paused.
-  - Broadcast functionality explicitly skips network dispatch when *Egress* is paused.
+  - The Iroh connection loop ignores incoming connections when Ingress is paused.
+  - `GossipEvent::Received` parsing is skipped when Ingress is paused.
+  - Broadcast functionality skips network dispatch when Egress is paused.
 
-### 2. UI Implementations (Flutter) 📱
-- Added a new **Network Traffic Control** section to the `account_manager.dart` modal that sits prominently above the Private Security Vault.
-- Bound semantic toggles allowing you to:
-   - **Inbound Sync**: "Enable receiving new messages and sync updates from the mesh."
-   - **Outbound Sync**: "Allow broadcasting your messages and identity updates to peers."
-- Surfaced `ingressEnabled` and `egressEnabled` into the core Riverpod layer within `chat_provider.dart`. 
+### 2. UI Implementation (Flutter)
+- Added a **Network Traffic Control** section to the account manager modal.
+- Implemented toggles for:
+   - **Inbound Sync**: Controls receiving messages and synchronization updates from the mesh.
+   - **Outbound Sync**: Controls broadcasting messages and identity updates to peers.
+- Integrated `ingressEnabled` and `egressEnabled` into the Riverpod layer in `chat_provider.dart`.
 
-### 3. Documentation 📝
-- Completely rewrote `docs/spec/14_flight_mode.md` to reflect the new **Network Traffic Control** spec.
-- Added a prominent `[!CAUTION]` block explicitly warning that Lurking (enabling Inbound while keeping Outbound disabled) breaks range-based historical sync because the node cannot dialogue regarding what is missing.
+### 3. Documentation
+- Updated `docs/spec/14_flight_mode.md` to reflect the Network Traffic Control specification.
+- Added a `[!CAUTION]` block regarding passive inbound sync (Ingress enabled, Egress disabled), noting that it prevents negotiation of missing historical data ranges.
 
 > [!NOTE]
-> The Rust code compiles properly (`cargo check` is stable). When you perform your next local build, ensure `flutter_rust_bridge_codegen generate` runs to map the new FFI definitions for the settings.
+> Verified via `cargo check`. Ensure `flutter_rust_bridge_codegen generate` is executed during the next build to update FFI definitions.
+
+---
+**Status**: Granular traffic control implementation complete.

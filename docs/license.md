@@ -11,7 +11,7 @@ legal reviewers, and downstream packagers.
 **SPDX identifier:** `AGPL-3.0-only`
 
 Both `exotalk_flutter` and `conscia` are published under the AGPL-3.0. This is a
-deliberate and considered choice grounded in how the decentralized, sovereignty-oriented
+deliberate and considered choice grounded in how the decentralized, autonomy-oriented
 open-source community has converged on protecting itself. The sections below document
 what our peers chose, and why.
 
@@ -59,7 +59,7 @@ the canonical choice of our ecosystem.
 
 ### Tier 2: GPL-3.0 — End-to-End Encrypted Messaging
 
-A subset of the sovereign communications space chose GPL-3.0 rather than AGPL-3.0.
+A subset of the decentralized communications space chose GPL-3.0 rather than AGPL-3.0.
 These are primarily **client applications** or **protocols**, not server-side relay
 services, which is why the network loophole of GPL-3.0 is less relevant to them.
 
@@ -107,7 +107,7 @@ protected one, even if proprietary actors benefit.
 
 **Why ExoTalk does not use MIT/Apache for Conscia:** Iroh (our dependency) correctly
 uses MIT/Apache because it is a low-level library. Conscia is *not* a library — it
-is a sovereign relay node. Applying library-level permissiveness to a network service
+is an independent relay node. Applying library-level permissiveness to a network service
 inverts the logic. We *depend* on permissively-licensed protocol libraries; we *publish*
 AGPL-3.0 services that use them.
 
@@ -130,7 +130,7 @@ used as a building block inside other applications.
 
 **Why MPL-2.0 does not fit ExoTalk:** The file-level boundary is too easily circumvented
 for a network service. A proprietary relay could refactor modified logic into new files
-and avoid share-alike entirely. ExoTalk's sovereignty guarantee requires project-level
+and avoid share-alike entirely. ExoTalk's autonomy guarantee requires project-level
 copyleft — not file-level.
 
 ---

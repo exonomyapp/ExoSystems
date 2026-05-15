@@ -1,18 +1,8 @@
+// account_manager.dart — Identity Management
 // =============================================================================
-// account_manager.dart — Sovereign Identity Dashboard
-// =============================================================================
-// This modal is the primary control surface for a user's self-sovereign identity.
-// It follows a high-density two-column "matrix" layout to surface all identity
-// and security controls without requiring vertical scrolling.
-//
-// Key architectural choices:
-//   • All interactive tiles (avatar + identity links) share a single interaction
-//     model via _ConsciaMenuButton, ensuring visual consistency and tactile
-//     feedback everywhere.
-//   • Context menus are anchored to the BOTTOM edge of their triggering button
-//     via a zero-height RelativeRect, guaranteeing the menu always opens below.
-//   • Network sync (inbound/outbound) calls Rust FFI functions directly, keeping
-//     the Flutter layer as a pure presentation layer.
+// This modal is the control surface for the user identity.
+// It follows a two-column layout to surface identity
+// and security controls.
 // =============================================================================
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -39,8 +29,7 @@ class AccountManagerModal extends ConsumerStatefulWidget {
 }
 
 class _AccountManagerModalState extends ConsumerState<AccountManagerModal> {
-  // --- SERVICE-FIRST DESIGN ---
-  // The state below mirrors the programmatic IdentityVault.
+  // The state below mirrors the programmatic IdentityRecord.
   // 'localName' and 'localAvatar' are pending metadata changes that only commit 
   // to the engine when _handleSync() is called.
   // ----------------------------
@@ -162,7 +151,7 @@ class _AccountManagerModalState extends ConsumerState<AccountManagerModal> {
             maxHeight: 800.0 * scale,
           ),
           clipBehavior: Clip.antiAlias,
-          decoration: ConsciaTheme.premiumCardDecoration(context, scale),
+          decoration: AppTheme.premiumCardDecoration(context, scale),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -189,9 +178,9 @@ class _AccountManagerModalState extends ConsumerState<AccountManagerModal> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // LEFT: Security Vault
+                              // LEFT: Security Keys
                               Expanded(
-                                child: _SecurityVaultSection(
+                                child: _SecurityKeysSection(
                                   did: localDid,
                                   secret: localPrivateKey,
                                   isGenerating: isGenerating,
@@ -259,19 +248,19 @@ class _ModalHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24.0 * scale, vertical: 16.0 * scale),
-      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: ConsciaTheme.border(context)))),
+      decoration: BoxDecoration(border: Border(bottom: BorderSide(color: AppTheme.border(context)))),
       child: LayoutGrid(
         columnSizes: [auto, auto, auto, auto, 1.fr, auto],
         rowSizes: [auto],
         columnGap: 12.0 * scale,
         children: [
-          Icon(LucideIcons.shield, color: ConsciaTheme.accent(context), size: 24.0 * scale).withGridPlacement(columnStart: 0, rowStart: 0),
-          Text("Account Manager", style: ConsciaTheme.headingStyle(context, scale)).withGridPlacement(columnStart: 1, rowStart: 0),
-          Container(width: 1, height: 16 * scale, color: ConsciaTheme.border(context)).withGridPlacement(columnStart: 2, rowStart: 0),
-          Text("Self-sovereign identity settings", 
-            style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.muted(context))).withGridPlacement(columnStart: 3, rowStart: 0),
+          Icon(LucideIcons.shield, color: AppTheme.accent(context), size: 24.0 * scale).withGridPlacement(columnStart: 0, rowStart: 0),
+          Text("Account Manager", style: AppTheme.headingStyle(context, scale)).withGridPlacement(columnStart: 1, rowStart: 0),
+          Container(width: 1, height: 16 * scale, color: AppTheme.border(context)).withGridPlacement(columnStart: 2, rowStart: 0),
+          Text("Identity settings", 
+            style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.muted(context))).withGridPlacement(columnStart: 3, rowStart: 0),
           SizedBox().withGridPlacement(columnStart: 4, rowStart: 0),
-          Text("v0.7.6+1", style: ConsciaTheme.versionStyle(context, scale)).withGridPlacement(columnStart: 5, rowStart: 0),
+          Text("v0.7.6+1", style: AppTheme.versionStyle(context, scale)).withGridPlacement(columnStart: 5, rowStart: 0),
         ],
       ),
     );
@@ -286,7 +275,7 @@ class _ProfileSection extends ConsumerWidget {
   final TextEditingController nameController;
   final VoidCallback onPickImage;
   final VoidCallback onRemoveImage;
-  final IdentityVault? profile;
+  final IdentityRecord? profile;
   final double scale;
 
   const _ProfileSection({
@@ -323,7 +312,7 @@ class _ProfileSection extends ConsumerWidget {
               ],
               child: localAvatarBytes != null
                 ? ClipOval(child: Image.memory(localAvatarBytes!, fit: BoxFit.cover, width: 80 * scale, height: 80 * scale))
-                : Icon(LucideIcons.user, size: 32.0 * scale, color: ConsciaTheme.muted(context)),
+                : Icon(LucideIcons.user, size: 32.0 * scale, color: AppTheme.muted(context)),
             ).withGridPlacement(columnStart: 0, rowStart: 0),
             _SectionWrapper(
               title: "Display Name",
@@ -331,8 +320,8 @@ class _ProfileSection extends ConsumerWidget {
               child: TextField(
                 autofocus: true,
                 controller: nameController,
-                style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold),
-                decoration: ConsciaTheme.inputDecoration(context, "Enter display name", scale).copyWith(
+                style: AppTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold),
+                decoration: AppTheme.inputDecoration(context, "Enter display name", scale).copyWith(
                   contentPadding: EdgeInsets.symmetric(horizontal: 16.0 * scale, vertical: 14.0 * scale),
                 ),
               ),
@@ -347,14 +336,14 @@ class _ProfileSection extends ConsumerWidget {
           action: TextButton.icon(
             onPressed: () => showDialog(context: context, builder: (_) => DevicePairingModal()),
             icon: Icon(LucideIcons.smartphone, size: 14.0 * scale),
-            label: Text("Pair", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.accent(context), fontWeight: FontWeight.bold)),
+            label: Text("Pair", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.accent(context), fontWeight: FontWeight.bold)),
           ),
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 12.0 * scale, vertical: 8.0 * scale),
             decoration: BoxDecoration(
-              color: ConsciaTheme.background(context), 
+              color: AppTheme.background(context), 
               borderRadius: BorderRadius.circular(12.0 * scale), 
-              border: Border.all(color: ConsciaTheme.border(context).withValues(alpha: 0.5))
+              border: Border.all(color: AppTheme.border(context).withValues(alpha: 0.5))
             ),
             child: LayoutGrid(
               columnSizes: [1.fr, auto, 1.fr],
@@ -369,7 +358,7 @@ class _ProfileSection extends ConsumerWidget {
                   },
                   scale: scale,
                 ).withGridPlacement(columnStart: 0, rowStart: 0),
-                Container(width: 1, height: 20 * scale, margin: EdgeInsets.symmetric(horizontal: 12 * scale), color: ConsciaTheme.border(context).withValues(alpha: 0.5))
+                Container(width: 1, height: 20 * scale, margin: EdgeInsets.symmetric(horizontal: 12 * scale), color: AppTheme.border(context).withValues(alpha: 0.5))
                     .withGridPlacement(columnStart: 1, rowStart: 0),
                 _SyncToggle(
                   label: "Broadcast sync",
@@ -390,7 +379,7 @@ class _ProfileSection extends ConsumerWidget {
 }
 
 class _IdentitySection extends ConsumerStatefulWidget {
-  final IdentityVault? profile;
+  final IdentityRecord? profile;
   final TextEditingController nameController;
   final double scale;
   const _IdentitySection({required this.profile, required this.nameController, required this.scale});
@@ -434,7 +423,7 @@ class _IdentitySectionState extends ConsumerState<_IdentitySection> {
       title: "Verified Identities",
       action: TextButton.icon(
         icon: Icon(LucideIcons.plus, size: 14.0 * scale),
-        label: Text("Add Link", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.accent(context), fontWeight: FontWeight.bold)),
+        label: Text("Add Link", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.accent(context), fontWeight: FontWeight.bold)),
         onPressed: profile == null ? null : () async {
           final newName = widget.nameController.text.trim();
           if (newName.isNotEmpty) {
@@ -453,12 +442,12 @@ class _IdentitySectionState extends ConsumerState<_IdentitySection> {
         height: 70.0 * scale,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: ConsciaTheme.background(context), 
+          color: AppTheme.background(context), 
           borderRadius: BorderRadius.circular(12.0 * scale), 
-          border: Border.all(color: ConsciaTheme.border(context))
+          border: Border.all(color: AppTheme.border(context))
         ),
         child: (profile == null || profile!.verifiedLinks.isEmpty)
-          ? Center(child: Text("No verified links", style: ConsciaTheme.captionStyle(context, scale)))
+          ? Center(child: Text("No verified links", style: AppTheme.captionStyle(context, scale)))
           : Stack(
               children: [
                 ListView.builder(
@@ -490,7 +479,7 @@ class _IdentitySectionState extends ConsumerState<_IdentitySection> {
                         }),
                       ],
                       child: Center(
-                        child: Icon(icon, size: 24.0 * scale, color: ConsciaTheme.accent(context)),
+                        child: Icon(icon, size: 24.0 * scale, color: AppTheme.accent(context)),
                       ),
                     );
                   },
@@ -570,7 +559,7 @@ class _ConsciaMenuButtonState extends State<_ConsciaMenuButton> {
         shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10 * scale),
-            side: BorderSide(color: ConsciaTheme.border(context)),
+            side: BorderSide(color: AppTheme.border(context)),
           ),
         ),
         maximumSize: WidgetStatePropertyAll(Size(140.0 * scale, double.infinity)),
@@ -583,7 +572,7 @@ class _ConsciaMenuButtonState extends State<_ConsciaMenuButton> {
             onPressed: item.onTap,
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.hovered)) return ConsciaTheme.hover(context);
+                if (states.contains(WidgetState.hovered)) return AppTheme.hover(context);
                 return Colors.transparent;
               }),
               padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: innerPadH, vertical: innerPadV)),
@@ -594,11 +583,11 @@ class _ConsciaMenuButtonState extends State<_ConsciaMenuButton> {
               rowSizes: [auto],
               columnGap: 8.0 * scale,
               children: [
-                Icon(item.icon, size: 14 * scale, color: item.isDestructive ? ConsciaTheme.error(context) : ConsciaTheme.muted(context)).withGridPlacement(columnStart: 0, rowStart: 0),
+                Icon(item.icon, size: 14 * scale, color: item.isDestructive ? AppTheme.error(context) : AppTheme.muted(context)).withGridPlacement(columnStart: 0, rowStart: 0),
                 Text(item.label, 
                   overflow: TextOverflow.ellipsis,
-                  style: ConsciaTheme.captionStyle(context, scale).copyWith(
-                    color: item.isDestructive ? ConsciaTheme.error(context) : Colors.white,
+                  style: AppTheme.captionStyle(context, scale).copyWith(
+                    color: item.isDestructive ? AppTheme.error(context) : Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ).withGridPlacement(columnStart: 1, rowStart: 0),
@@ -627,10 +616,10 @@ class _ConsciaMenuButtonState extends State<_ConsciaMenuButton> {
               height: (widget.isCircle ? 80.0 : 52.0) * scale,
               margin: EdgeInsets.only(right: widget.isCircle ? 0 : 12.0 * scale),
               decoration: BoxDecoration(
-                color: _isPressed ? ConsciaTheme.hover(context) : ConsciaTheme.surface(context),
+                color: _isPressed ? AppTheme.hover(context) : AppTheme.surface(context),
                 shape: widget.isCircle ? BoxShape.circle : BoxShape.rectangle,
                 borderRadius: widget.isCircle ? null : BorderRadius.circular(12.0 * scale),
-                border: Border.all(color: _isPressed ? ConsciaTheme.accent(context) : ConsciaTheme.border(context)),
+                border: Border.all(color: _isPressed ? AppTheme.accent(context) : AppTheme.border(context)),
               ),
               child: widget.child,
             ),
@@ -658,7 +647,7 @@ class _SyncToggle extends StatelessWidget {
         columnSizes: [1.fr, auto],
         rowSizes: [auto],
         children: [
-          Text(label, style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold)).withGridPlacement(columnStart: 0, rowStart: 0),
+          Text(label, style: AppTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold)).withGridPlacement(columnStart: 0, rowStart: 0),
           Transform.scale(
             scale: 0.7,
             child: Switch(
@@ -672,7 +661,7 @@ class _SyncToggle extends StatelessWidget {
   }
 }
 
-class _SecurityVaultSection extends StatelessWidget {
+class _SecurityKeysSection extends StatelessWidget {
   final String did;
   final String secret;
   final bool isGenerating;
@@ -681,24 +670,24 @@ class _SecurityVaultSection extends StatelessWidget {
   final VoidCallback onCopySecret;
   final double scale;
 
-  const _SecurityVaultSection({required this.did, required this.secret, required this.isGenerating, required this.onRotate, required this.onCopyDid, required this.onCopySecret, required this.scale});
+  const _SecurityKeysSection({required this.did, required this.secret, required this.isGenerating, required this.onRotate, required this.onCopyDid, required this.onCopySecret, required this.scale});
 
   @override
   Widget build(BuildContext context) {
     return _SectionWrapper(
-      title: "Security Vault",
+      title: "Security Keys",
       action: TextButton.icon(
         onPressed: isGenerating ? null : onRotate,
         icon: isGenerating 
-          ? SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: ConsciaTheme.accent(context)))
-          : Icon(LucideIcons.refreshCw, size: 12.0 * scale, color: ConsciaTheme.accent(context)),
-        label: Text("Synthesize", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.accent(context), fontWeight: FontWeight.bold)),
+          ? SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.accent(context)))
+          : Icon(LucideIcons.refreshCw, size: 12.0 * scale, color: AppTheme.accent(context)),
+        label: Text("Generate", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.accent(context), fontWeight: FontWeight.bold)),
       ),
       scale: scale,
       child: Container(
         height: 70.0 * scale,
         padding: EdgeInsets.symmetric(horizontal: 16.0 * scale, vertical: 10.0 * scale),
-        decoration: BoxDecoration(color: ConsciaTheme.background(context), borderRadius: BorderRadius.circular(12.0 * scale), border: Border.all(color: ConsciaTheme.border(context))),
+        decoration: BoxDecoration(color: AppTheme.background(context), borderRadius: BorderRadius.circular(12.0 * scale), border: Border.all(color: AppTheme.border(context))),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -709,18 +698,18 @@ class _SecurityVaultSection extends StatelessWidget {
                   width: 100.0 * scale,
                   child: Row(
                     children: [
-                      Icon(LucideIcons.fingerprint, color: ConsciaTheme.accent(context), size: 16.0 * scale),
+                      Icon(LucideIcons.fingerprint, color: AppTheme.accent(context), size: 16.0 * scale),
                       SizedBox(width: 8.0 * scale),
-                      Text("Identifier", style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold, color: ConsciaTheme.accent(context))),
+                      Text("Identifier", style: AppTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold, color: AppTheme.accent(context))),
                     ],
                   ),
                 ),
                 SizedBox(width: 8.0 * scale),
                 Expanded(
-                  child: Text(did, style: ConsciaTheme.captionStyle(context, scale).copyWith(fontFamily: 'monospace'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  child: Text(did, style: AppTheme.captionStyle(context, scale).copyWith(fontFamily: 'monospace'), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ),
                 SizedBox(width: 8.0 * scale),
-                IconButton(padding: EdgeInsets.zero, constraints: BoxConstraints(), icon: Icon(LucideIcons.copy, size: 14.0 * scale, color: ConsciaTheme.muted(context)), onPressed: onCopyDid),
+                IconButton(padding: EdgeInsets.zero, constraints: BoxConstraints(), icon: Icon(LucideIcons.copy, size: 14.0 * scale, color: AppTheme.muted(context)), onPressed: onCopyDid),
               ],
             ),
             SizedBox(height: 6.0 * scale),
@@ -728,14 +717,14 @@ class _SecurityVaultSection extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 100.0 * scale,
-                  child: Text("Signing Secret", style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold)),
+                  child: Text("Signing Secret", style: AppTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold)),
                 ),
                 SizedBox(width: 8.0 * scale),
                 Expanded(
-                  child: Text("••••••••••••••••••••••••••••••••", style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontFamily: 'monospace'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  child: Text("••••••••••••••••••••••••••••••••", style: AppTheme.bodyStyle(context, scale).copyWith(fontFamily: 'monospace'), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ),
                 SizedBox(width: 8.0 * scale),
-                IconButton(padding: EdgeInsets.zero, constraints: BoxConstraints(), icon: Icon(LucideIcons.copy, size: 14.0 * scale, color: ConsciaTheme.muted(context)), onPressed: onCopySecret),
+                IconButton(padding: EdgeInsets.zero, constraints: BoxConstraints(), icon: Icon(LucideIcons.copy, size: 14.0 * scale, color: AppTheme.muted(context)), onPressed: onCopySecret),
               ],
             ),
           ],
@@ -759,7 +748,7 @@ class _ModalFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(24.0 * scale),
-      decoration: BoxDecoration(color: ConsciaTheme.surface(context), border: Border(top: BorderSide(color: ConsciaTheme.border(context)))),
+      decoration: BoxDecoration(color: AppTheme.surface(context), border: Border(top: BorderSide(color: AppTheme.border(context)))),
       child: LayoutGrid(
         columnSizes: [1.fr, auto, auto],
         rowSizes: [auto],
@@ -767,20 +756,20 @@ class _ModalFooter extends StatelessWidget {
           SizedBox().withGridPlacement(columnStart: 0, rowStart: 0),
           TextButton(
             onPressed: onCancel, 
-            child: Text("Cancel", style: ConsciaTheme.bodyStyle(context, scale).copyWith(color: ConsciaTheme.muted(context))),
+            child: Text("Cancel", style: AppTheme.bodyStyle(context, scale).copyWith(color: AppTheme.muted(context))),
           ).withGridPlacement(columnStart: 1, rowStart: 0),
           Padding(
             padding: EdgeInsets.only(left: 16.0 * scale),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: ConsciaTheme.accent(context), 
+                backgroundColor: AppTheme.accent(context), 
                 foregroundColor: Colors.white, 
                 elevation: 0,
                 padding: EdgeInsets.symmetric(horizontal: 24.0 * scale, vertical: 18.0 * scale), 
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0 * scale)),
               ),
               onPressed: onSync,
-              child: Text(isNewIdentity ? "Initialize Identity" : "Sync Account", style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
+              child: Text(isNewIdentity ? "Save Identity" : "Save Changes", style: AppTheme.bodyStyle(context, scale).copyWith(fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ).withGridPlacement(columnStart: 2, rowStart: 0),
         ],
@@ -813,7 +802,7 @@ class _SectionWrapper extends StatelessWidget {
               Expanded(
                 child: Text(
                   title, 
-                  style: ConsciaTheme.subHeadingStyle(context, scale).copyWith(fontWeight: FontWeight.bold),
+                  style: AppTheme.subHeadingStyle(context, scale).copyWith(fontWeight: FontWeight.bold),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -847,21 +836,21 @@ class _ViewProofModal extends ConsumerWidget {
           maxWidth: (MediaQuery.of(context).size.width * 0.85).clamp(350.0, 450.0 * scale),
         ),
         padding: EdgeInsets.all(24.0 * scale),
-        decoration: ConsciaTheme.premiumCardDecoration(context, scale),
+        decoration: AppTheme.premiumCardDecoration(context, scale),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Identity Proof", style: ConsciaTheme.headingStyle(context, scale)),
+            Text("Identity Proof", style: AppTheme.headingStyle(context, scale)),
             SizedBox(height: 24.0 * scale),
-            Text("Verification URL", style: ConsciaTheme.captionStyle(context, scale)),
+            Text("Verification URL", style: AppTheme.captionStyle(context, scale)),
             SizedBox(height: 8.0 * scale),
             Container(
               padding: EdgeInsets.all(12.0 * scale),
               decoration: BoxDecoration(
-                color: ConsciaTheme.background(context),
+                color: AppTheme.background(context),
                 borderRadius: BorderRadius.circular(12.0 * scale),
-                border: Border.all(color: ConsciaTheme.border(context)),
+                border: Border.all(color: AppTheme.border(context)),
               ),
               child: LayoutGrid(
                 columnSizes: [1.fr, auto],
@@ -870,11 +859,11 @@ class _ViewProofModal extends ConsumerWidget {
                 children: [
                   Text(
                     link.url,
-                    style: ConsciaTheme.bodyStyle(context, scale).copyWith(fontFamily: 'monospace', fontSize: 12.0 * scale),
+                    style: AppTheme.bodyStyle(context, scale).copyWith(fontFamily: 'monospace', fontSize: 12.0 * scale),
                     overflow: TextOverflow.ellipsis,
                   ).withGridPlacement(columnStart: 0, rowStart: 0),
                   IconButton(
-                    icon: Icon(LucideIcons.copy, size: 16.0 * scale, color: ConsciaTheme.muted(context)),
+                    icon: Icon(LucideIcons.copy, size: 16.0 * scale, color: AppTheme.muted(context)),
                     onPressed: () {
                       Clipboard.setData(ClipboardData(text: link.url));
                       ref.read(authToastProvider)("Proof URL copied.", isError: false);
@@ -888,7 +877,7 @@ class _ViewProofModal extends ConsumerWidget {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text("Close", style: ConsciaTheme.bodyStyle(context, scale).copyWith(color: ConsciaTheme.accent(context))),
+                child: Text("Close", style: AppTheme.bodyStyle(context, scale).copyWith(color: AppTheme.accent(context))),
               ),
             ),
           ],

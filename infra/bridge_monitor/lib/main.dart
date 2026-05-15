@@ -17,7 +17,7 @@ void main() async {
     File('/home/exocrat/bridge_monitor_clicks.log').writeAsStringSync('${DateTime.now().toIso8601String()} | STARTUP | v1.5.0-BRIDGE\n', mode: FileMode.append);
   } catch (_) {}
   
-  runApp(const ExoTechBridgeApp());
+  runApp(const BridgeMonitorApp());
 }
 
 final buildCountNotifier = ValueNotifier<int>(0);
@@ -28,8 +28,8 @@ final memRssNotifier = ValueNotifier<String>("0/0 MB");
 final currentIntervalNotifier = ValueNotifier<int>(1000);
 final debugPaintNotifier = ValueNotifier<bool>(false);
 
-class ExoTechBridgeApp extends StatelessWidget {
-  const ExoTechBridgeApp({super.key});
+class BridgeMonitorApp extends StatelessWidget {
+  const BridgeMonitorApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class ExoTechBridgeApp extends StatelessWidget {
         valueListenable: themeModeNotifier,
         builder: (context, themeMode, _) {
           return MaterialApp(
-            title: 'ExoTech Bridge',
+            title: 'Bridge Monitor',
             debugShowCheckedModeBanner: false,
             themeMode: themeMode,
             darkTheme: ThemeData(
@@ -83,7 +83,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
   _BridgeMonitorScreenState() {
     _nodes = [
       BridgeNode(id: "signaling", name: "Signaling Relay", machine: "EXONOMY", role: "WebRTC Handshake Bridge", port: 8080, icon: Icons.hub_outlined, startCmd: "start", stopCmd: "stop", serviceName: "exotalk-signaling"),
-      BridgeNode(id: "conscia", name: "Conscia Beacon", machine: "EXONOMY", role: "P2P Mesh Node (Sovereign)", port: 3000, icon: Icons.radar_outlined, startCmd: "start", stopCmd: "stop", serviceName: "exotalk-conscia"),
+      BridgeNode(id: "conscia", name: "Conscia Beacon", machine: "EXONOMY", role: "P2P Mesh Node", port: 3000, icon: Icons.radar_outlined, startCmd: "start", stopCmd: "stop", serviceName: "exotalk-conscia"),
       BridgeNode(id: "zrok", name: "Public Proxy", machine: "ZROK INFRA", role: "External Gateway (exotalk.tech)", port: 0, icon: Icons.public_outlined, startCmd: "start", stopCmd: "stop", serviceName: "exotalk-zrok"),
     ];
   }
@@ -233,7 +233,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
         child: Scaffold(
           body: Column(
             children: [
-              RepaintBoundary(child: _buildPremiumHeader(isDark)),
+              RepaintBoundary(child: _buildHeader(isDark)),
               Expanded(child: RepaintBoundary(child: _isGridView ? _buildGrid(isDark) : _buildList(isDark))),
             ],
           ),
@@ -242,7 +242,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
     );
   }
 
-  Widget _buildPremiumHeader(bool isDark) {
+  Widget _buildHeader(bool isDark) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
@@ -263,7 +263,7 @@ class _BridgeMonitorScreenState extends State<BridgeMonitorScreen> with SingleTi
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("EXOTECH BRIDGE", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 32, letterSpacing: -1)),
+                  const Text("BRIDGE MONITOR", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 32, letterSpacing: -1)),
                   const SizedBox(height: 4),
                   Text("ACTIVE TELEMETRY | NODE: $_localHost", style: const TextStyle(fontSize: 14, color: Color(0xFF00C9A7), fontWeight: FontWeight.bold, letterSpacing: 1.2)),
                   const SizedBox(height: 2),

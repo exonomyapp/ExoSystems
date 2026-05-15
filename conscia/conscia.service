@@ -1,5 +1,17 @@
+# 🧠 EDUCATIONAL CONTEXT: The Conscia Beacon Service
+# This systemd unit manages the lifecycle of the Conscia daemon, which operates 
+# as an independent participant in the P2P mesh. It ensures the node starts 
+# automatically on boot and remains active via the 'always' restart policy, 
+# facilitating the node's role in relay, indexing, and federation.
+#
+# Context:
+# - Binary: /usr/bin/conscia (Compiled from conscia/src/main.rs)
+# - State Directory: /var/lib/conscia (Where config.toml and Iroh data reside)
+# - Command: 'daemon' (Starts the Axum HTTP API and Iroh networking engine)
+# =============================================================================
+
 [Unit]
-Description=Conscia Sovereign Beacon Node
+Description=Conscia Beacon Node
 After=network.target
 
 [Service]

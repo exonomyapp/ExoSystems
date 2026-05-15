@@ -34,7 +34,7 @@ All three tiers consume the same Conscia HTTP API and render their UI dynamicall
 
 ---
 
-## Phase 1: Foundation — Sovereign Identity & Node Discovery
+## Phase 1: Foundation — Authorial Identity & Node Discovery
 
 ### 1.1 Integrate ExoAuth
 
@@ -49,7 +49,7 @@ dependencies:
       path: exoauth
 ```
 
-This gives every Synesys instance its own `did:peer` sovereign identity — generated locally on the device using Ed25519 keys, with zero server dependency.
+This gives every Synesys instance its own `did:peer` decentralized identity — generated locally on the device using Ed25519 keys, with zero server dependency.
 
 ### 1.2 Node Discovery Flow
 
@@ -78,7 +78,7 @@ The `GET /api/discovery` endpoint returns the node's public identity card. The c
 
 | Field | Description | Synesys Use |
 |---|---|---|
-| `did` | Sovereign `did:peer` identity | Verify node authenticity |
+| `did` | Decentralized `did:peer` identity | Verify node authenticity |
 | `node_id` | Iroh network identifier | Internal routing |
 | `node_name` | Human-readable name | Display in "Known Nodes" list |
 | `version` | Conscia daemon version | Compatibility checks |

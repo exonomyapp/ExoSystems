@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0"
 authors = ["ExoSystems Governance <federation@exonomy.local>"]
-description = "Interactive FHS-compliant installer for the Conscia Sovereign Node"
+description = "Interactive FHS-compliant installer for the Conscia node"
 
-# 🧠 EDUCATIONAL CONTEXT: Dependency Philosophy
+# EDUCATIONAL CONTEXT: Dependency Philosophy
 # We use `inquire` (Tier 2: Interactive) per Spec 07 §7.7 for the wizard flow,
 # NOT `ratatui` (Tier 3: TUI) which is reserved for immersive monitoring dashboards.
 # `indicatif` provides progress bars during the installation phase.

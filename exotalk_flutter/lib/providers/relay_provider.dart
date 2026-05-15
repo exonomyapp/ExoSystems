@@ -1,18 +1,15 @@
-// =============================================================================
-// conscia_provider.dart — Conscia "Lifeline" Connection Monitor
-// =============================================================================
+// = : = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+// relay_provider.dart — Relay Connection Monitor
+// = : = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 //
-// Conscia nodes are always-on Iroh peers that provide data persistence
-// ("Lifeline") for the user's Willow replica when their devices are offline.
-// Think of them as a personal cloud mirror — they don't own your data, but
-// they keep a synchronized copy available for your other devices.
+// Relay nodes are peers that provide data persistence
+// for the user's Willow replica when devices are offline.
 //
 // This provider polls the Rust engine every 500ms to check whether the
-// associated Conscia node is reachable. The status is displayed in the
-// sidebar footer via `_ConsciaStatusFooter` in home_screen.dart.
+// associated relay node is reachable.
 //
-// See: docs/spec/10_identity_vault.md §10.2 for the persistence model.
-// =============================================================================
+// See: docs/spec/10_identity_storage.md for the persistence model.
+// = : = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
@@ -20,57 +17,52 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:exoauth/exoauth.dart';
 import '../src/rust/api/network.dart';
 
-// 🧠 Educational Context: The Mesh Lifeline Monitor
-/// Provider that periodically polls the Rust engine for the Conscia connection status.
-/// This implementation uses a low-overhead stream to provide high-fidelity 
-/// liveness detection (500ms intervals) for the user's sovereign persistence 
-/// node, bridging the asynchronous Rust FFI to the synchronous UI layer.
-final consciaStatusProvider = StreamProvider<ConsciaStatus>((ref) async* {
+/// Provider that periodically polls the Rust engine for the relay connection status.
+final relayStatusProvider = StreamProvider<RelayStatus>((ref) async* {
   final identity = ref.watch(identityProvider);
   
-  // If no one is signed in, we are disconnected by definition
   if (identity.activeDid == null) {
-    yield const ConsciaStatus(nodeId: null, isConnected: false, activePeers: 0);
+    yield const RelayStatus(nodeId: null, isConnected: false, activePeers: 0);
     return;
   }
 
   // Grace Period: 500ms to allow for initial handshake.
-  yield const ConsciaStatus(nodeId: null, isConnected: false, activePeers: 0);
+  yield const RelayStatus(nodeId: null, isConnected: false, activePeers: 0);
   await Future.delayed(const Duration(milliseconds: 500));
 
   // Yield the initial status with the engine's liveness check
-  final rawInitial = await getConsciaStatus();
+  final rawInitial = await getRelayStatus();
   
-  final initial = ConsciaStatus(
+  final initial = RelayStatus(
     nodeId: rawInitial.nodeId,
     isConnected: rawInitial.isConnected,
     activePeers: rawInitial.activePeers,
   );
-  debugPrint("DEBUG: Conscia Status Initial: connected=${initial.isConnected} (raw=${rawInitial.isConnected}, activePeers=${initial.activePeers})");
+  debugPrint("DEBUG: Relay Status Initial: connected=${initial.isConnected}");
   yield initial;
 
   // Then poll every 500ms
   while (true) {
     await Future.delayed(const Duration(milliseconds: 500));
     try {
-      final rawStatus = await getConsciaStatus();
+      final rawStatus = await getRelayStatus();
 
-      final status = ConsciaStatus(
+      final status = RelayStatus(
         nodeId: rawStatus.nodeId,
         isConnected: rawStatus.isConnected,
         activePeers: rawStatus.activePeers, 
       );
       yield status;
     } catch (e) {
-      debugPrint("DEBUG: Conscia Status Poll Error: $e");
+      debugPrint("DEBUG: Relay Status Poll Error: $e");
       // If the engine is busy or restarting, just yield an offline status
-      yield const ConsciaStatus(nodeId: null, isConnected: false, activePeers: 0);
+      yield const RelayStatus(nodeId: null, isConnected: false, activePeers: 0);
     }
   }
 });
 
-/// Notifier to manage the associated Conscia ID (e.g. from an invitation)
-class AssociatedConsciaNotifier extends Notifier<String?> {
+/// Notifier to manage the associated relay ID
+class AssociatedRelayNotifier extends Notifier<String?> {
   @override
   String? build() {
     // We load the initial state asynchronously
@@ -81,21 +73,21 @@ class AssociatedConsciaNotifier extends Notifier<String?> {
   Future<void> _loadFromManifest() async {
     try {
       final manifest = await getDeviceManifest();
-      state = manifest.associatedConsciaId;
+      state = manifest.associatedRelayId;
     } catch (_) {}
   }
 
   Future<void> associateNode(String nodeId) async {
-    await setAssociatedConscia(nodeId: nodeId);
+    await setAssociatedRelay(nodeId: nodeId);
     state = nodeId;
   }
 }
 
-final associatedConsciaProvider = NotifierProvider<AssociatedConsciaNotifier, String?>(() {
-  return AssociatedConsciaNotifier();
+final associatedRelayProvider = NotifierProvider<AssociatedRelayNotifier, String?>(() {
+  return AssociatedRelayNotifier();
 });
 
-/// Exposes the live roster of associated Conscia peers from the Rust engine.
+/// Exposes the live roster of associated peers from the Rust engine.
 /// Polls every 500ms to detect newly-discovered mesh peers.
 /// Invalidate this provider after manually adding a node to trigger an immediate refresh.
 final peerListProvider = StreamProvider<List<PeerInfo>>((ref) async* {
@@ -133,6 +125,5 @@ final peerListProvider = StreamProvider<List<PeerInfo>>((ref) async* {
 /// Tracks whether the local node is in "Sleep Mode" (mesh-connected but low-activity).
 final nodeSleepProvider = StateProvider<bool>((ref) => false);
 
-/// Tracks which specific Conscia node is currently selected in the sidebar.
-/// Null means no node is selected (main view shows chat or empty state).
+/// Tracks which specific relay node is currently selected in the sidebar.
 final selectedNodeIdProvider = StateProvider<String?>((ref) => null);

@@ -3,7 +3,7 @@
 This document defines the distribution strategy for Exocracy, the decentralized project management and voucher-based funding platform.
 
 ## 1. Philosophical Identity & Independence
-Exocracy is the "Governance Layer" of the mesh. It is a completely independent application designed for high-trust environments where organizational transparency and sovereign project management are paramount.
+Exocracy is the "Governance Layer" of the mesh. It is a completely independent application designed for high-trust environments where organizational transparency and independent project management are paramount.
 
 **Modular Funding**: Exocracy can operate entirely without vouchers, accepting real-world forms of money as project funding. However, in the spirit of the Exosystem's open architecture, an Exocracy project manager can *optionally* modularize their workflow by choosing to fund tasks using **Exonomy vouchers**. This is an engineered interoperability feature, not a rigid app-level dependency.
 

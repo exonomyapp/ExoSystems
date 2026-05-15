@@ -16,7 +16,7 @@
 
 use exotalk_core::network_internal;
 
-pub struct ConsciaStatus {
+pub struct RelayStatus {
     pub node_id: Option<String>,
     pub is_connected: bool,
     pub active_peers: u32,
@@ -51,20 +51,20 @@ pub async fn join_conversation_topic(namespace: [u8; 32]) -> Result<(), String> 
     network_internal::join_conversation_topic(namespace).await
 }
 
-pub async fn set_associated_conscia(node_id: String) -> Result<(), String> {
-    network_internal::set_associated_conscia(node_id.clone()).await?;
+pub async fn set_associated_relay(node_id: String) -> Result<(), String> {
+    network_internal::set_associated_relay(node_id.clone()).await?;
     Ok(())
 }
 
-pub async fn force_handshake() -> Result<(), String> {
-    network_internal::force_handshake().await
+pub async fn initiate_connection() -> Result<(), String> {
+    network_internal::initiate_connection().await
 }
 
 
 
-pub async fn get_conscia_status() -> ConsciaStatus {
-    let (node_id, is_connected, active_peers) = network_internal::get_conscia_status().await;
-    ConsciaStatus { node_id, is_connected, active_peers }
+pub async fn get_relay_status() -> RelayStatus {
+    let (node_id, is_connected, active_peers) = network_internal::get_relay_status().await;
+    RelayStatus { node_id, is_connected, active_peers }
 }
 
 pub async fn get_peer_list() -> Vec<PeerInfo> {

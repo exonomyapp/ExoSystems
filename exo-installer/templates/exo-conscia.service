@@ -1,12 +1,12 @@
-# 🧠 EDUCATIONAL CONTEXT: Production FHS-Compliant Systemd Unit
-# This is the enterprise-grade replacement for the legacy user-space unit
+# EDUCATIONAL CONTEXT: Production FHS-Compliant Systemd Unit
+# This is the standard replacement for the legacy user-space unit
 # that ran under ~/deployments/. Key differences:
 # - Runs as exo-sys (non-login system user) instead of the human operator
 # - Uses EnvironmentFile for clean config injection
 # - Includes systemd hardening directives (NoNewPrivileges, ProtectSystem)
 # - Signaling relay is now built into the Conscia daemon — no separate service
 [Unit]
-Description=Conscia - Sovereign Lifeline Daemon
+Description=Conscia - Lifeline Daemon
 After=network-online.target
 Wants=network-online.target
 

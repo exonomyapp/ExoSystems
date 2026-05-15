@@ -3,15 +3,12 @@
 // =============================================================================
 //
 // Boot sequence:
-//   1. RustLib.init()         — Loads the Rust shared library and initializes FRB
-//   2. initWillowDatabase()   — Loads (or creates) the local identity vault and
-//                                conversation/message stores from JSON files
-//   3. initNetwork()          — Starts the Iroh QUIC endpoint, gossip overlay,
-//                                and blob store for P2P mesh communication
-//   4. runApp()               — Launches the Flutter widget tree wrapped in a
-//                                Riverpod ProviderScope for global state management
+//   1. RustLib.init()         — Initializes the Rust library
+//   2. initDatabase()         — Loads the local identity and conversation stores
+//   3. initNetwork()          — Starts the Iroh QUIC endpoint and P2P communication
+//   4. runApp()               — Launches the Flutter widget tree
 //
-// Routing: AppRouter watches the userProfileProvider and shows WelcomeScreen
+// Routing: AppRouter watches the userProfileProvider.
 
 // otherwise shows HomeScreen with the sidebar + chat layout.
 // =============================================================================
@@ -32,14 +29,11 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
   
-  // 🧠 Educational Context: The Sovereign Boot Sequence
-  // Before the Flutter UI can even paint, we must ensure the underlying 
-  // sovereign engines (Willow P2P, Identity Vault, Rust FFI) are fully 
-  // initialized. This ensures that the user's local identity and mesh 
-  // state are the source of truth from the first frame.
+  // Boot Sequence
+  // Initialize the underlying engines (P2P, Identity, Rust FFI)
+  // before the UI is rendered.
   try {
-    // P2P messaging is initialized lazily after profile selection
-    // via initWillowDatabase(did, secret) in the identity flow.
+    // P2P messaging is initialized lazily after profile selection.
     
     // Window management for desktop
     await windowManager.ensureInitialized();
@@ -106,8 +100,8 @@ class ExoTalkApp extends ConsumerWidget {
       child: MaterialApp(
         title: 'ExoTalk',
         debugShowCheckedModeBanner: false,
-        theme: ConsciaTheme.lightTheme,
-        darkTheme: ConsciaTheme.darkTheme,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
         themeMode: ref.watch(themeModeProvider),
         home: const AppRouter(),
       ),
@@ -122,11 +116,11 @@ class AppRouter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final identity = ref.watch(identityProvider);
     
-    // 🧠 Educational Context: Deterministic Routing
-    // The AppRouter acts as the ultimate gatekeeper. If no active identity 
-    // is found in the local vault (DID is null), the user is routed to 
-    // the ExoAuthView. Once an identity is selected/created, the HomeScreen 
-    // is swapped in with a smooth transition, locking the session to that DID.
+    // Deterministic Routing
+    // The AppRouter handles view transitions based on identity status.
+    // If no active identity is found (DID is null), the user is routed 
+    // to the ExoAuthView. Once an identity is active, the HomeScreen 
+    // is rendered.
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 500),
       switchInCurve: Curves.easeInOutCubic,

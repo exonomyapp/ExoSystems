@@ -24,7 +24,7 @@ The `rust_builder` plugin inside each app automatically compiles the correct iso
 3. For UI-only development: `npm run dev`.
 4. For full native desktop build: `npm run tauri dev`.
 
-The `src-tauri` directory is a symlink to the corresponding Rust backend crate inside `exotalk_engine/` (e.g., `republet_desktop`). Tauri compiles the Rust backend and bundles the SvelteKit frontend into a single native binary.
+The `src-tauri` directory is a symlink to the corresponding Rust backend crate in the root (e.g., `republet_desktop`). Tauri compiles the Rust backend and bundles the SvelteKit frontend into a single native binary.
 
 ### Engine Workspace (Validation)
 To verify all isolated crates compile harmoniously:
@@ -51,7 +51,7 @@ We recognize two primary tiers of Conscia deployment to accommodate both non-tec
 ### Level 2: Advanced Deployment (HA Clusters)
 - **Target:** High traffic, mission-critical environments.
 - **Topology:** 3-node clusters (1 Master, 2 Slaves) utilizing redundant disks. Slaves provide failover and load-balancing for read/write requests.
-- **Infrastructure as Code (IaC):** To provide uniform provisioning across disparate cloud targets (GCP, AWS, Oracle), HA cluster deployments are standardized on **OpenTofu**. This allows users to specify an HA architecture declaratively without worrying about cloud-provider specific APIs, maintaining a sovereign, open-source toolchain.
+- **Infrastructure as Code (IaC):** To provide uniform provisioning across disparate cloud targets (GCP, AWS, Oracle), HA cluster deployments are standardized on **OpenTofu**. This allows users to specify an HA architecture declaratively without worrying about cloud-provider specific APIs, maintaining an independent, open-source toolchain.
 - **AI Conscierge:** Advanced deployments support injecting an "AI Key" into the node, allowing an AI agent to become environmentally aware of the Conscia telemetry and autonomously manage resources.
 
 ## Laptop-to-Laptop Deployment (Exonomy)

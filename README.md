@@ -1,4 +1,4 @@
-# The Sovereign Exosystem
+# The Exosystem
 
 <p align="center">
   <img src="assets/branding/exotalk_pappus_desktop.png" alt="Pappus Logo" width="300">
@@ -6,18 +6,18 @@
 
 > **"A digital node should be as free as the person who owns it and as connectable as the physics of the internet allows."** — *[The Vision](docs/vision.md)*
 
-Welcome to the root of the **Sovereign Exosystem**. This monorepo is the forge for a decentralized, zero-harvesting communications stack designed to defend digital sovereignty in an era of centralized hegemony and algorithmic "kill chains."
+Welcome to the root of the **Exosystem**. This monorepo is the forge for a decentralized, zero-harvesting communications stack designed to defend digital freedom in an era of centralized hegemony and algorithmic "kill chains."
 
 ---
 
 ## 📖 The Manifest
 <p align="center">
-  <img src="assets/branding/ExoTown-LEGO.png" alt="Sovereign Exosystem Banner" width="100%">
+  <img src="assets/branding/ExoTown-LEGO.png" alt="Exosystem Banner" width="100%">
 </p>
 
 Before contributing or deploying, align your frequency with the core philosophy:
-*   **[The Vision](docs/vision.md)**: Identity sovereignty, data locality, and publisher-led aggregation.
-*   **[The Sovereign Saga](docs/scenarios/sovereign_saga.md)**: Our narrative framework for digital resistance.
+*   **[The Vision](docs/vision.md)**: Identity ownership, data locality, and publisher-led aggregation.
+*   **[The Saga](docs/scenarios/the_saga.md)**: Our narrative framework for digital resistance.
 *   **[Agent Protocol](agent.md)**: The "Bible" for AI and human agents operating in this SDLC.
 
 ---
@@ -25,7 +25,7 @@ Before contributing or deploying, align your frequency with the core philosophy:
 ## 🚀 The Application Triad
 We build in threes. Each application is designed for multi-dimensional resilience across mobile, desktop, and web.
 
-### 💬 ExoTalk — *Sovereign Messaging*
+### 💬 ExoTalk — *Decentralized Messaging*
 The flagship. Encrypted, offline-first gossip via Willow and Iroh.
 - **[exotalk_flutter/](exotalk_flutter/README.md)**: High-density desktop client.
 - **[exotalk_web/](exotalk_web/README.md)**: Wasm-based entry point.
@@ -38,7 +38,7 @@ Decentralized social credit and exchange without intermediate brokers.
 - **[exonomy_web/](exonomy_web/README.md)**: Indexing node.
 
 ### 🗳️ Exocracy — *Project Governance*
-Fluid, cryptographically-verified decision making for the autonomous age.
+Fluid, cryptographically-verified decision making for the decentralized age.
 - **[exocracy_lite/](exocracy_lite/README.md)** | **[exocracy_flutter/](exocracy_flutter/README.md)** | **[exocracy_web/](exocracy_web/README.md)**
 
 ### 📚 RepubLet — *Scientific Publishing*
@@ -50,7 +50,7 @@ Verifiable, immutable archival of human knowledge.
 ## 🏗️ Core Infrastructure
 The shared backbone that powers the Exosystem.
 
-*   **[conscia/](conscia/README.md)**: **The Sovereign Lifeline.** A first-class, headless beacon and HA relay daemon.
+*   **[conscia/](conscia/README.md)**: **The Lifeline.** A first-class, headless beacon and HA relay daemon.
 *   **[exoauth/](exoauth/README.md)**: **The Universal Passport.** Portable Ed25519 identity synthesis and FFI plugin.
 *   **[infra/](infra/README.md)**: Signaling relays, diagnostic bridges, and monitoring tools.
 
@@ -68,7 +68,7 @@ The Exosystem is documented as a living history.
 
 ## 🤖 Agentic SDLC (BMAD)
 This repository is managed via an **Event-Driven Multi-Agent SDLC**.
-- **[Spec 31](docs/spec/31_bmad_agile_methodology.md)**: Meet the AI Workforce (The Sovereign PM, Iroh Expert, etc.).
+- **[Spec 31](docs/spec/31_bmad_agile_methodology.md)**: Meet the AI Workforce (The Autonomous PM, Iroh Expert, etc.).
 - **[Spec 32](docs/spec/32_archon_workflow_standard.md)**: High-fidelity automation standards.
 
 ---

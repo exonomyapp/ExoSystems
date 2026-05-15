@@ -1,7 +1,8 @@
-// 🧠 EDUCATIONAL CONTEXT: The Conscia Beacon acts as a sovereign entry point into the mesh.
-// It bridges the gap between raw P2P protocols (Iroh) and human-readable interfaces (Web).
-// By serving an Axum-based HTTP API alongside the P2P engine, we enable "Remote Observability"
-// where any authorized UI (like the Exotech Bridge) can interrogate the node state.
+// 🧠 EDUCATIONAL CONTEXT: The Conscia Beacon operates as an independent participant
+// in the P2P mesh. It bridges the gap between raw P2P protocols (Iroh) 
+// and human-readable interfaces (Web). By serving an Axum-based HTTP API 
+// alongside the P2P engine, we enable "Remote Observability" where any 
+// authorized UI (like ConSoul) can interrogate the node state.
 // =============================================================================
 
 
@@ -9,7 +10,7 @@ use axum::{
     extract::Query,
     http::StatusCode,
     response::{Html, IntoResponse, sse::{Event, Sse}},
-    routing::{get, post, delete},
+    routing::{get, post, delete, put},
     Json, Router,
 };
 use clap::{Parser, Subcommand};
@@ -38,7 +39,7 @@ use tower_http::cors::{Any, CorsLayer};
 /// into typed Rust enums and structs.
 #[derive(Parser)]
 #[command(name = "conscia")]
-#[command(about = "Sovereign Beacon Node for the ExoTalk Mesh", long_about = None)]
+#[command(about = "Beacon Node for the ExoTalk Mesh", long_about = None)]
 struct Args {
     #[command(subcommand)]
     command: Option<Commands>,
@@ -67,12 +68,21 @@ enum Commands {
     },
 }
 
+// 🧠 EDUCATIONAL CONTEXT: Database Configuration
+// The Conscia daemon treats pgEdge as a first-class managed service rather than
+// a passive dependency. This struct captures the connection details for the local
+// pgEdge node within the 3-node cluster (exoNode/endoNode/nextNode). The health
+// check interval drives the background service worker's periodic liveness probes.
 #[derive(Serialize, Deserialize, Clone)]
 pub struct DatabaseConfig {
     pub connection_string: String,
     pub health_check_interval_secs: u64,
 }
 
+// 🧠 EDUCATIONAL CONTEXT: Email Configuration
+// Sendgrid integration enables the "out-of-mesh" communication lifeline. When
+// the P2P mesh is partitioned (e.g., prolonged network outage), the Conscierge
+// sidecar can use this email channel to "call home" and notify the operator.
 #[derive(Serialize, Deserialize, Clone)]
 pub struct EmailConfig {
     pub sendgrid_api_key: String,
@@ -239,7 +249,7 @@ async fn main() -> anyhow::Result<()> {
 /// interactive prompts and selection lists.
 fn run_onboarding(path: &std::path::Path) -> anyhow::Result<Config> {
     println!("--- 🛰️ Welcome to Conscia ---");
-    println!("No configuration detected. Let's initialize your sovereign node.\n");
+    println!("No configuration detected. Let's initialize your node.\n");
 
     let name = InquireText::new("What should we name this node?")
         .with_default("My Lifeline")
@@ -254,7 +264,7 @@ fn run_onboarding(path: &std::path::Path) -> anyhow::Result<Config> {
         .parse::<u16>()
         .unwrap_or(3000);
 
-    println!("\nGenerating sovereign identity...");
+    println!("\nGenerating identity...");
     // IDENTITY SYNTHESIS:
     // We generate a real Ed25519 keypair so this node has a mathematically
     // unique did:peer identity from its very first boot.
@@ -302,7 +312,7 @@ async fn start_daemon(config: Config) -> anyhow::Result<()> {
 
     // 1. START THE ENGINE
     // This is the hand-off to the P2P networking layer.
-    network_internal::start_iroh_node(config.did, config.secret).await 
+    network_internal::start_iroh_node(config.did.clone(), config.secret.clone()).await
         .map_err(|e| anyhow::anyhow!("Failed to start networking: {}", e))?;
     
     let stats = network_internal::get_stats().await;
@@ -310,8 +320,13 @@ async fn start_daemon(config: Config) -> anyhow::Result<()> {
 
     // 1.5. START CORE SERVICE WORKERS
     // 🧠 EDUCATIONAL CONTEXT: Core Service Management
-    // Conscia manages long-lived service workers for background tasks like 
-    // email notifications and database maintenance.
+    // Conscia manages long-lived service workers for background tasks like
+    // email notifications and database maintenance. These workers run
+    // independently from the HTTP server and the P2P engine, ensuring that
+    // periodic housekeeping (health checks, digest reports) never blocks
+    // the real-time data path. The worker receives a cloned copy of the
+    // node configuration because Rust's ownership model requires that
+    // data moved into a spawned async task is fully owned by that task.
     let worker_config = config.clone();
     tokio::spawn(async move {
         run_service_worker(worker_config).await;
@@ -322,6 +337,27 @@ async fn start_daemon(config: Config) -> anyhow::Result<()> {
     let app = Router::new()
         .route("/", get(serve_dashboard))
         .route("/api/stats", get(get_live_stats))
+        // ExoTalk Identity Endpoints
+        .route("/api/identity/generate", post(generate_identity))
+        .route("/api/identity/profile", get(get_profile).put(update_profile))
+        .route("/api/identity/device/link", post(link_device))
+        // ExoTalk Network Endpoints
+        .route("/api/network/proximity/scan", post(proximity_scan))
+        .route("/api/network/proximity/handshake", post(proximity_handshake))
+        .route("/api/network/peers", get(get_v1_peers))
+        .route("/api/network/peers/:peer_id", delete(disconnect_peer))
+        // ExoTalk Messaging Endpoints
+        .route("/api/messages/direct", post(send_direct_message))
+        .route("/api/messages/direct/:peer_id", get(get_direct_messages))
+        .route("/api/messages/channel/:channel_id", post(send_channel_message).get(get_channel_messages))
+        .route("/api/sync/force", post(force_sync))
+        // ExoTalk Governance Endpoints
+        .route("/api/governance/capabilities", get(get_capabilities_v1))
+        .route("/api/governance/proposals", post(submit_proposal).get(list_proposals))
+        .route("/api/governance/proposals/:proposal_id/vote", post(vote_proposal))
+        // ExoTalk System Endpoints
+        .route("/api/system/services", get(get_system_services))
+        .route("/api/system/services/pgedge/query", post(pgedge_query))
         .route("/api/federation/peers", get(get_peer_list))
         .route("/api/federation/topology", get(get_topology))
         .route("/api/peers/dial", post(dial_peer))
@@ -366,12 +402,22 @@ async fn start_daemon(config: Config) -> anyhow::Result<()> {
 }
 // ... [Remaining handlers are self-documenting API endpoints]
 
+// 🧠 EDUCATIONAL CONTEXT: Administrative Handlers
+// These functions respond to direct administrative actions from the ConSoul UI.
+// They bridge the gap between human intent (clicking a button) and the 
+// internal state of the P2P networking engine.
+
 async fn dial_peer(Json(payload): Json<serde_json::Value>) -> Result<impl IntoResponse, (StatusCode, String)> {
     let node_id_str = payload["node_id"].as_str().ok_or((StatusCode::BAD_REQUEST, "Missing node_id".to_string()))?;
     network_internal::set_associated_conscia(node_id_str.to_string()).await.map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e))?;
     Ok(StatusCode::OK)
 }
 
+/// 🧠 EDUCATIONAL CONTEXT: Static Dashboard Delivery
+/// Conscia is designed to be "self-healing" and "standalone". By embedding 
+/// the dashboard HTML directly, we ensure that an operator can always 
+/// access the node's local control panel even if the wider mesh or 
+/// external CDNs are unavailable.
 async fn serve_dashboard() -> Html<String> {
     let index = Assets::get("index.html").expect("Failed to load embedded dashboard");
     let template = std::str::from_utf8(index.data.as_ref()).expect("Invalid dashboard template");
@@ -582,7 +628,7 @@ static SIGNALING_STORE: Lazy<tokio::sync::RwLock<HashMap<String, Vec<serde_json:
     Lazy::new(|| tokio::sync::RwLock::new(HashMap::new()));
 
 // 🧠 EDUCATIONAL CONTEXT: Blind Indexing
-// As a "Sovereign Beacon", this node indexes metadata tags for global search 
+// As a "Beacon", this node indexes metadata tags for global search 
 // (like RepubLet articles) without ever needing the keys to decrypt the 
 // underlying content payloads.
 // In-memory store for blind indexing (ephemeral for this version)
@@ -617,6 +663,12 @@ async fn search_metadata(Query(params): Query<SearchQuery>) -> Json<Vec<Metadata
 // =============================================================================
 // PHASE 3 & 4: ADVANCED SERVICES & GEO ROUTING
 // =============================================================================
+// 🧠 EDUCATIONAL CONTEXT: Advanced Node Capabilities
+// As the Conscia node matures into a "High-Availability Mesh" role, it 
+// provides sophisticated services like Topology Visualization, Geographic 
+// Routing, and Managed Storage. These endpoints allow the mesh to 
+// optimize for latency and physical locality, ensuring that data is 
+// always served from the "closest" possible node.
 
 #[derive(Serialize)]
 struct TopologyGraphData {
@@ -787,6 +839,264 @@ async fn get_signaling(axum::extract::Path(target): axum::extract::Path<String>)
     let mut store = SIGNALING_STORE.write().await;
     let pending = store.remove(&target).unwrap_or_default();
     Json(pending)
+}
+
+// =============================================================================
+// EXOTALK CLIENT API ENDPOINTS (Spec 42)
+// =============================================================================
+// 🧠 EDUCATIONAL CONTEXT: The ExoTalk Client API
+// These endpoints define the HTTP contract between the ExoTalk Flutter UI and
+// the Conscia daemon. They enable the UI to manage identity, discover peers,
+// exchange messages, participate in governance, and query infrastructure
+// services — all without requiring direct access to the P2P networking layer.
+//
+// Currently, these handlers return stub responses to allow the Flutter client
+// to immediately test its HTTP integration layer. Once the KIND-based pgEdge
+// cluster (exoNode/endoNode/nextNode) is deployed, these stubs will be
+// replaced with live queries against the distributed database and the
+// Willow sync engine.
+// =============================================================================
+
+// --- Identity ---
+
+#[derive(Serialize)]
+struct GenerateIdentityResponse {
+    did: String,
+}
+
+// 🧠 EDUCATIONAL CONTEXT: Identity Generation
+// This handler synthesizes a new Ed25519 keypair and derives a did:peer
+// identifier from the public key. In production, this identity would be
+// persisted to the node's Willow store and signed into the local config.
+// The keypair generation uses the OS-level cryptographic RNG (OsRng) to
+// ensure true randomness rather than a deterministic seed.
+async fn generate_identity() -> Json<GenerateIdentityResponse> {
+    let signing_key = ed25519_dalek::SigningKey::generate(&mut rand::rngs::OsRng);
+    let public_b58 = bs58::encode(signing_key.verifying_key().to_bytes()).into_string();
+    Json(GenerateIdentityResponse {
+        did: format!("did:peer:{}", public_b58),
+    })
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct ProfilePayload {
+    name: String,
+    bio: String,
+    avatar_hash: String,
+}
+
+async fn get_profile() -> Json<ProfilePayload> {
+    Json(ProfilePayload {
+        name: "Anonymous Node".to_string(),
+        bio: "Node".to_string(),
+        avatar_hash: "".to_string(),
+    })
+}
+
+async fn update_profile(Json(_payload): Json<ProfilePayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    Ok(StatusCode::OK)
+}
+
+#[derive(Deserialize)]
+struct DeviceLinkPayload {
+    token: String,
+}
+
+async fn link_device(Json(_payload): Json<DeviceLinkPayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    Ok(StatusCode::OK)
+}
+
+// --- Network ---
+// 🧠 EDUCATIONAL CONTEXT: Proximity Discovery
+// These endpoints bridge the gap between physical-world discovery (BLE/mDNS
+// scanning, QR code exchange) and the digital P2P mesh. The scan endpoint
+// activates local radio discovery, while the handshake endpoint consumes
+// the out-of-band key material (e.g., from a scanned QR code) to establish
+// a cryptographically verified peer connection.
+
+#[derive(Serialize)]
+struct ProximityScanResponse {
+    devices_found: Vec<String>,
+}
+
+async fn proximity_scan() -> Json<ProximityScanResponse> {
+    Json(ProximityScanResponse {
+        devices_found: vec!["did:peer:scanned1".to_string(), "did:peer:scanned2".to_string()],
+    })
+}
+
+#[derive(Deserialize)]
+struct ProximityHandshakePayload {
+    qr_code_data: String,
+}
+
+async fn proximity_handshake(Json(_payload): Json<ProximityHandshakePayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    Ok(StatusCode::OK)
+}
+
+async fn get_v1_peers() -> Json<Vec<(String, Vec<String>)>> {
+    Json(network_internal::get_peer_list().await)
+}
+
+async fn disconnect_peer(axum::extract::Path(peer_id): axum::extract::Path<String>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Disconnecting peer: {}", peer_id);
+    Ok(StatusCode::OK)
+}
+
+// --- Messaging ---
+// 🧠 EDUCATIONAL CONTEXT: Messaging Architecture
+// Direct messages are encrypted end-to-end using the recipient's public key
+// derived from their did:peer. Channel messages are broadcast to a shared
+// Willow namespace that all channel members subscribe to. The force_sync
+// endpoint manually triggers a Willow reconciliation cycle, which is
+// normally automatic but can be invoked on demand for testing or after
+// network partition recovery.
+
+#[derive(Deserialize)]
+struct DirectMessagePayload {
+    target_did: String,
+    content: String,
+}
+
+async fn send_direct_message(Json(payload): Json<DirectMessagePayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Sending DM to {}: {}", payload.target_did, payload.content);
+    Ok(StatusCode::OK)
+}
+
+#[derive(Serialize)]
+struct MessagePayload {
+    id: String,
+    sender_did: String,
+    content: String,
+    timestamp: u64,
+}
+
+async fn get_direct_messages(axum::extract::Path(peer_id): axum::extract::Path<String>) -> Json<Vec<MessagePayload>> {
+    Json(vec![MessagePayload {
+        id: "msg_1".to_string(),
+        sender_did: peer_id,
+        content: "Hello from mock DM".to_string(),
+        timestamp: 1715690000,
+    }])
+}
+
+#[derive(Deserialize)]
+struct ChannelMessagePayload {
+    content: String,
+}
+
+async fn send_channel_message(axum::extract::Path(channel_id): axum::extract::Path<String>, Json(payload): Json<ChannelMessagePayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Sending message to channel {}: {}", channel_id, payload.content);
+    Ok(StatusCode::OK)
+}
+
+async fn get_channel_messages(axum::extract::Path(channel_id): axum::extract::Path<String>) -> Json<Vec<MessagePayload>> {
+    Json(vec![MessagePayload {
+        id: "cmsg_1".to_string(),
+        sender_did: "did:peer:someone".to_string(),
+        content: format!("Welcome to channel {}", channel_id),
+        timestamp: 1715690000,
+    }])
+}
+
+async fn force_sync() -> Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Forcing sync cycle...");
+    Ok(StatusCode::OK)
+}
+
+// --- Governance ---
+// 🧠 EDUCATIONAL CONTEXT: Meadowcap Governance
+// These endpoints expose the Meadowcap capability system to the UI. The
+// capabilities endpoint returns the set of permissions granted to the local
+// identity (e.g., Admin, SubmitProposal, Vote). Proposals are governance
+// actions submitted by community members and voted on cryptographically.
+// Each vote is signed with the voter's Ed25519 key, ensuring non-repudiation.
+
+#[derive(Serialize)]
+struct CapabilitiesV1Response {
+    capabilities: Vec<String>,
+}
+
+async fn get_capabilities_v1() -> Json<CapabilitiesV1Response> {
+    Json(CapabilitiesV1Response {
+        capabilities: vec!["Admin".to_string(), "SubmitProposal".to_string()],
+    })
+}
+
+#[derive(Deserialize)]
+struct ProposalPayload {
+    title: String,
+    description: String,
+}
+
+async fn submit_proposal(Json(payload): Json<ProposalPayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Submitting proposal: {}", payload.title);
+    Ok(StatusCode::OK)
+}
+
+#[derive(Serialize)]
+struct ProposalItem {
+    id: String,
+    title: String,
+    status: String,
+}
+
+async fn list_proposals() -> Json<Vec<ProposalItem>> {
+    Json(vec![ProposalItem {
+        id: "prop_1".to_string(),
+        title: "Upgrade to pgEdge".to_string(),
+        status: "Active".to_string(),
+    }])
+}
+
+#[derive(Deserialize)]
+struct VotePayload {
+    approve: bool,
+}
+
+async fn vote_proposal(axum::extract::Path(proposal_id): axum::extract::Path<String>, Json(payload): Json<VotePayload>) -> Result<impl IntoResponse, (StatusCode, String)> {
+    tracing::info!("Voting on proposal {}: approve={}", proposal_id, payload.approve);
+    Ok(StatusCode::OK)
+}
+
+// --- System ---
+// 🧠 EDUCATIONAL CONTEXT: Infrastructure Integration
+// These endpoints expose the status of managed infrastructure services
+// (pgEdge cluster, Sendgrid email) to the ConSoul administrative UI.
+// The pgedge_query endpoint is a diagnostic tool restricted to authorized
+// operators, allowing direct SQL queries against the local pgEdge node
+// for troubleshooting and health verification. In the KIND deployment,
+// this will connect to whichever of the three pgEdge nodes (exoNode,
+// endoNode, nextNode) the Conscia daemon is configured to manage.
+
+#[derive(Serialize)]
+struct ServiceStatus {
+    service: String,
+    status: String,
+}
+
+async fn get_system_services() -> Json<Vec<ServiceStatus>> {
+    Json(vec![
+        ServiceStatus { service: "pgEdge".to_string(), status: "disconnected".to_string() },
+        ServiceStatus { service: "SendGrid".to_string(), status: "active".to_string() },
+    ])
+}
+
+#[derive(Deserialize)]
+struct PgEdgeQueryPayload {
+    query: String,
+}
+
+#[derive(Serialize)]
+struct PgEdgeQueryResponse {
+    results: Vec<serde_json::Value>,
+}
+
+async fn pgedge_query(Json(payload): Json<PgEdgeQueryPayload>) -> Json<PgEdgeQueryResponse> {
+    tracing::info!("Received pgEdge query: {}", payload.query);
+    Json(PgEdgeQueryResponse {
+        results: vec![serde_json::json!({"mock_column": "mock_value"})],
+    })
 }
 
 

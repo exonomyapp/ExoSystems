@@ -1,7 +1,7 @@
 {
   "name": "@exotalk/conscia",
   "version": "0.7.7",
-  "description": "Sovereign Beacon Node for the ExoTalk Mesh — npm delivery wrapper",
+  "description": "Beacon Node for the ExoTalk Mesh — npm delivery wrapper",
   "repository": {
     "type": "git",
     "url": "https://github.com/exonomy/exotalk"

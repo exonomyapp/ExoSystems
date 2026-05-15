@@ -1,6 +1,6 @@
 # Conscia Citizenship Extraction
 
-Conscia is the Sovereign Beacon — the HTTP gateway, blind indexer, and federation broker for every application in the Exosystem. It currently resides inside `exotalk_engine/conscia/`, implying it is a sub-component of ExoTalk. This is architecturally incorrect. Conscia serves ExoTalk, Exonomy, Exocracy, RepubLet, and ThreeSteps equally. It must be promoted to a first-class monorepo citizen with full Triad parity.
+Conscia is the Beacon — the HTTP gateway, blind indexer, and federation broker for every application in the Exosystem. It currently resides inside `exotalk_engine/conscia/`, implying it is a sub-component of ExoTalk. This is architecturally incorrect. Conscia serves ExoTalk, Exonomy, Exocracy, RepubLet, and ThreeSteps equally. It must be promoted to a first-class monorepo citizen with full Triad parity.
 
 ## Proposed Changes
 
@@ -43,7 +43,7 @@ The existing embedded `index.html` dashboard, extracted and elevated into a stan
 
 #### [MODIFY] `infra/` (systemd services)
 Update `ExecStart` paths in all Conscia-related systemd unit files on the Exonomy node:
-- `exotalk-conscia.service`
+- `conscia.service`
 - `exotalk-zrok-conscia.service`
 
 #### [MODIFY] Deployment scripts
@@ -97,5 +97,5 @@ graph TD
 
 ### Manual Verification
 - Deploy the relocated binary to the Exonomy node via the standard deployment pathway.
-- Verify `systemctl status exotalk-conscia` starts successfully with the updated paths.
+- Verify `systemctl status conscia` starts successfully with the updated paths.
 - Verify `https://conscianikolasee.share.zrok.io` remains reachable after the relocation.

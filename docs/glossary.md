@@ -10,7 +10,7 @@
 ## Terminology Matrix
 
 ### `Conscia`
-- **Definition**: The authoritative beacon node of the monorepo. A headless Rust daemon that operates as an autonomous participant in the P2P mesh, providing service-layer capabilities (Relay, Indexing, Discovery, Federation) while maintaining content-agnostic data synchronization.
+- **Definition**: The authoritative beacon node of the monorepo. A headless Rust daemon that operates as an independent participant in the P2P mesh, providing service-layer capabilities (Relay, Indexing, Discovery, Federation) while maintaining content-agnostic data synchronization.
 - **History**:
     1.  **[Walkthrough 00](walkthroughs/00_migration_legacy_summary.md)**: Introduced as the core service daemon (initially described as the "Beacon").
     2.  **[Walkthrough 70](walkthroughs/70_conscia_citizenship_extraction.md)**: Formally extracted as a top-level monorepo citizen.
@@ -60,7 +60,7 @@
 ### `Private`
 - **Definition**: The restriction on the reach of publication. It defines which peers are authorized to synchronize or view specific data.
 - **History**:
-    1.  **[Spec 41](spec/41_conscia_database_services_and_curation.md)**: Formally distinguished from "Personal" to clarify data sovereignty vs. data privacy.
+    1.  **[Spec 41](spec/41_conscia_database_services_and_curation.md)**: Formally distinguished from "Personal" to clarify data autonomy vs. data privacy.
 - **Category**: Architectural / Security.
 - **Function**: Reach restriction and access control.
 

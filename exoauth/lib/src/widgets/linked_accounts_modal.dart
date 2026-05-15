@@ -1,13 +1,13 @@
 // =============================================================================
-// linked_accounts_modal.dart — OAuth Account Management ("Inward Recovery")
+// linked_accounts_modal.dart — OAuth Account Management
 // =============================================================================
 //
-// This modal manages the user's linked OAuth accounts. These are "Recovery
-// Anchors" — secondary sign-in methods that allow the user to regain access
+// This modal manages the user's linked OAuth accounts. These are recovery
+// mechanisms — secondary sign-in methods that allow the user to regain access
 // to their did:peer identity after losing a device.
 //
 // IMPORTANT: Linked accounts do NOT own the identity. The did:peer remains
-// the sovereign root. OAuth providers are "Friends of the Identity" that can
+// the root. OAuth providers are verification methods that can
 // vouch for the user during a recovery flow on a Conscia node.
 //
 // UI layout:

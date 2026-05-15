@@ -9,7 +9,7 @@ Just as her credentials die and her screens flash 'ACCESS DENIED', a trusted gov
 
 ## Cognitive Shift
 **Centralized Expectation**: "I need to log in with my email and password so the central server knows who I am, authenticates my access, and grants me permission to speak."
-**Sovereign Reality**: "The app is a gateway. I don't need a server to exist. My identity is forged locally, cryptographic and self-sovereign. Sovereignty isn't given by an institution; it's claimed by the individual."
+**Decentralized Reality**: "The app is a gateway. I don't need a server to exist. My identity is forged locally, cryptographic and self-determined. Autonomy isn't given by an institution; it's claimed by the individual."
 
 ## World Event Reference
 The atmosphere is heavy with the realities of asymmetric warfare. The local power grid in the Levant is flickering, subjected to "tactical load shedding." Internet service providers are actively throttling encrypted traffic during ongoing "security operations," attempting to force all comms onto easily monitorable, unencrypted channels. Isabella's digital struggle is a microcosm of the broader physical blackout happening around her.
@@ -17,4 +17,4 @@ The atmosphere is heavy with the realities of asymmetric warfare. The local powe
 ## Technical Milestones
 - First-time launch of the ExoTalk binary on a clean, isolated system.
 - Visual inspection of the "Non-Elastic" UI frame, emphasizing local control over cloud synchronization.
-- Zero network traffic emission until the sovereign identity is explicitly authorized and established.
+- Zero network traffic emission until the local identity is explicitly authorized and established.

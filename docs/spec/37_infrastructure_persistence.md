@@ -1,7 +1,7 @@
-# Spec 37: Sovereign Infrastructure & Persistence
+# Spec 37: Infrastructure & Persistence
 
 ## 1. Overview
-This specification defines the standard for "Boot-Stable" sovereign infrastructure within the Exonomy ecosystem. It ensures that a node can survive a cold reboot and restore all public-facing services (Signaling, Mesh, Dashboard) at deterministic, permanent URLs without human intervention.
+This specification defines the standard for "Boot-Stable" persistent infrastructure within the Exonomy ecosystem. It ensures that a node can survive a cold reboot and restore all public-facing services (Signaling, Mesh, Dashboard) at deterministic, permanent URLs without human intervention.
 
 ## 2. Service Topology
 The node infrastructure consists of three primary layers:

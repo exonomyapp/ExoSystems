@@ -1,5 +1,4 @@
-// =============================================================================
-// new_chat_dialog.dart — Create Conversation Modal (Sovereign Generation)
+// new_chat_dialog.dart — Create Conversation Modal
 // =============================================================================
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -60,7 +59,7 @@ class _NewChatDialogModalState extends ConsumerState<NewChatDialogModal> with Si
           maxWidth: (MediaQuery.of(context).size.width * 0.85).clamp(400.0, 550.0 * scale),
           maxHeight: 600.0 * scale,
         ),
-        decoration: ConsciaTheme.premiumCardDecoration(context, scale),
+        decoration: AppTheme.premiumCardDecoration(context, scale),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -108,7 +107,7 @@ class _ModalHeader extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(24.0 * scale),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: ConsciaTheme.border(context))),
+        border: Border(bottom: BorderSide(color: AppTheme.border(context))),
       ),
       child: LayoutGrid(
         columnSizes: [auto, 1.fr],
@@ -117,14 +116,14 @@ class _ModalHeader extends StatelessWidget {
         children: [
           Container(
             padding: EdgeInsets.all(12.0 * scale),
-            decoration: BoxDecoration(color: ConsciaTheme.accentDark(context), borderRadius: BorderRadius.circular(16.0 * scale)),
-            child: Icon(LucideIcons.plus, color: ConsciaTheme.accent(context), size: 24.0 * scale),
+            decoration: BoxDecoration(color: AppTheme.accentDark(context), borderRadius: BorderRadius.circular(16.0 * scale)),
+            child: Icon(LucideIcons.plus, color: AppTheme.accent(context), size: 24.0 * scale),
           ).withGridPlacement(columnStart: 0, rowStart: 0),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Secure chat", style: ConsciaTheme.subHeadingStyle(context, scale).copyWith(fontSize: 18.0 * scale)),
-              Text("Create a direct or group channel", style: ConsciaTheme.captionStyle(context, scale)),
+              Text("Secure chat", style: AppTheme.subHeadingStyle(context, scale).copyWith(fontSize: 18.0 * scale)),
+              Text("Create a direct or group channel", style: AppTheme.captionStyle(context, scale)),
             ],
           ).withGridPlacement(columnStart: 1, rowStart: 0),
         ],
@@ -142,16 +141,16 @@ class _TabSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(4.0 * scale),
-      decoration: BoxDecoration(color: ConsciaTheme.background(context), borderRadius: BorderRadius.circular(12.0 * scale)),
+      decoration: BoxDecoration(color: AppTheme.background(context), borderRadius: BorderRadius.circular(12.0 * scale)),
       child: TabBar(
         controller: controller,
-        indicator: BoxDecoration(color: ConsciaTheme.surface(context), borderRadius: BorderRadius.circular(8.0 * scale), border: Border.all(color: ConsciaTheme.border(context))),
-        labelColor: ConsciaTheme.text(context),
-        unselectedLabelColor: ConsciaTheme.muted(context),
+        indicator: BoxDecoration(color: AppTheme.surface(context), borderRadius: BorderRadius.circular(8.0 * scale), border: Border.all(color: AppTheme.border(context))),
+        labelColor: AppTheme.text(context),
+        unselectedLabelColor: AppTheme.muted(context),
         dividerColor: Colors.transparent,
         tabs: [
-          Tab(child: Text("Direct", style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold))),
-          Tab(child: Text("Group", style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold))),
+          Tab(child: Text("Direct", style: AppTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold))),
+          Tab(child: Text("Group", style: AppTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold))),
         ],
       ),
     );
@@ -170,30 +169,30 @@ class _DirectTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Peer Identifier", style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold)),
+        Text("Peer Identifier", style: AppTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold)),
         SizedBox(height: 12.0 * scale),
         TextField(
           onChanged: onChanged,
-          style: ConsciaTheme.bodyStyle(context, scale),
+          style: AppTheme.bodyStyle(context, scale),
           decoration: InputDecoration(
             hintText: "did:peer:2... or +peername",
-            hintStyle: ConsciaTheme.captionStyle(context, scale),
+            hintStyle: AppTheme.captionStyle(context, scale),
             filled: true,
-            fillColor: ConsciaTheme.background(context),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide(color: ConsciaTheme.border(context))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide(color: ConsciaTheme.border(context))),
+            fillColor: AppTheme.background(context),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide(color: AppTheme.border(context))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide(color: AppTheme.border(context))),
           ),
         ),
         SizedBox(height: 40.0 * scale),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: ConsciaTheme.accent(context),
+            backgroundColor: AppTheme.accent(context),
             foregroundColor: Colors.white,
             minimumSize: Size(double.infinity, 50.0 * scale),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0 * scale)),
           ),
           onPressed: onSubmit,
-          child: Text("Start Chat", style: ConsciaTheme.subHeadingStyle(context, scale).copyWith(color: Colors.white)),
+          child: Text("Start Chat", style: AppTheme.subHeadingStyle(context, scale).copyWith(color: Colors.white)),
         ),
       ],
     );
@@ -212,44 +211,44 @@ class _GroupTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Group Name", style: ConsciaTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold)),
+        Text("Group Name", style: AppTheme.captionStyle(context, scale).copyWith(fontWeight: FontWeight.bold)),
         SizedBox(height: 12.0 * scale),
         TextField(
           onChanged: onChanged,
-          style: ConsciaTheme.bodyStyle(context, scale),
+          style: AppTheme.bodyStyle(context, scale),
           decoration: InputDecoration(
             hintText: "e.g. Project Willow Core",
-            hintStyle: ConsciaTheme.captionStyle(context, scale),
+            hintStyle: AppTheme.captionStyle(context, scale),
             filled: true,
-            fillColor: ConsciaTheme.background(context),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide(color: ConsciaTheme.border(context))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide(color: ConsciaTheme.border(context))),
+            fillColor: AppTheme.background(context),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide(color: AppTheme.border(context))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0 * scale), borderSide: BorderSide(color: AppTheme.border(context))),
           ),
         ),
         SizedBox(height: 24.0 * scale),
         Container(
           padding: EdgeInsets.all(16.0 * scale),
-          decoration: BoxDecoration(color: ConsciaTheme.accentDark(context), borderRadius: BorderRadius.circular(16.0 * scale), border: Border.all(color: ConsciaTheme.accent(context))),
+          decoration: BoxDecoration(color: AppTheme.accentDark(context), borderRadius: BorderRadius.circular(16.0 * scale), border: Border.all(color: AppTheme.accent(context))),
           child: LayoutGrid(
             columnSizes: [auto, 1.fr],
             rowSizes: [auto],
             columnGap: 12.0 * scale,
             children: [
-              Icon(LucideIcons.shieldCheck, color: ConsciaTheme.accent(context), size: 20.0 * scale).withGridPlacement(columnStart: 0, rowStart: 0),
-              Text("Multi-peer groups use Willow protocol for decentralized sync.", style: ConsciaTheme.captionStyle(context, scale).copyWith(color: ConsciaTheme.accent(context))).withGridPlacement(columnStart: 1, rowStart: 0),
+              Icon(LucideIcons.shieldCheck, color: AppTheme.accent(context), size: 20.0 * scale).withGridPlacement(columnStart: 0, rowStart: 0),
+              Text("Multi-peer groups use Willow protocol for decentralized sync.", style: AppTheme.captionStyle(context, scale).copyWith(color: AppTheme.accent(context))).withGridPlacement(columnStart: 1, rowStart: 0),
             ],
           ),
         ),
         SizedBox(height: 40.0 * scale),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: ConsciaTheme.accent(context),
+            backgroundColor: AppTheme.accent(context),
             foregroundColor: Colors.white,
             minimumSize: Size(double.infinity, 50.0 * scale),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0 * scale)),
           ),
           onPressed: onSubmit,
-          child: Text("Create Group", style: ConsciaTheme.subHeadingStyle(context, scale).copyWith(color: Colors.white)),
+          child: Text("Create Group", style: AppTheme.subHeadingStyle(context, scale).copyWith(color: Colors.white)),
         ),
       ],
     );

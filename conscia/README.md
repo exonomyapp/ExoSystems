@@ -1,10 +1,10 @@
-# Conscia Node — The Sovereign Lifeline
+# Conscia Node — The Lifeline
 
 [ 🏠 Back to Exosystem Root ](../README.md)
 
 Conscia is the always-on, standalone beacon and relay daemon for the ExoTalk network. It provides archival storage, high-availability peer routing, and "Lifeline" identity recovery for users like **Charlie**, ensuring messages are delivered even when devices are offline.
 
-## 🛡️ The Sovereign Lifeline
+## 🛡️ The Lifeline
 In the ExoTalk ecosystem, Conscia acts as your personal "Store and Forward" buffer. When you are hiking in the mountains or traveling through "dead zones," your Conscia node stays online, securely buffering encrypted messages until you reconnect.
 
 ## Deployment Levels
@@ -28,7 +28,7 @@ For high-traffic, mission-critical infrastructure, Conscia supports a robust 3-N
 We strive to make installing `conscia` as native and frictionless as possible. Choose your preferred package manager.
 
 ### 1. APT Repository (Recommended for Linux)
-The primary method for native Linux system-wide service integration, as shown in our [technical screenplays](../../docs/scenarios/screenplays/03_sovereign_lifeline.md).
+The primary method for native Linux system-wide service integration, as shown in our [technical screenplays](../../docs/scenarios/screenplays/03_the_lifeline.md).
 ```bash
 sudo apt update && sudo apt install -y conscia
 ```

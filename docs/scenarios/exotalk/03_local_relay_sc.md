@@ -6,7 +6,7 @@
 **Visual**: A separate terminal window showing Conscia logs (`CONSCIA_LOGS`).
 **Action**: Launching a Conscia node on a solar-powered relay.
 
-**Narrator VO**: "Malik works from a solar-powered bunker in Beirut. He knows that sovereignty requires infrastructure. He initializes a Conscia node—not to join a corporate cloud, but to act as a community anchor."
+**Narrator VO**: "Malik works from a solar-powered bunker in Beirut. He knows that autonomy requires infrastructure. He initializes a Conscia node—not to join a corporate cloud, but to act as a community anchor."
 
 ### Scene 2: The Link
 **Visual**: Isabella’s ExoTalk client binding to Malik’s relay.
@@ -24,5 +24,5 @@
 ---
 
 ## Technical Footer
-- **Scenario Reference**: [03_local_relay.md](file:///home/exocrat/code/exotalk/docs/scenarios/03_local_relay.md)
+- **Scenario Reference**: [03_local_relay.md](03_local_relay.md)
 - **Engine State**: Conscia relay active, mDNS advertising enabled.

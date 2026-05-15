@@ -2,7 +2,7 @@
 
 [ 🏠 Back to Exosystem Root ](../../README.md)
 
-This directory contains the formal specifications for the Sovereign Exosystem. These documents define the architectural, operational, and visual standards for all applications in the suite.
+This directory contains the formal specifications for the Exosystem. These documents define the architectural, operational, and visual standards for all applications in the suite.
 
 ## 🧭 Navigation Map
 
@@ -28,14 +28,14 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 
 ### 📦 Distribution & Acquisition (Production Suite)
 - **[20. Distribution Control Panel](20_distribution_control_panel.md)**: **Master Hub** for App IDs, Docker naming, and acquisition syntax.
-- **[21. Distribution Strategy](21_distribution_and_acquisition_strategy.md)**: Unified strategy for Flatpak, Docker, and App Stores.
+- **[21. Distribution Strategy](21_distribution_and_acquisition_strategy.md)**: Comprehensive strategy for Flatpak, Docker, and App Stores.
 - **[19. Verification Telemetry API](19_verification_telemetry_api.md)**: Port 11434 sidecar for automated health auditing.
 - **[Telemetry Verification (Live)](telemetry_verification.md)**: Real-time results of the programmatic infrastructure stress test.
 
 ---
 
 ### ⚙️ Implementation & DevOps
-- **[13. Build Infrastructure](13_build_deployment.md)**: Toolchains, CI/CD, and internal developer deployment.
+- **[13. Build Infrastructure](13_build_infrastructure.md)**: Toolchains, CI/CD, and internal developer deployment.
 - **[11. Meadowcap Capabilities](11_meadowcap_capabilities.md)**: Advanced capability-based security model.
 - **[16. Mesh Delivery Guarantees](16_mesh_delivery_guarantees.md)**: Reliability and ordering protocols.
 
@@ -49,7 +49,7 @@ The starting point: philosophy, shared infrastructure, and documentation roadmap
 
 ### 🚀 Strategy & Evolution
 - **[27. Storage Infrastructure Matrix](27_storage_infrastructure_matrix.md)**: Comparative analysis of S3 and P2P storage solutions.
-- **[28. Sovereign Management Evolution](28_sovereign_management_evolution.md)**: Roadmap from **BridgeNode** to the **ExoMC**.
+- **[28. Management Evolution](28_management_evolution.md)**: Roadmap from **BridgeNode** to the **ExoMC**.
 
 ---
 

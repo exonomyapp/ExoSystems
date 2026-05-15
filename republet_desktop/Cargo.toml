@@ -18,7 +18,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.5.6" }
 
 [dependencies]
-exotalk_core = { path = "../exotalk_core" }
+exotalk_core = { path = "../exotalk_engine/exotalk_core" }
 tauri = { version = "2", features = [] }
 tauri-plugin-shell = "2"
 tauri-plugin-log = "2"
